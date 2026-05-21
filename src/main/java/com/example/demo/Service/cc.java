@@ -5,5 +5,5 @@ import org.springframework.stereotype.Service;
 @Service
 public class cc {
     private final String baka = "sss";
-
+    private final String cacs = "cc";
 }
