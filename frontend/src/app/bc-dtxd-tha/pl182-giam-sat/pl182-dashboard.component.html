@@ -1,0 +1,112 @@
+<div class="dashboard-root">
+
+  @if (loadError(); as err) {
+    <div class="error-banner">{{ err }}</div>
+  }
+
+  @if (!entryExists()) {
+    <app-no-data-hint
+      [templateId]="templateId()"
+      message="Kỳ này chưa có báo cáo Biểu 3.1 NĐ 29/2021. Vui lòng nhập số liệu giám sát đánh giá đầu tư qua màn hình nhập liệu.">
+    </app-no-data-hint>
+  }
+
+  <section class="tier tier-kpi">
+    <h2 class="tier-title">Tổng quan giám sát đầu tư</h2>
+    <div class="kpi-grid kpi-grid-6col">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-body">
+          <div class="kpi-label">DA quyết định ĐT</div>
+          <div class="kpi-value">{{ fmtCount(kpi().daQuyetDinhDT) }}</div>
+          <div class="kpi-unit">trong kỳ (I.2)</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-icon">🚧</div>
+        <div class="kpi-body">
+          <div class="kpi-label">DA thực hiện ĐT</div>
+          <div class="kpi-value">{{ fmtCount(kpi().daThucHienDT) }}</div>
+          <div class="kpi-unit">trong kỳ (II.1)</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-cyan">
+        <div class="kpi-icon">🔍</div>
+        <div class="kpi-body">
+          <div class="kpi-label">DA đã đánh giá</div>
+          <div class="kpi-value">{{ fmtCount(kpi().daDaDanhGia) }}</div>
+          <div class="kpi-unit">trong kỳ (II.5)</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-rose">
+        <div class="kpi-icon">⏰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">DA chậm tiến độ</div>
+          <div class="kpi-value">{{ fmtCount(kpi().daChamTienDo) }}</div>
+          <div class="kpi-unit">cộng II.9.a-đ</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-emerald">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-body">
+          <div class="kpi-label">DA kết thúc ĐT</div>
+          <div class="kpi-value">{{ fmtCount(kpi().daKetThuc) }}</div>
+          <div class="kpi-unit">trong kỳ (III.1)</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-violet">
+        <div class="kpi-icon">📑</div>
+        <div class="kpi-body">
+          <div class="kpi-label">DA quyết toán</div>
+          <div class="kpi-value">{{ fmtCount(kpi().daDaQuyetToan) }}</div>
+          <div class="kpi-unit">trong kỳ (III.3)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Phân loại dự án &amp; Vòng đời</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>Phân loại theo nhóm dự án (II.1)</h3>
+        <div class="chart-host">
+          @if (nhomDuAn().length === 0) {
+            <div class="chart-empty">Chưa có dữ liệu</div>
+          } @else {
+            <echarts [options]="nhomChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Số dự án theo 3 giai đoạn vòng đời</h3>
+        <div class="chart-host">
+          <echarts [options]="phasesChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Cảnh báo &amp; Vi phạm</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>Nguyên nhân chậm tiến độ (II.9)</h3>
+        <div class="chart-host">
+          @if (chamTienDo().length === 0) {
+            <div class="chart-empty">Chưa có dự án chậm tiến độ</div>
+          } @else {
+            <echarts [options]="chamChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Sự cố / Vi phạm trong kỳ</h3>
+        <div class="chart-host">
+          <echarts [options]="viPhamChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

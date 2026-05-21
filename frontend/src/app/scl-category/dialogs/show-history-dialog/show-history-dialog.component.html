@@ -1,0 +1,41 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{
+    size: 'auto',
+    dismissible: true,
+    closeable: true,
+  }"
+>
+  <div class="dialog-wrapper">
+    <div class="dialog-body">
+      <app-grid-header
+        [title]="'Lịch sử - ' + dialogLabel"
+        [showBtnDelete]="false"
+        [showBtnCreateNew]="false"
+      ></app-grid-header>
+
+      <div class="dialog-grid-container">
+        <app-ag-grid-wrapper [enableRangeSelection]="true"
+          [rowData]="sclHistory"
+          [columnDefs]="columnDefs"
+          [animateRows]="true"
+          [pagination]="false"
+          [suppressCellFocus]="true"
+          [height]="'100%'"
+          [width]="'100%'"
+          [theme]="'ag-theme-quartz'"
+          (gridReady)="onGridReady($event)"
+        ></app-ag-grid-wrapper>
+      </div>
+
+      <app-custom-pagination
+        [totalRows]="totalRows"
+        [currentPage]="pageNum + 1"
+        [pageSize]="pageSize"
+        (pageChanged)="onPageChanged($event)"
+        (pageSizeChanged)="onPageSizeChanged($event)"
+      />
+    </div>
+  </div>
+</ng-template>

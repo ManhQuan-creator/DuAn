@@ -1,0 +1,26 @@
+.attach-cell {
+  display: block;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+//   padding: 0px 10px;
+
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .file-text {
+    color: #1677ff; // xanh dương
+    transition: all 0.2s;
+    padding: 0px 10px;
+  }
+
+  &:hover .file-text {
+    text-decoration: underline;
+  }
+}
+
+.icon {
+  transform:translateY(-3px) rotate(-45deg); // xoay 45 độ
+}

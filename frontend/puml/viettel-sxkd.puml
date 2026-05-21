@@ -1,0 +1,96 @@
+@startuml
+title Quy trình Lập và Giao Kế hoạch SXKD (Sản xuất Kinh doanh)
+autonumber
+
+actor "Đơn vị cấp 3" as DV
+participant "Hệ thống\n(Phần mềm)" as Sys
+participant "Ban Kế hoạch\n(Chủ trì)" as BKH
+participant "Ban TGĐ/P.TGĐ" as TGD
+participant "HĐTV" as HDTV
+actor "Tập đoàn EVN" as EVN
+
+== Giai đoạn 1: Xây dựng hướng dẫn (Tháng 7) ==
+note right of BKH: Trước 10/7/N-1
+BKH -> Sys: Xây dựng dự thảo Hướng dẫn & Biểu mẫu
+activate Sys
+Sys --> TGD: Chuyển dự thảo
+deactivate Sys
+
+note right of TGD: Trước 20/7/N-1
+TGD -> Sys: Phê duyệt Hướng dẫn
+activate Sys
+Sys --> BKH: Hướng dẫn được thông qua
+deactivate Sys
+
+note right of BKH: Thực hiện ngoài hệ thống
+BKH -> DV: Gửi công văn Hướng dẫn lập KH
+activate DV
+
+== Giai đoạn 2: Lập và Thẩm định Kế hoạch Đơn vị (Tháng 8-9) ==
+note right of DV: Trước 30/8/N-1
+DV -> DV: Xây dựng KHSXKD
+DV -> Sys: Nhập/Gửi kế hoạch của đơn vị
+deactivate DV
+activate Sys
+Sys --> BKH: Dữ liệu KH từ các đơn vị
+deactivate Sys
+
+BKH -> Sys: Tổng hợp & Rà soát dữ liệu
+activate Sys
+note right of BKH: Có thể yêu cầu ĐV làm rõ/bổ sung
+Sys --> BKH: Báo cáo tổng hợp
+deactivate Sys
+
+note right of BKH: Trước 10/09/N-1. Các Ban phối hợp thẩm định
+BKH -> TGD: Trình kết quả thẩm định KH đơn vị
+activate TGD
+TGD -> Sys: Duyệt KH đơn vị (Số hóa)
+deactivate TGD
+
+== Giai đoạn 3: Lập Kế hoạch Tổng thể & Đăng ký EVN ==
+note right of BKH: Trước 20/09/N-1
+BKH -> Sys: Tổng hợp KH toàn Tổng công ty (TCT)
+activate Sys
+Sys --> TGD: Dữ liệu KH tổng thể
+deactivate Sys
+
+TGD -> TGD: Xem xét & Điều chỉnh
+TGD -> Sys: Trình KH tổng thể lên HĐTV
+
+activate HDTV
+HDTV -> Sys: Phê duyệt KH tổng thể (Số hóa)
+deactivate HDTV
+
+note right of TGD: Thực hiện ngoài hệ thống (Trước 30/09/N-1)
+TGD -> EVN: Ký & Gửi văn bản đăng ký KH với EVN
+activate EVN
+EVN --> HDTV: Quyết định giao KH năm N
+deactivate EVN
+
+== Giai đoạn 4: Phân bổ & Giao Kế hoạch Chính thức ==
+note right of HDTV: Thực hiện ngoài hệ thống
+HDTV -> TGD: Chỉ đạo tổ chức thực hiện
+TGD -> BKH: Giao nhiệm vụ phân bổ KH
+
+BKH -> Sys: Xây dựng phương án triển khai & Giao KH
+activate Sys
+Sys --> TGD: Dự thảo phương án giao
+deactivate Sys
+
+TGD -> HDTV: Trình phương án phân bổ
+activate HDTV
+HDTV -> Sys: Phê duyệt phương án (Số hóa)
+deactivate HDTV
+
+BKH -> Sys: Phát hành Quyết định giao KH
+activate Sys
+Sys -> DV: Gửi KH chính thức tới Đơn vị cấp 3
+deactivate Sys
+
+== Giai đoạn 5: Thực hiện & Đánh giá ==
+activate DV
+DV -> DV: Triển khai & Giao việc cấp 4 (Ngoài hệ thống)
+DV -> DV: Đánh giá kết quả & Chấm điểm (Ngoài hệ thống)
+deactivate DV
+
+@enduml

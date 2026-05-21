@@ -1,0 +1,27 @@
+@startuml
+title Nguyên tắc (a) - Logic tính GHTD cho 1 Commitment
+
+start
+if (Quay vòng?) then (Có)
+    if (Trong/Trước thời hạn rút vốn?) then (Đúng)
+        :GHTD = MAX(Số tiền đề xuất, Số dư) * %TSRR;
+    else (Sai)
+        :GHTD = Số dư * %TSRR;
+    endif
+else (Không)
+    if (Trong/Trước thời hạn rút vốn?) then (Đúng)
+        :GHTD = MAX(Số tiền đề xuất - DS thu nợ, Số dư) * %TSRR;
+    else (Sai)
+        :GHTD = Số dư * %TSRR;
+    endif
+endif
+
+note right
+  **Ghi chú dữ liệu:**
+  * Số dư: Lấy từ MIS T-1 (Doka, Thẻ, Vay...)
+  * DS thu nợ: Lũy kế từ khi mở TK
+  * Nếu thiếu thông tin: Báo lỗi "Thiếu thông tin x"
+end note
+
+stop
+@endum

@@ -1,0 +1,93 @@
+@startuml
+
+' --- CẤU HÌNH GIAO DIỆN ---
+!theme plain
+hide circle
+skinparam linetype ortho
+skinparam roundcorner 10
+skinparam class {
+    BackgroundColor White
+    ArrowColor #2C3E50
+    BorderColor #2C3E50
+}
+
+' --- 1. BẢNG MẪU BÁO CÁO ---
+entity "report_template" as template {
+  *id : VARCHAR2(36) <<PK>>
+  --
+  *template_code : VARCHAR2(50)   // Mã mẫu (VD: TT200, TT133)
+  *template_name : VARCHAR2(255)  // Tên hiển thị đầy đủ
+  *issuer : VARCHAR2(100)         // Cơ quan ban hành (Bộ TC...)
+  *effective_date : DATE          // Ngày hiệu lực (Ko được chọn quá khứ)
+  *version : VARCHAR2(20)         // Phiên bản (VD: 1.0, 2.0)
+  is_active : NUMBER(1)           // Trạng thái active của version
+  approval_status : VARCHAR2(20)  // Enum: draft, pending, approved, rejected
+  reject_reason : VARCHAR2(255)          // Lý do từ chối (nếu có)
+  description : VARCHAR2(255)             // Ghi chú thêm
+  created_at : TIMESTAMP
+  created_by : VARCHAR2(50)
+  updated_at : TIMESTAMP
+  updated_by : VARCHAR2(50)
+  --
+  // UNIQUE(template_code, version): Không trùng version trong 1 mã
+}
+
+' --- 2. BẢNG FORM BÁO CÁO ---
+entity "report_form" as form {
+  *id : VARCHAR2(36) <<PK>>
+  --
+  *template_id : VARCHAR2(36) <<FK>> // Link tới mẫu báo cáo
+  *form_code : VARCHAR2(50)          // Mã Form (F01, F02...)
+  *form_name : VARCHAR2(255)         // Tên Form (Cân đối kế toán...)
+  description : VARCHAR2(255) 
+  created_at : TIMESTAMP
+  created_by : VARCHAR2(50)
+  updated_at : TIMESTAMP
+  updated_by : VARCHAR2(50)
+  --
+  // UNIQUE(template_id, form_code): Mã form duy nhất trong 1 mẫu
+}
+
+' --- 3. BẢNG CHỈ TIÊU (Quan trọng nhất) ---
+entity "report_indicator" as indicator {
+  *id : VARCHAR2(36) <<PK>>
+  --
+  *form_id : VARCHAR2(36) <<FK>>      // Thuộc Form nào
+  parent_id : VARCHAR2(36) <<FK>>     // Chỉ tiêu cha (để tạo cây thư mục)
+  
+  *indicator_code : VARCHAR2(50)      // Mã hiển thị (110, 111...)
+  technical_code : VARCHAR2(30)       // Mã kỹ thuật dùng cho công thức
+  
+  ' status : NUMBER                   // 0:Chờ duyệt, 1:Đã gửi, 2:Duyệt, 3:Từ chối
+  
+  *name_vn : VARCHAR2(255)            // Tên tiếng Việt
+  name_en : VARCHAR2(255)             // Tên tiếng Anh
+  display_order : NUMBER(3)          // Thứ tự sắp xếp
+  
+  *data_type : VARCHAR2(20)           // Lấy theo tham số Kiểu dữ liệu DL_STRING: String | DL_NUMBER: Number | DL_PERCENTAGE: Percentage | DL_DATE: Date | DL_BOOLEAN: Boolean | DL_FORMULA: Formula
+  unit : VARCHAR2(50)                 // Đơn vị tính (VND, %, Triệu...)
+  
+  calculation_type : VARCHAR2(1)      // 0: Tự động,1: Bán tự động, 2: thủ công
+  formula : VARCHAR2(4000)            // VD: (CP('110') + PP('110')) / 2
+  validation_rule : VARCHAR2(255)     // VD: >0, <=100
+  
+  created_at : TIMESTAMP
+  created_by : VARCHAR2(50)
+  updated_at : TIMESTAMP
+  updated_by : VARCHAR2(50)
+  --
+  // UNIQUE(form_id, indicator_code): Mã chỉ tiêu duy nhất trong Form
+}
+
+' --- QUAN HỆ ---
+
+' 1 Template - n Form
+template ||..o{ form : "1 Template chứa nhiều Form"
+
+' 1 Form - n Chỉ tiêu
+form ||..o{ indicator : "1 Form chứa nhiều Chỉ tiêu"
+
+' Đệ quy: Cha - Con
+indicator |o..o{ indicator : "Cấu trúc cây (Cha-Con)"
+
+@enduml

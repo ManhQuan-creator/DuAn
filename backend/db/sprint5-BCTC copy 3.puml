@@ -1,0 +1,61 @@
+@startuml BE003_Update_BCTC
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title BE003 - Cập nhật giá trị chỉ tiêu BCTC 
+
+actor "User" as user
+participant "FE\n(Lending Hub)" as fe
+participant "customer-info\nservice" as master
+database "LDH_DB" as master_db
+participant "param-credit\nservice" as param
+
+== Bước 1: User chọn kỳ để sửa ==
+
+user -> fe : Click "Chỉnh sửa" trên 1 kỳ BCTC
+activate fe
+
+== Bước 2: Load form chỉnh sửa ==
+
+fe -> master : GET {{BASE_URL}}/customer-information-service/v1\n/customers/financial-reports/detail?cif={cif}&reportId={reportId}
+activate master
+master --> fe : Report with items[]
+deactivate master
+
+fe -> param : GET {{BASE_URL}}/param-credit-service/v1/report-templates/detail?code={templateCode}
+activate param
+param --> fe : Template with formulas
+deactivate param
+
+fe --> user : Hiển thị form với các chỉ tiêu và giá trị
+deactivate fe
+
+== Bước 3: User nhập liệu ==
+
+user -> fe : Nhập giá trị các chỉ tiêu
+activate fe
+
+fe -> fe : Tính toán các ô công thức (real-time)
+
+user -> fe : Click "Lưu"
+
+== Bước 4: Ghi đè vào Master (LDH_DB) ==
+
+fe -> master : POST {{BASE_URL}}/customer-information-service/v1\n/customers/financial-reports/update?cif={cif}&reportId={reportId}\nBody: { items[] }
+activate master
+
+loop for each item
+    master -> master_db : UPDATE CUSTOMER_FINANCIAL_REPORT_ITEM\nSET VALUE = ?, UPDATED_BY = ?, UPDATED_AT = NOW()\nWHERE REPORT_ID = ? AND INDICATOR_CODE = ?
+end
+
+master -> master_db : UPDATE CUSTOMER_FINANCIAL_REPORT\nSET VERSION = VERSION + 1, UPDATED_AT = NOW()\nWHERE ID = ?
+
+master -> master_db : INSERT INTO CUSTOMER_FINANCIAL_REPORT_HISTORY\n(action = 'UPDATE')
+
+master --> fe : Response: { reportId, updatedAt }
+deactivate master
+
+fe --> user : Toast "Cập nhật thành công"
+deactivate fe
+
+@enduml

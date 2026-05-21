@@ -1,0 +1,47 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{ size: 'm', dismissible: true, closeable: true, label: 'Lưu biểu mẫu' }"
+>
+  <div class="tui-space_top-2">
+    <div class="tui-form__row">
+      <tui-input 
+        [formControl]="saveCodeCtrl"
+        maxlength="50"
+      >
+        Mã biểu mẫu
+      <input tuiTextfield />
+      </tui-input>
+      <div
+        *ngIf="saveCodeCtrl.invalid && saveCodeCtrl.touched"
+        class="text-red-500 text-xs mt-1"
+      >
+        Chỉ chấp nhận chữ, số và dấu gạch dưới, tối đa 50 ký tự
+      </div>
+    </div>
+    <div class="tui-form__row tui-space_top-3">
+      <tui-input [formControl]="saveNameCtrl">
+        Tên biểu mẫu
+        <input tuiTextfield />
+      </tui-input>
+    </div>
+    <div class="tui-form__row tui-space_top-3">
+      <tui-text-area [formControl]="saveDescCtrl" [expandable]="true">
+        Mô tả (không bắt buộc)
+      </tui-text-area>
+    </div>
+    <div class="tui-form__buttons tui-form__buttons_align_end tui-space_top-4">
+      <button
+        tuiButton
+        appearance="flat"
+        type="button"
+        (click)="close()"
+      >
+        Hủy
+      </button>
+      <button tuiButton type="button" (click)="onSubmit()" [disabled]="saving || saveCodeCtrl.invalid || saveNameCtrl.invalid">
+        {{ saving ? 'Đang lưu...' : 'Lưu' }}
+      </button>
+    </div>
+  </div>
+</ng-template>

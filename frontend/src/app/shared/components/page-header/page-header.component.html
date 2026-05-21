@@ -1,0 +1,73 @@
+<div class="page-header">
+  <nav class="page-header__breadcrumbs" aria-label="breadcrumb" *ngIf="breadcrumbs?.length">
+    <ng-container *ngFor="let item of breadcrumbs; let last = last">
+      <a
+        *ngIf="!last && item.link; else plainLabel"
+        class="page-header__breadcrumb-link page-header__breadcrumb-link--clickable"
+        [routerLink]="item.link"
+      >
+        {{ item.label }}
+      </a>
+      <ng-template #plainLabel>
+        <span
+          class="page-header__breadcrumb-link"
+          [class.page-header__breadcrumb-link--last]="last"
+        >
+          {{ item.label }}
+        </span>
+      </ng-template>
+      <span class="page-header__breadcrumb-sep" *ngIf="!last">&gt;</span>
+    </ng-container>
+  </nav>
+
+  <div class="page-header__title-row" *ngIf="title || showCreateBtn || hasVisibleCustomBtn">
+    <div class="page-header__title-wrapper">
+      <button
+        type="button"
+        *ngIf="showBackBtn"
+        tuiIconButton
+        icon="tuiIconChevronLeftLarge"
+        appearance="flat"
+        class="page-header__back"
+        (click)="handleBack()"
+      ></button>
+      <h1 class="page-header__title-text">{{ title }}</h1>
+    </div>
+
+    <div class="page-header__actions">
+      <button
+        type="button"
+        *ngIf="showCreateBtn"
+        tuiButton
+        appearance="primary"
+        size="s"
+        icon="tuiIconPlus"
+        (click)="handleCreate()"
+        class="btn-action"
+      >
+        Thêm mới
+      </button>
+
+      <ng-container *ngFor="let btn of customButtons; trackBy: trackByAction">
+        <button
+          type="button"
+          *ngIf="btn.show !== false"
+          tuiButton
+          [appearance]="btn.appearance ?? 'primary'"
+          size="s"
+          [icon]="btn.icon"
+          [disabled]="btn.disabled ?? false"
+          (click)="handlerClickCustomButton(btn)"
+          class="btn-action"
+        >
+          {{ btn.title }}
+        </button>
+      </ng-container>
+
+      <!-- Placeholder cho action từ các component con truyền vào -->
+      <ng-content select="[page-header-actions]"></ng-content>
+    </div>
+  </div>
+
+  <ng-content select=".header-tab"></ng-content>
+</div>

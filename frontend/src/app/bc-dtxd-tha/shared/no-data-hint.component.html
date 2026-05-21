@@ -1,0 +1,14 @@
+<div class="hint-banner" role="alert">
+  <div class="hint-icon">⚠️</div>
+  <div class="hint-body">
+    <div class="hint-title">Chưa có dữ liệu báo cáo</div>
+    <div class="hint-message">{{ message }}</div>
+  </div>
+  <button
+    class="hint-action"
+    type="button"
+    [disabled]="templateId == null"
+    (click)="openExcelRender()">
+    Mở màn hình nhập liệu →
+  </button>
+</div>

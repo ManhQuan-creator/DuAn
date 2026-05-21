@@ -1,0 +1,63 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="onDialogChange($event)"
+  [appDialogOptions]="{
+    size: 'auto',
+    dismissible: true,
+    closeable: true,
+  }"
+>
+  <div class="dialog-wrapper">
+    <div class="dialog-title">Đổi trạng thái</div>
+
+    <div class="form-group">
+      <label tuiLabel class="app-form-label" for="updateStatusSelect">Trạng thái mới</label>
+
+      <tui-select
+        id="updateStatusSelect"
+        [(ngModel)]="selectedStatus"
+        [stringify]="stringifyStatus"
+        [tuiTextfieldLabelOutside]="true"
+        [tuiTextfieldCleaner]="true"
+        tuiTextfieldSize="m"
+      >
+        Chọn trạng thái
+        <tui-data-list *tuiDataList>
+          <button
+            *ngFor="let status of statusOptions"
+            tuiOption
+            [value]="status"
+            class="option-item"
+          >
+            {{ status?.name }}
+          </button>
+        </tui-data-list>
+      </tui-select>
+    </div>
+
+    <div class="dialog-footer">
+      <button
+        class="cd-btn cd-btn--cancel"
+        type="button"
+        tuiButton
+        appearance="secondary"
+        size="s"
+        (click)="onCancel()"
+      >
+        Hủy
+      </button>
+
+      <button
+        class="cd-btn cd-btn--success"
+        type="button"
+        tuiButton
+        appearance="primary"
+        size="s"
+        [disabled]="!selectedStatus"
+        (click)="onConfirm()"
+      >
+        Xác nhận
+      </button>
+    </div>
+  </div>
+</ng-template>

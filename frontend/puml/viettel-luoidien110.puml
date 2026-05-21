@@ -1,0 +1,93 @@
+@startuml
+title Quy trình Lập và Giao Kế hoạch Đầu tư Xây dựng (ĐTXD) Lưới điện 110kV
+autonumber
+
+actor "Đơn vị cấp 3" as DV
+participant "Hệ thống/Kho dữ liệu" as Sys
+participant "Ban Kế hoạch (TCT)" as BKH
+participant "Tổ xét duyệt/Ban CM" as TXD
+participant "Ban TGĐ EVNNPC" as TGD
+participant "HĐTV EVNNPC" as HDTV
+actor "Tập đoàn EVN" as EVN
+
+== Giai đoạn 1: Xác định chủ trương & Xây dựng danh mục (Năm N-1) ==
+
+BKH -> TGD: Trình chủ trương & nhu cầu ĐTXD năm N-1
+activate TGD
+TGD --> BKH: Thông qua
+deactivate TGD
+
+BKH -> HDTV: Trình duyệt chủ trương
+activate HDTV
+HDTV --> BKH: Nghị quyết thông qua chủ trương
+deactivate HDTV
+
+BKH -> DV: Thông báo chủ trương & Yêu cầu xây dựng danh mục (Trước 30/4)
+note right of DV: Căn cứ hướng dẫn và nhu cầu địa phương
+
+activate DV
+DV -> DV: Lập Phương án ĐTXD (theo mẫu)
+DV -> Sys: Nộp Hồ sơ PAĐT & Danh mục dự án (B.81, B.82)
+deactivate DV
+
+activate Sys
+Sys -> Sys: Tổng hợp danh mục các đơn vị thành file chung
+Sys --> BKH: Danh mục tổng hợp toàn TCT
+deactivate Sys
+
+== Giai đoạn 2: Thẩm định & Tạm giao kế hoạch vốn ==
+
+BKH -> TXD: Phân phối hồ sơ & Yêu cầu thẩm định
+activate TXD
+TXD -> TXD: Thẩm định chuyên ngành (KH, KT, ĐT...)
+TXD --> Sys: Nhập ý kiến thẩm định
+deactivate TXD
+
+Sys -> BKH: Tổng hợp ý kiến
+BKH -> DV: Gửi ý kiến yêu cầu giải trình/hiệu chỉnh (nếu có)
+DV -> Sys: Cập nhật danh mục hoàn thiện
+
+BKH -> TXD: Thống nhất phương án
+TXD -> TGD: Báo cáo phương án
+TGD -> HDTV: Trình phê duyệt danh mục
+activate HDTV
+HDTV --> BKH: Nghị quyết phê duyệt danh mục
+deactivate HDTV
+
+BKH -> DV: Quyết định giao danh mục & Tạm giao vốn
+note right of DV: Đơn vị chuẩn bị đầu tư & phê duyệt thủ tục
+
+== Giai đoạn 3: Đăng ký & Giao kế hoạch chính thức ==
+
+DV -> Sys: Đăng ký kế hoạch chi tiết năm N (B.76 - B.86)
+activate Sys
+Sys -> Sys: Tổng hợp số liệu từ Kho dữ liệu
+Sys --> BKH: Kế hoạch tổng thể toàn Tổng công ty (B.10 - B.14)
+deactivate Sys
+
+BKH -> TGD: Trình phương án kế hoạch tổng thể
+TGD --> BKH: Thông qua
+BKH -> HDTV: Trình HĐTV
+HDTV -> EVN: Trình Tập đoàn phê duyệt
+activate EVN
+EVN --> HDTV: Quyết định giao kế hoạch cho TCT
+deactivate EVN
+
+HDTV -> TGD: Chuyển giao nhiệm vụ
+TGD -> BKH: Chỉ đạo giao kế hoạch chi tiết
+
+BKH -> DV: Quyết định giao kế hoạch chính thức (Theo QĐ 1853)
+
+== Giai đoạn 4: Thực hiện, Báo cáo & Điều chỉnh ==
+
+DV -> DV: Triển khai thực hiện đầu tư
+DV -> Sys: Báo cáo tiến độ/vốn/giám sát (Định kỳ)
+Sys -> BKH: Dashboard theo dõi & đánh giá
+
+opt Bổ sung danh mục / Thay đổi TMĐT
+    DV -> BKH: Đề xuất điều chỉnh/bổ sung
+    BKH -> TXD: Thẩm định lại
+    note right of BKH: Lặp lại quy trình xét duyệt như đăng ký mới
+end
+
+@enduml

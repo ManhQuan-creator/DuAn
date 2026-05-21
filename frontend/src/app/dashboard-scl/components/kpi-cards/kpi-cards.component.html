@@ -1,0 +1,73 @@
+<div class="kpi-grid">
+  <div class="kpi-card kpi-card--primary">
+    <div class="kpi-card__icon">💰</div>
+    <div class="kpi-card__body">
+      <div class="kpi-card__label">Tổng kế hoạch chi phí</div>
+      <div class="kpi-card__value">{{ fmtCurrency(kpi.khChiPhiTong) }}</div>
+      <div class="kpi-card__trend">Kế hoạch năm</div>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-card--info">
+    <div class="kpi-card__icon">📊</div>
+    <div class="kpi-card__body">
+      <div class="kpi-card__label">Đã hạch toán</div>
+      <div class="kpi-card__value">{{ fmtCurrency(kpi.hachToan) }}</div>
+      <div class="kpi-card__trend">{{ fmtPercent(kpi.hachToanPct) }} so với kế hoạch</div>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-card--accent">
+    <div class="kpi-card__icon">🏗️</div>
+    <div class="kpi-card__body">
+      <div class="kpi-card__label">Khối lượng thực hiện</div>
+      <div class="kpi-card__value">{{ fmtCurrency(kpi.klLuyKe) }}</div>
+      <div class="kpi-card__trend">{{ fmtPercent(kpi.klLuyKePct) }} so với kế hoạch</div>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-card--muted">
+    <div class="kpi-card__icon">📉</div>
+    <div class="kpi-card__body">
+      <div class="kpi-card__label">Còn phải thực hiện</div>
+      <div class="kpi-card__value">{{ fmtCurrency(kpi.conLai) }}</div>
+      <div class="kpi-card__trend">{{ fmtPercent(kpi.conLaiPct) }} khối lượng còn lại</div>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-card--neutral">
+    <div class="kpi-card__icon">📦</div>
+    <div class="kpi-card__body">
+      <div class="kpi-card__label">Tổng hạng mục triển khai</div>
+      <div class="kpi-card__value">{{ fmtCount(kpi.hmTrienkhai) }}</div>
+      <div class="kpi-card__trend">hạng mục</div>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-card--success">
+    <div class="kpi-card__icon">✅</div>
+    <div class="kpi-card__body">
+      <div class="kpi-card__label">Đã thi công xong</div>
+      <div class="kpi-card__value">{{ fmtCount(kpi.tdXong) }}</div>
+      <div class="kpi-card__trend">{{ fmtPercent(kpi.tdXongPct) }} hạng mục triển khai</div>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-card--warning">
+    <div class="kpi-card__icon">⚠️</div>
+    <div class="kpi-card__body">
+      <div class="kpi-card__label">Bị chậm (hoàn thành sau 30/6)</div>
+      <div class="kpi-card__value">{{ fmtCount(kpi.htSau) }}</div>
+      <div class="kpi-card__trend">hạng mục cần theo dõi</div>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-card--danger">
+    <div class="kpi-card__icon">🚨</div>
+    <div class="kpi-card__body">
+      <div class="kpi-card__label">Chưa phê duyệt PAKT-ĐT</div>
+      <div class="kpi-card__value">{{ fmtCount(kpi.hmChuaDuyet) }}</div>
+      <div class="kpi-card__trend">hạng mục tồn đọng</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,442 @@
+@startuml BCTC_Sprint7_ERD
+skinparam linetype ortho
+skinparam roundcorner 10
+skinparam shadowing false
+
+title ERD - Sprint 7 - Tab Khoản tín dụng
+
+package "customer-information-service" #E3F2FD {
+  /'
+  entity "CUSTOMER_FINANCIAL_REPORT" as master_report #90CAF9 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CIF : VARCHAR2(20)
+    * REPORT_TEMPLATE_CODE : VARCHAR2(50)
+    * REPORT_TYPE : VARCHAR2(20)
+    * REPORT_STATUS : VARCHAR2(20)
+    * REPORT_CATEGORY : VARCHAR2(20)
+    * PERIOD_TYPE : VARCHAR2(10)
+    * PERIOD_YEAR : NUMBER(4)
+    PERIOD_QUARTER : NUMBER(1)
+    * FISCAL_END_DATE : DATE
+    * CURRENCY : VARCHAR2(10)
+    * DISPLAY_UNIT : VARCHAR2(20)
+    SOURCE_SYSTEM : VARCHAR2(50)
+    SOURCE_ID : VARCHAR2(100)
+    IS_DELETED : NUMBER(1)
+    * VERSION : NUMBER(10)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+    ..
+    <i>REPORT_CATEGORY: MANDATORY | SUPPLEMENTARY</i>
+  }
+
+  entity "CUSTOMER_FINANCIAL_REPORT_FORM" as master_form #81D4FA {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * REPORT_ID : VARCHAR2(36) <<FK>>
+    * FORM_CODE : VARCHAR2(50)
+    * FORM_NAME : VARCHAR2(500)
+    * FORM_ORDER : NUMBER(3)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+    ..
+    <i>Danh sách form trong BCTC</i>
+  }
+
+  entity "CUSTOMER_FINANCIAL_REPORT_ITEM" as master_item #BBDEFB {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * REPORT_ID : VARCHAR2(36) <<FK>>
+    FORM_ID : VARCHAR2(36) <<FK>>
+    * INDICATOR_CODE : VARCHAR2(50)
+    * INDICATOR_NAME : VARCHAR2(500)
+    * INDICATOR_ORDER : NUMBER(5)
+    PARENT_INDICATOR_CODE : VARCHAR2(50)
+    * LEVEL : NUMBER(2)
+    VALUE : NUMBER(20,4)
+    FORMULA : VARCHAR2(500)
+    IS_FORMULA_FIELD : NUMBER(1)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+
+  entity "CUSTOMER_FINANCIAL_INDICATOR" as master_indicator #FFF59D {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CIF : VARCHAR2(20)
+    * INDICATOR_CODE : VARCHAR2(50)
+    * INDICATOR_NAME : VARCHAR2(500)
+    * PERIOD_TYPE : VARCHAR2(10)
+    * PERIOD_YEAR : NUMBER(4)
+    PERIOD_QUARTER : NUMBER(1)
+    * REPORT_STATUS : VARCHAR2(20)
+    VALUE : NUMBER(20,4)
+    UNIT : VARCHAR2(20)
+    * IS_RATIO : NUMBER(1)
+    * CALCULATED_AT : TIMESTAMP
+    SOURCE_REPORT_ID : VARCHAR2(36)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+
+   entity "CUSTOMER_FINANCIAL_REPORT_HISTORY" as history #FFCDD2 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * REPORT_ID : VARCHAR2(36) <<FK>>
+    * VERSION : NUMBER(10)
+    * ACTION : VARCHAR2(20)
+    OLD_DATA : CLOB
+    NEW_DATA : CLOB
+    CHANGE_REASON : VARCHAR2(500)
+    * CHANGED_AT : TIMESTAMP
+    * CHANGED_BY : VARCHAR2(50)
+    CHANGED_BY_NAME : VARCHAR2(200)
+  }
+    '/
+  '========================================
+  ' Thông tin khoản tín dụng khách hàng
+  '========================================
+  entity "CUSTOMER_FACILITY_MASTER" as cus_facility {
+    *id : VARCHAR2(36) <<PK>>
+    parent_id: VARCHAR2(36)
+    --
+    * CIF : VARCHAR2(20)
+    --
+    == Thông tin sản phẩm ==
+    * product_type : VARCHAR2(20)
+    product_code : VARCHAR2(50)
+    * product_name : VARCHAR2(200)
+    specific_product_code : VARCHAR2(50)
+    specific_product_name : VARCHAR2(200)
+    has_extra_fields : NUMBER(1)
+    --
+    == Phân loại & Kỳ hạn ==
+    * product_category : VARCHAR2(20)
+    term_type : VARCHAR2(20) "NH | TH | DH"
+    --
+    == Thông tin tài chính ==
+    amount : NUMBER(20,2) "Số tiền"
+    vnd_amount : NUMBER(20) "Số tiền – quy đổi"
+    currency : VARCHAR2(3)
+    exchange_rate : NUMBER(20,2)
+    term_unit : VARCHAR2(10) "DAY | MONTH | YEAR"
+    term_value : NUMBER(5)
+    effective_date : DATE "Thời hạn"
+    disbursement_deadline : DATE "Thời hạn rút vốn"
+    last_approved_cas_id : number
+    is_backed_limit : NUMBER(1) "Bảo đảm 100% TG/GTCG" "0 = No, 1 = Yes"
+    total_outstanding_amount : NUMBER(20,2) "Số dư quy đổi"
+    is_shared : NUMBER(1) "Chia sẻ" "0 = No, 1 = Yes"
+    is_backed_limit : NUMBER(1) "Bảo đảm 100% TG/GTCG" "0 = No, 1 = Yes"
+
+    * is_deleted : NUMBER(1) "0 = active, 1 = deleted"
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+  '========================================
+  ' Thông tin mở rộng khoản tín dụng khách hàng
+  '========================================
+  entity "CUSTOMER_FACILITY_EXTRA" as cus_facility_extra #LightYellow {
+    * id : VARCHAR2(36) <<PK>>
+    --
+    * facility_id : VARCHAR2(36) <<FK>>
+    --
+    * extra_fields_config : CLOB (JSON array - cả bộ config)
+    extra_fields_values : CLOB (JSON object - {fieldCode: value})
+    --
+    == Audit ==
+    * created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+  }
+}
+
+package "credit-proposal-service" #FFF3E0 {
+  '========================================
+  ' Thông tin đề xuất tín dụng
+  '========================================
+  entity "CAS_PROPOSAL" as proposal #FFE0B2 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CUSTOMER_CIF : VARCHAR2(20)
+    * PROPOSAL_TYPE : VARCHAR2(20)
+    * STATUS : VARCHAR2(20) "Unassigned | RETURNED | INPROGRESS | DECLINED | Cancelled | APPROVED | DRAFT"
+    * LO_STATUS : VARCHAR2(20) "Pending_PROCESSING | NOT_REQUIRED | DRAFT | pending_approval | approved | ReTuRNED | ISSUED | CUSTOMER_ACCEPTED | CUSTOMER_REJECTED"
+    facility_master_id: VARCHAR2(36) <<FK>> "Lưu id facility master người dùng chọn khi tạo mới CAS"
+    * CREATED_BY : VARCHAR2(50)
+    * CREATED_AT : TIMESTAMP
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+/'
+  entity "CAS_FINANCIAL_REPORT" as selection #A5D6A7 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CAS_ID : VARCHAR2(36) <<FK>>
+    * CUSTOMER_FINANCIAL_REPORT_ID : VARCHAR2(36) <<FK>>
+    DISPLAY_ORDER : NUMBER(3)
+    IS_DELETED : NUMBER(1)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+    ..
+    <i>REPORT_CATEGORY lấy từ Master qua FK</i>
+  }
+
+  entity "CAS_FINANCIAL_REPORT_ITEM" as cas_item #C8E6C9 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CAS_FINANCIAL_REPORT_ID : VARCHAR2(36) <<FK>>
+    * INDICATOR_CODE : VARCHAR2(50)
+    * IS_SELECTED : NUMBER(1)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+    ..
+    <i>Chỉ lưu chỉ tiêu được chọn</i>
+    <i>VALUE lấy từ Master</i>
+  }
+
+  entity "CAS_FINANCIAL_ASSESSMENT" as assessment #F48FB1 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CAS_ID : VARCHAR2(36) <<FK>> <<UNIQUE>>
+    OVERALL_S3_KEY : VARCHAR2(500)
+    OVERALL_S3_BUCKET : VARCHAR2(100)
+    OVERALL_BATCH_ID : VARCHAR2(50)
+    OVERALL_FILE_ID : VARCHAR2(50)
+    * VERSION : NUMBER(10)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+
+  entity "CAS_FINANCIAL_ASSESSMENT_BLOCK" as block #F8BBD9 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * ASSESSMENT_ID : VARCHAR2(36) <<FK>>
+    * BLOCK_NAME : VARCHAR2(200)
+    * BLOCK_ORDER : NUMBER(3)
+    S3_KEY : VARCHAR2(500)
+    S3_BUCKET : VARCHAR2(100)
+    BATCH_ID : VARCHAR2(50)
+    FILE_ID : VARCHAR2(50)
+    * VERSION : NUMBER(10)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+
+  entity "CAS_FINANCIAL_ASSESSMENT_INDICATOR" as indicator #FCE4EC {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * BLOCK_ID : VARCHAR2(36) <<FK>>
+    * INDICATOR_CODE : VARCHAR2(50)
+    * INDICATOR_NAME : VARCHAR2(500)
+    * INDICATOR_ORDER : NUMBER(3)
+    CHART_TYPE : VARCHAR2(20)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+  }
+'/
+'========================================
+' Thông tin khoản tín dụng đề xuất trong CAS
+'========================================
+entity "CAS_FACILITY" as cas_facility #LightBlue {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  facility_master_id : VARCHAR2(36) <<FK>>
+  * CAS_ID : VARCHAR2(36) <<FK>>
+  parent_id : VARCHAR2(36) <<FK>> (self)
+  --
+  == Thông tin sản phẩm ==
+  * product_type : VARCHAR2(20) "STANDARD | SPECIFIC"
+  product_code : VARCHAR2(50)
+  * product_name : VARCHAR2(200)
+  specific_product_code : VARCHAR2(50)
+  specific_product_name : VARCHAR2(200)
+  has_extra_fields : NUMBER(1)
+  --
+  == Phân loại & Kỳ hạn ==
+  * product_category : VARCHAR2(20)
+  term_type : VARCHAR2(20) "NH | TH | DH"
+  --
+  == Thông tin tài chính ==
+  == Thông tin đề xuất ==
+  amount : NUMBER(20,2) "Số tiền đề xuất"
+  vnd_amount : NUMBER(20) "Số tiền đề xuất tín dụng – quy đổi"
+  currency : VARCHAR2(3)
+  exchange_rate : NUMBER(20,2)
+  term_unit : VARCHAR2(10) "DAY | MONTH | YEAR"
+  term_value : NUMBER(5)
+  effective_date : DATE "Thời hạn – đề xuất"
+  disbursement_deadline : DATE "Thời hạn rút vốn"
+  == Thông tin tại master ==
+  approval_amount : NUMBER(20,2) "Số tiền đã duyệt – nguyên tệ"
+  approval_vnd_amount : NUMBER(20) "Số tiền đã duyệt – quy đổi"
+  approval_currency : VARCHAR2(3)
+  approval_effective_date : DATE "Thời hạn – đã duyệt"
+  == Thông tin tại core ==
+  facility_id_no : VARCHAR2(50) "Facility ID từ core"
+  --
+  == Thông tin khác ==
+  step : VARCHAR2(1) "Bước xử lý" "0: Đề xuất | 1: thẩm định | 2: phê duyệt"
+  index : VARCHAR2(5) "STT"
+  level : NUMBER(2) "0,1,2..."
+  name: VARCHAR2(100) "Tên commitment"
+  total_outstanding_amount : NUMBER(20,2) "Số dư quy đổi"
+  is_shared : NUMBER(1) "Chia sẻ" "0 = No, 1 = Yes"
+  is_backed_limit : NUMBER(1) "Bảo đảm 100% TG/GTCG" "0 = No, 1 = Yes"
+  is_rooted : NUMBER(1) "Khoản gốc" "0 = No, 1 = Yes"
+  == Audit ==
+  * action : VARCHAR2(20) "Trạng thái" "CREATE | UPDATE | REMOVE | NONE"
+  * is_deleted : NUMBER(1) "0 = active, 1 = deleted"
+  * CREATED_AT : TIMESTAMP
+  * CREATED_BY : VARCHAR2(50)
+  UPDATED_AT : TIMESTAMP
+  UPDATED_BY : VARCHAR2(50)
+}
+
+'========================================
+' Thông tin lịch sử thay đổi khoản tín dụng trong CAS
+'========================================
+entity "CAS_FACILITY_HIS" as cas_facility_his #LightBlue {
+  * id : VARCHAR2(36) <<PK>> 
+  * CAS_FACILITY_ID : VARCHAR2(36) <<FK>>
+  --
+  step : VARCHAR2(1) "Bước xử lý" "0: Đề xuất | 1: thẩm định | 2: phê duyệt"
+  OLD_DATA : CLOB
+  NEW_DATA : CLOB
+  * CREATED_AT : TIMESTAMP
+  * CREATED_BY : VARCHAR2(50)
+  UPDATED_AT : TIMESTAMP
+  UPDATED_BY : VARCHAR2(50)
+}
+'========================================
+' Thông tin giới hạn khoản tín dụng trong CAS
+'========================================
+entity "CAS_LIMIT_DETAILS" as cas_limit_details #LightBlue {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * CAS_ID : VARCHAR2(36) <<FK>>
+  step : VARCHAR2(1) "Bước xử lý" "0: Đề xuất | 1: thẩm định | 2: phê duyệt"
+  MANUAL_GENERAL_LIMIT    NUMBER(20,2) "Nhập tay GHTD của KH (không bao gồm TD bảo đảm 100% TG, GTCG BIDV)"
+  SYS_GENERAL_LIMIT       NUMBER(20,2) "Tự tính GHTD KH (không gồm khoản bảo đảm 100% TG/GTCG)"
+  MANUAL_CASH_BACKED_LIMIT  NUMBER(20,2) "Nhập tay GHTD của KH đối với các TD bảo đảm 100% TG, GTCG BIDV"
+  SYS_CASH_BACKED_LIMIT     NUMBER(20,2) "Tự tính GHTD KH đối với khoản bảo đảm 100% TG/GTCG"
+  remark : VARCHAR2(500) "Ghi chú"
+  --
+}
+'========================================
+' Thông tin mở rộng khoản tín dụng trong CAS
+'========================================
+entity "CAS_FACILITY_EXTRA" as cas_facility_extra #LightYellow {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * facility_id : VARCHAR2(36) <<FK>>
+  --
+  * extra_fields_config : CLOB (JSON array - cả bộ config)
+  extra_fields_values : CLOB (JSON object - {fieldCode: value})
+  --
+  == Audit ==
+  * created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+}
+
+
+' ========================================
+' QUAN HỆ TRONG customer-information-service
+' ========================================
+/'
+' CUSTOMER_FINANCIAL_REPORT 1 - N CUSTOMER_FINANCIAL_REPORT_FORM
+' Một BCTC có nhiều form
+master_report ||--|{ master_form : "1 - N"
+
+' CUSTOMER_FINANCIAL_REPORT_FORM 1 - N CUSTOMER_FINANCIAL_REPORT_ITEM
+' Một form có nhiều chỉ tiêu
+master_form ||--o{ master_item : "1 - N"
+
+' CUSTOMER_FINANCIAL_REPORT 1 - N CUSTOMER_FINANCIAL_REPORT_ITEM
+' Một BCTC có nhiều chỉ tiêu
+master_report ||--|{ master_item : "1 - N"
+
+' CUSTOMER_FINANCIAL_REPORT 1 - N CUSTOMER_FINANCIAL_REPORT_HISTORY
+' Một BCTC có nhiều lịch sử chỉnh sửa
+master_report ||--|{ history : "1 - N"
+
+' ========================================
+' QUAN HỆ TRONG credit-proposal-service
+' ========================================
+
+' CAS_PROPOSAL 1 - N CAS_FINANCIAL_REPORT
+' Một CAS có thể chọn nhiều BCTC
+proposal ||--|{ selection : "1 - N"
+
+' CAS_FINANCIAL_REPORT 1 - N CAS_FINANCIAL_REPORT_ITEM
+' Một kỳ BCTC trong CAS có nhiều chỉ tiêu được chọn
+selection ||--|{ cas_item : "1 - N"
+
+' CAS_PROPOSAL 1 - 1 CAS_FINANCIAL_ASSESSMENT
+' Một CAS chỉ có 1 đánh giá tài chính
+proposal ||--|| assessment : "1 - 1"
+
+' CAS_FINANCIAL_ASSESSMENT 1 - N CAS_FINANCIAL_ASSESSMENT_BLOCK
+' Một đánh giá có nhiều khối (biểu đồ)
+assessment ||--|{ block : "1 - N"
+
+' CAS_FINANCIAL_ASSESSMENT_BLOCK 1 - N CAS_FINANCIAL_ASSESSMENT_INDICATOR
+' Một khối có nhiều chỉ tiêu
+block ||--|{ indicator : "1 - N"
+
+' ========================================
+' QUAN HỆ CROSS-SERVICE
+' ========================================
+
+' CUSTOMER_FINANCIAL_REPORT 1 - N CAS_FINANCIAL_REPORT
+' Một BCTC Master có thể được chọn vào nhiều CAS
+master_report ||--o{ selection : "1 - N"
+
+' CUSTOMER_FINANCIAL_INDICATOR ..> CAS_FINANCIAL_ASSESSMENT_INDICATOR
+' Chỉ tiêu trong CAS lấy giá trị từ Master
+master_indicator ..> indicator : "get value (by INDICATOR_CODE)"
+'/
+' CAS_FACILITY 1 - 1 CAS_FACILITY_EXTRA
+' Một chỉ tiêu có một bản mở rộng
+cas_facility ||--|| cas_facility_extra : "1 - 1"
+
+' CAS_PROPOSAL 1 - N CAS_FACILITY
+' Một CAS có nhiều khoản vay
+proposal ||--o{ cas_facility : "1 - N" 
+
+' CAS_PROPOSAL 1 - 1 CAS_LIMIT_DETAILS
+' Một CAS có nhiều khoản vay
+proposal ||--o{ cas_limit_details : "1 - 1" 
+
+' FACILITY_MASTER 1 - N CAS_FACILITY
+' Một khoản vay khách hàng có nhiều đề xuất thay đổi
+cus_facility ||--o{ cas_facility : "1 - N"  
+' FACILITY_MASTER 1 - 1 FACILITY_EXTRA
+' Một chỉ tiêu có một bản mở rộng
+cus_facility ||--o{ cus_facility_extra : "1 - 1"
+' CAS_FACILITY 1 - N CAS_FACILITY_HIS
+' Một khoản vay có nhiều bản ghi lịch sử thay đổi
+cas_facility ||--o{ cas_facility_his : "1 - N"  
+
+
+@enduml

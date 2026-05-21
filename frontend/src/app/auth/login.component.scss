@@ -1,0 +1,234 @@
+/* Biến màu & phông — giới hạn trong :host, không reset toàn cục app */
+:host {
+  --primary-blue: #0056b3;
+  --hover-blue: #004494;
+  --light-bg: #f4f7f6;
+  --white: #ffffff;
+  --text-color: #333333;
+  --secondary-text: #6c757d;
+  --input-border: #ced4da;
+  --input-focus: #80bdff;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--light-bg);
+  /* Nền: đổi sang ảnh JPG/WEBP bằng cách thay file trong src/assets/images/login/ và sửa url bên dưới */
+  background-image: url('../../assets/images/login/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:host *,
+:host *::before,
+:host *::after {
+  box-sizing: border-box;
+}
+
+.login-evn {
+  width: 100%;
+}
+
+.main-container {
+  width: 100%;
+  max-width: 480px;
+  padding: 20px;
+  margin: 0 auto;
+}
+
+.login-box {
+  background: rgba(71, 74, 110, 0.5) !important;
+  backdrop-filter: blur(10px) !important;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 35px;
+
+  & .logo {
+    width: 84px;
+    height: auto;
+    margin-bottom: 20px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+.form-title {
+  margin: 0;
+  font-size: 26px;
+  // font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: var(--white);
+}
+
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  // font-weight: 600;
+  color: var(--white);
+}
+
+.form-group input[type='text'],
+.form-group input[type='password'] {
+  width: 100%;
+  padding: 13px 18px;
+  border: 2px solid var(--white);
+  border-radius: 8px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, .2) !important;
+  color: var(--white) !important;
+  caret-color: var(--white) !important;
+  height: 48px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--white);
+  background-color: var(--white);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.form-group input::placeholder {
+  color: var(--white) !important;
+}
+
+.form-utils {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  font-size: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  color: var(--white);
+}
+
+.remember-me input {
+  margin-right: 8px;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-blue);
+  flex-shrink: 0;
+}
+
+.remember-me label {
+  margin: 0;
+  cursor: pointer;
+  // font-weight: 600;
+  color: var(--white);
+}
+
+.forgot-password {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--white);
+  // font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.forgot-password:hover {
+  color: var(--hover-blue);
+  text-decoration: underline;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--primary-blue);
+  color: var(--white);
+  font-size: 16px;
+  // font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    transform 0.1s;
+  letter-spacing: 0.5px;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: var(--hover-blue);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.submit-btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 25px;
+  margin-bottom: 0;
+  font-size: 14px;
+  color: var(--secondary-text);
+}
+
+.signup-link__action {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  color: var(--primary-blue);
+  // font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.signup-link__action:hover {
+  color: var(--hover-blue);
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .login-box {
+    padding: 35px 20px;
+  }
+
+  .form-title {
+    font-size: 22px;
+  }
+
+  .logo {
+    width: 130px;
+  }
+}

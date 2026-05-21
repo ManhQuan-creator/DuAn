@@ -1,0 +1,28 @@
+<div class="pg-bar">
+
+  <!-- Prev -->
+  <button class="pg-btn" (click)="goPrev()" [disabled]="currentPage === 1">&#8249;</button>
+
+  <!-- Page numbers -->
+  <ng-container *ngFor="let p of pageNumbers">
+    <span *ngIf="p === -1" class="pg-dots">...</span>
+    <div
+      *ngIf="p !== -1"
+      class="pg-num"
+      [class.active]="p === currentPage"
+      (click)="go(p)"
+    >{{ p }}</div>
+  </ng-container>
+
+  <!-- Next -->
+  <button class="pg-btn" (click)="goNext()" [disabled]="currentPage === totalPages">&#8250;</button>
+
+  <!-- Right side -->
+  <div class="pg-right">
+    <select class="pg-size-select" (change)="onSizeChange($event)">
+      <option *ngFor="let s of pageSizeOptions" [value]="s" [selected]="s === pageSize">{{ s }} / Trang</option>
+    </select>
+    <span class="pg-record-info">{{ rangeStart }} - {{ rangeEnd }} của {{ totalRows }} bản ghi</span>
+  </div>
+
+</div>

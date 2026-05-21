@@ -1,0 +1,47 @@
+<tui-hosted-dropdown tuiDropdownLimitWidth="fixed" [content]="dropdownContent" [(open)]="isOpen">
+    <!-- TRIGGER -->
+    <button type="button" class="select-trigger" [class.select-trigger_active]="isOpen" (click)="isOpen = !isOpen">
+        <span class="select-trigger__label" [class.select-trigger__label_placeholder]="!selectedItem">
+            {{ selectedItem ? stringifyLabel(selectedItem) : placeholder }}
+        </span>
+        <tui-svg class="select-trigger__icon" [src]="isOpen ? 'tuiIconChevronUp' : 'tuiIconChevronDown'"></tui-svg>
+    </button>
+</tui-hosted-dropdown>
+
+<!-- DROPDOWN PANEL -->
+<ng-template #dropdownContent>
+    <div class="dropdown-panel">
+
+        <!-- Search -->
+        <ng-container *ngIf="isSearch">
+            <div class="dropdown-panel__search">
+                <tui-input #searchField tuiTextfieldSize="s" [(ngModel)]="query" (ngModelChange)="onQueryChange($event)"
+                    (keydown.arrowDown.prevent)="onArrowDown(list, $event)">
+                    <tui-svg src="tuiIconSearch"></tui-svg>
+                    Tìm kiếm
+                </tui-input>
+            </div>
+        </ng-container>
+
+        <!-- List -->
+        <tui-scrollbar style="max-height: 300px">
+            <tui-data-list #list [emptyContent]="emptyTpl"
+                (keydown)="onKeyDown($event.key, searchField?.nativeFocusableElement)">
+                <ng-container *ngIf="isShowSelectAllValue">
+                    <button tuiOption [value]="selectAllValue" (click)="onSelect(selectAllValue)">
+                        {{ stringifyLabel(selectAllValue) }}
+                    </button>
+                </ng-container>
+
+                <button *ngFor="let item of displayList" tuiOption [value]="item" (click)="onSelect(item)">
+                    {{ stringifyLabel(item) }}
+                </button>
+            </tui-data-list>
+        </tui-scrollbar>
+    </div>
+</ng-template>
+
+<!-- Empty template -->
+<ng-template #emptyTpl>
+    <span class="empty-text">{{ labelResult }}</span>
+</ng-template>

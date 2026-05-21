@@ -1,0 +1,46 @@
+/* Footer dialog: cặp nút Hủy + Cập nhật — căn phải, gap đều, cùng size. */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+/* Section label — nhãn nhóm (Chế độ, Kiểu dữ liệu, Loại danh mục…).
+ * Nhỏ hơn `tui-form__header` mặc định của Taiga để không át nội dung input. */
+.section-label {
+  display: block;
+  font-size: 0.9rem;      // ~13px
+  font-weight: 600;
+  color: #334155;             // slate-700
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.01em;
+
+  &__value {
+    color: #1e40af;           // blue-800 — nhấn giá trị động
+    font-weight: 600;
+  }
+}
+
+/* Hint text với code chip — dùng cho hướng dẫn placeholder năm động */
+.hint-text {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: #475569;
+  line-height: 1.4;
+
+  code {
+    background: #eef2f7;
+    padding: 0 4px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.7rem;
+    color: #1e3a8a;
+  }
+
+  em {
+    color: #2563eb;
+    font-style: normal;
+    font-weight: 600;
+  }
+}

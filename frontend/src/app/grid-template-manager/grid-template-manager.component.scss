@@ -1,0 +1,111 @@
+::ng-deep .search-input [tuiwrapper] {
+  box-shadow: none !important;
+  border: 1px solid #ccc !important;
+  border-radius: 8px !important;
+}
+
+::ng-deep .search-input [tuiwrapper][data-appearance='icon'] {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.manager-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px 24px;
+  gap: 16px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+}
+
+.manager-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .header-desc {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #64748b;
+  }
+}
+
+/* Bố cục filter: grid 2 cột — ô tìm kiếm rộng, trạng thái cố định hợp lý */
+.manager-filters.app-search-toolbar {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(220px, 300px);
+  align-items: end;
+  column-gap: 24px;
+  row-gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+
+  .search-input,
+  .status-select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Bỏ giới hạn flex/max-width của toolbar chung trên màn này */
+  .app-search-toolbar__field,
+  .app-search-toolbar__field--grow {
+    flex: unset;
+    max-width: none;
+    min-width: 0;
+  }
+}
+
+.manager-grid-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.manager-grid {
+  flex: 1;
+  min-height: 0;
+}
+
+.grid-loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.grid-loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: gtm-spin 0.6s linear infinite;
+}
+
+@keyframes gtm-spin {
+  to { transform: rotate(360deg); }
+}

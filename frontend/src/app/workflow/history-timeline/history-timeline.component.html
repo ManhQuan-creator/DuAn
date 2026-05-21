@@ -1,0 +1,27 @@
+<div class="timeline" *ngIf="history.length > 0">
+  <div class="timeline-item" *ngFor="let item of history; let last = last">
+    <div class="timeline-dot" [ngClass]="getDotClass(item)">
+      <span class="dot-icon" [innerHTML]="getDotIcon(item)"></span>
+    </div>
+    <div class="timeline-line" *ngIf="!last"></div>
+    <div class="timeline-content">
+      <div class="tl-header">
+        <span class="tl-name">{{ item.activityName }}</span>
+        <span class="tl-badge" [ngClass]="getBadgeClass(item)">{{ getActionLabel(item) }}</span>
+      </div>
+      <div class="tl-meta">
+        <span *ngIf="item.assignee">{{ item.assignee }}</span>
+        <span class="tl-sep" *ngIf="item.assignee && item.startTime">&bull;</span>
+        <span *ngIf="item.startTime">{{ formatDate(item.startTime) }}</span>
+        <span *ngIf="item.durationMs != null"> ({{ formatDuration(item.durationMs) }})</span>
+      </div>
+      <div class="tl-comment" *ngIf="item.comment">
+        {{ item.comment }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="empty" *ngIf="history.length === 0">
+  Chưa có lịch sử phê duyệt.
+</div>

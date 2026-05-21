@@ -1,0 +1,30 @@
+<nav class="sidebar">
+    @for (section of sections; track section.key) {
+      @if (!section.adminOnly || isAdmin) {
+        <button
+          type="button"
+          class="sidebar-parent"
+          [attr.aria-expanded]="isExpanded(section.key)"
+          (click)="toggleMenu(section.key)"
+        >
+          <span class="sidebar-parent-title">{{ section.label }}</span>
+          <span class="sidebar-toggle-icon" [class.collapsed]="!isExpanded(section.key)"></span>
+        </button>
+
+        <div class="sidebar-children" [class.expanded]="isExpanded(section.key)">
+          <div class="sidebar-children-inner">
+            @for (child of section.children; track child.path) {
+              <a [routerLink]="child.path"
+                 [queryParams]="child.queryParams"
+                 routerLinkActive="active"
+                 [routerLinkActiveOptions]="linkActiveOptions"
+                 class="sidebar-link">
+                <tui-svg [src]="child.icon" class="sidebar-icon"></tui-svg>
+                <span>{{ child.label }}</span>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    }
+  </nav>

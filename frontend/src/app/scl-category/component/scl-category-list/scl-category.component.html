@@ -1,0 +1,197 @@
+<div class="manager-container">
+    <app-page-header
+        [title]="headerTitle"
+        [breadcrumbs]="breadcrumbs"
+        >
+    </app-page-header>
+
+    <div class="card manager-filters app-search-toolbar">
+        <div class="form-group">
+            <label tuiLabel class="app-form-label">Đơn vị</label>
+            <app-single-select
+                [options]="listUnitOptions"
+                [(ngModel)]="unitFilter"
+                (ngModelChange)="onUnitSelect($event)"
+                [placeholder]="'Chọn đơn vị'"
+                [size]="'m'"
+               
+            ></app-single-select>
+        </div>
+
+        <div class="form-group">
+            <label tuiLabel class="app-form-label">Mã hạng mục</label>
+            <tui-input
+                [(ngModel)]="categoryCodeFilter"
+                (ngModelChange)="onSearchInput()"
+                [tuiTextfieldLabelOutside]="true"
+                [tuiTextfieldCleaner]="true"
+                tuiTextfieldSize="m"
+               
+            >
+                Nhập mã hạng mục...
+            </tui-input>
+        </div>
+
+        <div class="form-group">
+            <label tuiLabel class="app-form-label">Tên hạng mục</label>
+            <tui-input
+                [(ngModel)]="categoryNameFilter"
+                (ngModelChange)="onSearchInput()"
+                [tuiTextfieldLabelOutside]="true"
+                [tuiTextfieldCleaner]="true"
+                tuiTextfieldSize="m"
+               
+            >
+                Nhập tên hạng mục...
+            </tui-input>
+        </div>
+
+        <div class="form-group">
+            <label tuiLabel class="app-form-label">Năm kế hoạch</label>
+            <app-single-select
+                [options]="yearOptionItems"
+                [(ngModel)]="yearFilter"
+                (ngModelChange)="onUnitChange()"
+                [clearable]="false"
+                [placeholder]="'Chọn năm kế hoạch'"
+                [size]="'m'"
+            ></app-single-select>
+        </div>
+
+        <div class="form-group">
+            <label tuiLabel class="app-form-label">Loại kế hoạch</label>
+            <app-multi-select
+                [options]="planTypeDisplayOptions"
+                [(ngModel)]="planTypeFilter"
+                (ngModelChange)="onPlanTypeChange($event)"
+                [placeholder]="'Chọn loại kế hoạch'"
+                [size]="'m'"
+               
+            ></app-multi-select>
+        </div>
+
+        <div class="form-group">
+            <label tuiLabel class="app-form-label">Trạng thái</label>
+            <app-multi-select
+                [options]="statusDisplayOptions"
+                [(ngModel)]="statusFilter"
+                (ngModelChange)="onStatusChange($event)"
+                [placeholder]="'Chọn trạng thái'"
+                [size]="'m'"
+               
+            ></app-multi-select>
+        </div>
+
+        <div class="form-group">
+            <label tuiLabel class="app-form-label">Tiến độ</label>
+            <app-multi-select
+                [options]="progressDisplayOptions"
+                [(ngModel)]="progressFilter"
+                (ngModelChange)="onProgressChange($event)"
+                [placeholder]="'Chọn tiến độ'"
+                [size]="'m'"
+               
+            ></app-multi-select>
+        </div>
+
+        <div class="form-group">
+            <label tuiLabel class="app-form-label">Phân loại</label>
+            <app-multi-select
+                [options]="assetTypeDisplayOptions"
+                [(ngModel)]="assetTypeFilter"
+                (ngModelChange)="onAssetTypeChange($event)"
+                [placeholder]="'Chọn phân loại'"
+                [size]="'m'"
+               
+            ></app-multi-select>
+        </div>
+
+        <div class="form-group">
+            <label tuiLabel class="app-form-label">Loại đăng ký</label>
+            <app-multi-select
+                [options]="registerTypeDisplayOptions"
+                [(ngModel)]="registerTypeFilter"
+                (ngModelChange)="onRegisterTypeChange($event)"
+                [placeholder]="'Chọn loại đăng ký'"
+                [size]="'m'"
+               
+            ></app-multi-select>
+        </div>
+    </div>
+
+    <div class="card manager-grid-card">
+        <div *ngIf="loading" class="grid-loading-overlay">
+            <span class="grid-loading-spinner"></span> Đang tải dữ liệu...
+        </div>
+        <app-ag-grid-header
+            [title]="title"
+            [actions]="gridHeaderActions"
+            (actionClick)="onGridHeaderAction($event)"
+        ></app-ag-grid-header>
+        <div class="manager-grid">
+            <app-ag-grid-wrapper [enableRangeSelection]="true"
+                [rowData]="templateList"
+                [columnDefs]="columnDefs"
+                [defaultColDef]="defaultColDef"
+                [animateRows]="true"
+                [pagination]="false"
+                [suppressCellFocus]="true"
+                [suppressRowClickSelection]="true"
+                [height]="'calc(100vh - 540px)'"
+                [width]="'100%'"
+                [theme]="'ag-theme-quartz'"
+                (gridReady)="onGridReady($event)"
+                (selectionChanged)="onSelectionChanged($event)"
+                (rowDoubleClicked)="onRowDoubleClicked($event)"
+            ></app-ag-grid-wrapper>
+        </div>
+        <app-custom-pagination
+            [totalRows]="totalRows"
+            [currentPage]="pageNum + 1"
+            [pageSize]="pageSize"
+            (pageChanged)="onPageChanged($event)"
+            (pageSizeChanged)="onPageSizeChanged($event)"
+        />
+    </div>
+</div>
+
+<app-accept-dialog
+  [(isOpen)]="isOpen"
+  [dataInput]="dialogData"
+  (confirmed)="handleAcceptEvent()"
+  (cancelled)="onCancel()"
+></app-accept-dialog>
+
+<app-add-scl-category
+  [(isOpen)]="isOpenAdd"
+  [pcOptions]="pcOptions"
+  [progressOptions]="progressOptions"
+  [statusOptions]="statusOptions || []"
+  (submitAddEvent)="submitAddEvent($event)"
+></app-add-scl-category>
+
+<app-send-assesment-dialog
+    [(isOpen)]="isOpenAssessment"
+    [(selectedUnits)]="selectedUnits"
+    (isOpenChange)="handleDialogOpenChange($event)"
+    [dialogLabel]="'Chọn ban thẩm định'"
+    [unitOptions]="assessmentUnitOptions"
+    [disableAssessment]="!selectedUnits.length"
+    (confirmed)="assessmentConfirm()"
+    (cancelled)="closeDialog()"
+></app-send-assesment-dialog>
+
+<app-reject-dialog
+    [(isOpen)]="isOpenReject"
+    [title]="'Từ chối hạng mục'"
+    [showInputFile]="false"
+    (confirmed)="onConfirmReject($event)"
+    (cancelled)="onCancelReject()"
+></app-reject-dialog>
+
+<app-change-status
+    [(isOpen)]="isOpenUpdateStatus"
+    [statusOptions]="statusOptions || []"
+    (confirmed)="onChangeStatusConfirmed($event)"
+    (cancelled)="onCancelReject()"
+></app-change-status>

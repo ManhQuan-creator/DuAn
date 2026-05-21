@@ -1,0 +1,196 @@
+// ── Dialog wrapper ─────────────────────────────
+.attach-dialog {
+  width: 400px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--tui-base-01);
+  border-radius: var(--tui-radius-l);
+  overflow: hidden;
+
+  // ── Header ───────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem 0.75rem 1.25rem;
+  }
+
+  &__title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--tui-text-01);
+  }
+
+  &__close {
+    color: var(--tui-text-03);
+    flex-shrink: 0;
+  }
+
+  &__divider {
+    height: 1px;
+    background: var(--tui-base-03);
+    flex-shrink: 0;
+  }
+
+  // ── File list ─────────────────────────────────
+  &__list {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(3.7 * (44px + 0.75rem * 2 + 1px)); // ≈ 242px
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-track {
+      background: var(--tui-base-02);
+    }
+    &::-webkit-scrollbar-thumb {
+      background: var(--tui-base-05);
+      border-radius: 2px;
+    }
+  }
+
+  // ── Footer ────────────────────────────────────
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1rem;
+
+    // Tui button override: chỉ text + icon, không border
+    button {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--tui-text-01);
+      gap: 0.375rem;
+    }
+  }
+}
+
+// ── File item ─────────────────────────────────────
+.attach-file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--tui-base-03);
+  transition: background 0.12s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--tui-base-02);
+  }
+
+  // ── Thumbnail icon ──────────────────────────
+  &__thumb {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--tui-radius-m);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+
+    tui-svg {
+      font-size: 1.25rem;
+    }
+
+    // Màu theo loại file
+    &--pdf {
+      background: #fff1f0;
+      color: #e53935;
+    }
+
+    &--xlsx,
+    &--xls {
+      background: #f0faf4;
+      color: #2e7d32;
+    }
+
+    &--image {
+      background: #e8f4fd;
+      color: #1565c0;
+    }
+
+    &--zip {
+      background: #fff8e1;
+      color: #f57f17;
+    }
+
+    &--default {
+      background: var(--tui-base-03);
+      color: var(--tui-text-03);
+    }
+  }
+
+  // Extension label bên trong thumb
+  &__ext {
+    font-size: 0.5625rem; // 9px
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    color: inherit;
+  }
+
+  // ── Number + text block ─────────────────────
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  &__index {
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--tui-text-01);
+    line-height: 1.35;
+    padding-top: 1px;
+  }
+
+  &__meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  &__name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--tui-text-01);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.35;
+  }
+
+  &__sub {
+    font-size: 0.75rem;
+    color: var(--tui-text-03);
+    white-space: nowrap;
+  }
+
+  // ── Download button ─────────────────────────
+  &__download {
+    flex-shrink: 0;
+    color: var(--tui-text-03);
+    opacity: 0.6;
+    transition: opacity 0.15s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

@@ -1,0 +1,191 @@
+<section class="cs-wrap">
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="cs-header"></div>
+
+  <!-- ── Comment list ────────────────────────────────────────────────────── -->
+  @if (comments?.length !== 0) {
+    @for (comment of comments; track comment.id; let last = $last) {
+      <div class="cs-comment">
+        <div class="cs-comment__body">
+          <!-- Meta -->
+          <div class="cs-comment__meta">
+            <tui-svg src="tuiIconUser" class="icon-user" />
+            <span class="cs-comment__author">
+              : {{ getUserById(comment.userId)?.fullName }} đã
+              <strong>
+                {{ comment.tagName ? comment.tagName : " góp ý" }}
+              </strong>
+            </span>
+
+            <!-- Actions -->
+            @if (
+              isMe(comment.userId) &&
+              comment.isDeleted === "N" &&
+              showInputNewComment
+            ) {
+              <div class="cs-actions">
+                <button
+                  type="button"
+                  class="cs-actions__btn cs-actions__btn--danger"
+                  (click)="onDeleteComment(comment.id)"
+                >
+                  <tui-svg src="tuiIconTrash2" />
+                  Xoá
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Text / Edit mode -->
+          @if (comment.isDeleted === "Y") {
+            <p class="cs-comment__text cs-comment__text--deleted">
+              [Bình luận đã bị xoá]
+            </p>
+          } @else if (
+            comment.content !== null && comment.content.trim() !== ""
+          ) {
+            <p class="cs-comment__text">
+              {{ comment.content }}
+            </p>
+          }
+
+          <span class="cs-comment__time">
+            {{ formatFullDateTime(comment.createdAt) }}
+          </span>
+          <!-- File đính kèm từ component cha -->
+          @if (getAttachmentsForComment(comment.id).length > 0) {
+            <div class="cs-attachments-list">
+              @for (att of getAttachmentsForComment(comment.id); track att.id) {
+                <button
+                  type="button"
+                  class="cs-attachment"
+                  [title]="'Tải xuống ' + att.originalFileName"
+                  (click)="downloadFile(att)"
+                >
+                  <div class="file-ext file-ext--sm">
+                    {{ getExt(att.originalFileName || att.fileName || "") }}
+                  </div>
+                  <div class="file-info">
+                    <span class="file-info__name">{{
+                      att.originalFileName || att.fileName
+                    }}</span>
+                    @if (att.fileSize) {
+                      <span class="file-info__size">{{
+                        formatSize(att.fileSize)
+                      }}</span>
+                    }
+                  </div>
+                  <tui-svg src="tuiIconDownload" />
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (!last) {
+        <hr class="cs-divider" />
+      }
+    }
+  } @else if (comments?.length === 0 && !showInputNewComment) {
+    <div class="empty-data">Không có dữ liệu</div>
+  }
+
+  <!-- ── Compose ─────────────────────────────────────────────────────────── -->
+  @if (showInputNewComment) {
+    @if (comments?.length !== 0) {
+      <hr class="cs-divider" />
+    }
+    <div class="cs-compose">
+      <div class="cs-compose__body">
+        <label class="cs-compose__label">Góp ý</label>
+        <!-- Drop zone bao quanh textarea -->
+        <div
+          class="cs-drop-zone"
+          [class.cs-drop-zone--active]="isDraggingOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          <tui-textarea
+            class="cs-compose__textarea"
+            [formControl]="newCommentControl"
+            tuiTextfieldSize="m"
+            [tuiTextfieldLabelOutside]="true"
+            [expandable]="true"
+            [rows]="4"
+          >
+            Thêm góp ý...
+          </tui-textarea>
+
+          <!-- Overlay khi kéo file vào -->
+          @if (isDraggingOver) {
+            <div class="cs-drop-overlay">
+              <tui-svg src="tuiIconUpload" />
+              <span>Thả file vào đây</span>
+            </div>
+          }
+        </div>
+
+        <!-- Input file ẩn — được trigger bởi nút đính kèm -->
+        <input
+          #fileInput
+          type="file"
+          style="display: none"
+          accept=".doc,.docx,.pdf,.xlsx,.png,.jpg,.jpeg"
+          multiple
+          (change)="onFileSelected($event)"
+        />
+
+        <!-- Danh sách file pending (nhiều file) -->
+        @if (pendingFiles.length > 0) {
+          <div class="cs-pending-files">
+            @for (file of pendingFiles; track file.name; let i = $index) {
+              <div class="cs-attachment cs-attachment--pending">
+                <div class="file-ext file-ext--sm">{{ getExt(file.name) }}</div>
+                <div class="file-info">
+                  <span class="file-info__name">{{ file.name }}</span>
+                  <span class="file-info__size">{{
+                    formatSize(file.size)
+                  }}</span>
+                </div>
+                <button
+                  type="button"
+                  class="btn-icon-danger"
+                  (click)="removePendingFile(i)"
+                >
+                  <tui-svg src="tuiIconX" />
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="cs-compose__actions">
+          <!-- Nút đính kèm: dùng mousedown thay vì click để không trigger blur của textarea -->
+          <button
+            type="button"
+            class="btn-attach"
+            title="Đính kèm file (hoặc kéo thả vào ô nhập)"
+            (mousedown)="$event.preventDefault(); openFileExplorer()"
+          >
+            <tui-svg src="tuiIconPaperclip" />
+          </button>
+          <button
+            tuiButton
+            type="button"
+            appearance="primary"
+            size="s"
+            [disabled]="
+              !newCommentControl.value?.trim() && pendingFiles.length === 0
+            "
+            (mousedown)="$event.preventDefault()"
+            (click)="onSubmitComment()"
+          >
+            Góp ý
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

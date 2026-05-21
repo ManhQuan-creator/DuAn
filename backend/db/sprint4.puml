@@ -1,0 +1,143 @@
+@startuml
+skinparam linetype ortho
+skinparam roundcorner 10
+skinparam classFontSize 10
+
+' Parent Table (Orange) - Reference từ Sprint trước
+entity "CAS_PROPOSAL" as cas_proposal #LightCoral {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * customer_id : VARCHAR2(36)
+  * proposal_type : VARCHAR2(20)
+  * status : VARCHAR2(20)
+  * version : NUMBER(10)
+  * created_at : TIMESTAMP
+  * updated_at : TIMESTAMP
+  ...
+}
+
+' Lookup Tables (Gray)
+entity "CAS_CREDIT_PLAN_TYPE" as plan_type #LightGray {
+  * code : VARCHAR2(20) <<PK>>
+  --
+  * name : VARCHAR2(100)
+  * description : VARCHAR2(500)
+  * is_active : NUMBER(1)
+}
+
+' Master Table (Green)
+entity "CAS_PROPOSAL_CREDIT_PLAN" as credit_plan #LightGreen {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * cas_id : VARCHAR2(36) <<FK>>
+  * credit_plan_type_code : VARCHAR2(20) <<FK>>
+  --
+  * order_number : NUMBER(3)
+  * name : VARCHAR2(200)
+  investor_contractor : VARCHAR2(1000)
+  province_code : VARCHAR2(20)
+  district_code : VARCHAR2(20)
+  is_env_risk_management : NUMBER(1)
+  project_group_code : VARCHAR2(20)
+  --
+  original_asset_value : NUMBER(19,2)
+  total_investment : NUMBER(19,2)
+  investment_rate : NUMBER(19,2)
+  --
+  document_evaluation_code : VARCHAR2(20)
+  credit_demand_code : VARCHAR2(20)
+  feasibility_code : VARCHAR2(20)
+  obligation_code : VARCHAR2(20)
+  --
+  is_adjusted : NUMBER(1)
+  --
+  * version : NUMBER(10)
+  * is_deleted : NUMBER(1)
+  deleted_at : TIMESTAMP
+  deleted_by : VARCHAR2(50)
+  --
+  * created_at : TIMESTAMP
+  * updated_at : TIMESTAMP
+  * created_by : VARCHAR2(50)
+  * updated_by : VARCHAR2(50)
+}
+
+' Detail Tables (Blue)
+entity "CAS_PROPOSAL_CREDIT_PLAN_DOCUMENT" as plan_document #LightBlue {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * credit_plan_id : VARCHAR2(36) <<FK>>
+  * document_id : VARCHAR2(36)
+  --
+  document_name : VARCHAR2(200)
+  document_number : VARCHAR2(100)
+  issue_date : DATE
+  issuing_unit : VARCHAR2(200)
+  summary : VARCHAR2(500)
+  download_url : VARCHAR2(2000)
+  --
+  file_name : VARCHAR2(255)
+  file_size : NUMBER(19)
+  file_type : VARCHAR2(20)
+  mime_type : VARCHAR2(100)
+  s3_doc_id : VARCHAR2(100)
+  s3_bucket : VARCHAR2(100)
+  s3_key : VARCHAR2(500)
+  s3_url : VARCHAR2(2000)
+  --
+  * order_number : NUMBER(3)
+  is_deleted : NUMBER(1)
+  deleted_at : TIMESTAMP
+  deleted_by : VARCHAR2(50)
+  * created_at : TIMESTAMP
+  * created_by : VARCHAR2(50)
+}
+
+entity "CAS_PROPOSAL_CREDIT_PLAN_CAPITAL" as plan_capital #LightBlue {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * credit_plan_id : VARCHAR2(36) <<FK>>
+  --
+  * capital_type : VARCHAR2(20)
+  * amount : NUMBER(19,2)
+  percentage : NUMBER(5,2)
+  note : VARCHAR2(200)
+  --
+  * order_number : NUMBER(3)
+  * created_at : TIMESTAMP
+  * updated_at : TIMESTAMP
+}
+
+entity "CAS_PROPOSAL_CREDIT_PLAN_FILE" as plan_file #LightBlue {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * credit_plan_id : VARCHAR2(36) <<FK>>
+  --
+  * file_type : VARCHAR2(20)
+  * file_category : VARCHAR2(50)
+  * file_name : VARCHAR2(255)
+  * s3_key : VARCHAR2(500)
+  * s3_bucket : VARCHAR2(100)
+  file_size : NUMBER(19)
+  content_type : VARCHAR2(100)
+  batch_id : VARCHAR2(50)
+  file_id : VARCHAR2(50)
+  --
+  * order_number : NUMBER(3)
+  * is_deleted : NUMBER(1)
+  deleted_at : TIMESTAMP
+  deleted_by : VARCHAR2(50)
+  --
+  * created_at : TIMESTAMP
+  * created_by : VARCHAR2(50)
+}
+
+' Relationships
+cas_proposal ||--o{ credit_plan : "1-N"
+credit_plan }o--|| plan_type : "type"
+
+credit_plan ||--o{ plan_document : "1-N"
+credit_plan ||--o{ plan_capital : "1-N (Trung dài hạn only)"
+credit_plan ||--o{ plan_file : "1-N (IMAGE, EXCEL, HTML, TXT)"
+
+@enduml

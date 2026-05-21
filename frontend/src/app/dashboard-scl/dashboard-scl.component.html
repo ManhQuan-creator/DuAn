@@ -1,0 +1,129 @@
+<div class="dashboard-scl-page">
+  <header class="page-header">
+    <div class="page-header__text">
+      <h1 class="page-header__title">EVNNPC — Dashboard Tiến độ SCL năm {{ selectedYear }}</h1>
+      <p class="page-header__subtitle">
+        Tiến độ thực hiện các hạng mục Sửa Chữa Lớn của Tổng Công ty Điện lực miền Bắc tính đến {{ cutoffDate }}.
+      </p>
+    </div>
+
+    <div class="page-header__filters">
+      <div class="page-header__filter">
+        <label class="page-header__filter-label">Năm</label>
+        <div class="page-header__filter-control page-header__filter-control--year">
+          <app-single-select
+            [options]="yearOptions"
+            [ngModel]="selectedYear"
+            (ngModelChange)="onYearChange($event)"
+            [clearable]="false"
+            placeholder="Chọn năm"
+            size="m"
+          ></app-single-select>
+        </div>
+      </div>
+
+      <div class="page-header__filter-divider" *ngIf="isHeadquarters" aria-hidden="true"></div>
+
+      <div class="page-header__filter" *ngIf="isHeadquarters">
+        <label class="page-header__filter-label">Đơn vị</label>
+        <div class="page-header__filter-control">
+          <app-tree-select
+            [nodes]="(unitTree$ | async) ?? []"
+            [ngModel]="selectedUnit"
+            (ngModelChange)="onUnitChange($event)"
+            placeholder="Toàn Tổng công ty (TỔNG CỘNG)"
+            clearLabel="Toàn Tổng công ty (TỔNG CỘNG)"
+            searchPlaceholder="Tìm đơn vị..."
+            size="m"
+          ></app-tree-select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div *ngIf="selectedUnit" class="unit-filter-note">
+    <span class="unit-filter-note__icon">ℹ️</span>
+    Đang xem số liệu của <strong>{{ selectedUnit }}</strong>.
+    Các biểu đồ so sánh đa đơn vị và cảnh báo tổng hợp đã tạm ẩn —
+    <button type="button" class="unit-filter-note__reset" (click)="onUnitChange(null)">
+      quay lại Toàn TCT
+    </button>
+    để xem đầy đủ.
+  </div>
+
+  <ng-container *ngIf="(kpi$ | async) as kpi">
+    <section class="section">
+      <app-scl-kpi-cards [kpi]="kpi"></app-scl-kpi-cards>
+    </section>
+  </ng-container>
+
+  <section class="section" *ngIf="!selectedUnit">
+    <div class="section__head">
+      <h2 class="section__title">Cảnh báo đơn vị chậm tiến độ</h2>
+      <span class="section__hint">Các đơn vị còn hạng mục hoàn thành sau 30/6/{{ selectedYear }}</span>
+    </div>
+    <app-scl-delay-alerts [alerts]="(delays$ | async) ?? []"></app-scl-delay-alerts>
+  </section>
+
+  <section class="section">
+    <div class="section__head">
+      <h2 class="section__title">Biểu đồ phân tích</h2>
+      <span class="section__hint" *ngIf="!selectedUnit">
+        6 biểu đồ tổng quan — line, donut, bar, stacked, heatmap, bubble
+      </span>
+      <span class="section__hint" *ngIf="selectedUnit">
+        Hiển thị biểu đồ chi tiết theo đơn vị
+      </span>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card chart-card--wide">
+        <div class="chart-card__title">
+          Khối lượng thực hiện theo tháng
+          <span class="chart-card__subtitle">— {{ selectedUnit ?? 'Toàn TCT' }}</span>
+        </div>
+        <app-scl-kl-monthly-chart [total]="(effectiveTotal$ | async) ?? null"></app-scl-kl-monthly-chart>
+      </div>
+      <div
+        class="chart-card"
+        [class.chart-card--wide]="!!selectedUnit"
+      >
+        <div class="chart-card__title">
+          Phân bố trạng thái hạng mục
+          <span class="chart-card__subtitle">— {{ selectedUnit ?? 'Toàn TCT' }}</span>
+        </div>
+        <app-scl-status-donut-chart [total]="(effectiveTotal$ | async) ?? null"></app-scl-status-donut-chart>
+      </div>
+
+      <ng-container *ngIf="!selectedUnit">
+        <div class="chart-card">
+          <div class="chart-card__title">
+            Xếp hạng đơn vị theo % hạch toán
+            <span class="chart-card__subtitle">
+              — 3 cao nhất & 3 thấp nhất trong {{ (hachToanEligibleCount$ | async) ?? 0 }} đơn vị
+            </span>
+          </div>
+          <app-scl-hach-toan-top-chart
+            [units]="(units$ | async) ?? []"
+            [topCount]="3"
+            [bottomCount]="3"
+          ></app-scl-hach-toan-top-chart>
+        </div>
+        <div class="chart-card chart-card--wide">
+          <div class="chart-card__title">Cơ cấu hạng mục triển khai theo đơn vị</div>
+          <app-scl-unit-structure-chart [units]="(units$ | async) ?? []"></app-scl-unit-structure-chart>
+        </div>
+        <div class="chart-card chart-card--wide">
+          <div class="chart-card__title">Heatmap khối lượng KL theo Tháng × Đơn vị</div>
+          <app-scl-heatmap-kl-chart [units]="(units$ | async) ?? []"></app-scl-heatmap-kl-chart>
+        </div>
+        <div class="chart-card chart-card--wide">
+          <div class="chart-card__title">
+          Hiệu quả thực hiện SCL theo đơn vị
+            <span class="chart-card__subtitle">— bubble lớn = nhiều HM, màu đỏ = tỷ lệ chậm cao</span>
+          </div>
+          <app-scl-efficiency-bubble-chart [units]="(units$ | async) ?? []"></app-scl-efficiency-bubble-chart>
+        </div>
+      </ng-container>
+    </div>
+  </section>
+</div>

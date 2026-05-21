@@ -1,0 +1,48 @@
+{
+  "name": "ExcelPro",
+  "uri": "http://evnnpc.vn/workflow/excelpro",
+  "prefix": "excelpro",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "types": [
+    {
+      "name": "Candidates",
+      "superClass": ["Element"],
+      "properties": [
+        {
+          "name": "candidate",
+          "type": "Candidate",
+          "isMany": true
+        }
+      ]
+    },
+    {
+      "name": "SubmitterCandidates",
+      "superClass": ["Element"],
+      "properties": [
+        {
+          "name": "candidate",
+          "type": "Candidate",
+          "isMany": true
+        }
+      ]
+    },
+    {
+      "name": "Candidate",
+      "superClass": ["Element"],
+      "properties": [
+        {
+          "name": "orgCode",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "positionCode",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    }
+  ]
+}

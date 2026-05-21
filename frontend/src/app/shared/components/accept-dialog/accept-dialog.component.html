@@ -1,0 +1,31 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{
+    size: 's',
+    dismissible: true,
+    closeable: true,
+  }"
+>
+  <div class="cd-content">
+    <div class="cd-icon-wrap" [ngClass]="'cd-icon--' + status">
+      <span class="cd-icon">{{ icon }}</span>
+    </div>
+
+    <div class="cd-title">{{ data.title }}</div>
+
+    <div class="cd-message">
+      {{ data.message }}
+    </div>
+
+    <div class="cd-actions">
+      <button class="cd-btn cd-btn--cancel" (click)="cancel()">
+        {{ data.cancelText }}
+      </button>
+
+      <button class="cd-btn" [ngClass]="'cd-btn--' + status" (click)="confirm()">
+        {{ data.confirmText }}
+      </button>
+    </div>
+  </div>
+</ng-template>

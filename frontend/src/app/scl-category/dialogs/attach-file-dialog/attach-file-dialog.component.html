@@ -1,0 +1,78 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="onDialogChange($event)"
+  [appDialogOptions]="{
+    size: 'auto',
+    dismissible: true,
+    closeable: true,
+  }"
+>
+  <div class="attach-dialog" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <app-grid-header
+      [title]="'Danh sách file đính kèm'"
+      [showBtnDelete]="false"
+      [showBtnCreateNew]="false"
+    ></app-grid-header>
+
+    <div class="attach-dialog__divider"></div>
+
+    <!-- File list -->
+    <div class="attach-dialog__list">
+      @for (file of attachedFiles; track $index; let i = $index) {
+        <div class="attach-file-item">
+          <div class="attach-file-item__thumb" [ngClass]="getThumbClass(file)">
+            <tui-svg [src]="getFileIcon(file)"></tui-svg>
+            <span class="attach-file-item__ext">{{ getFileExt(file) }}</span>
+          </div>
+
+          <!-- Info -->
+          <div class="attach-file-item__info">
+            <span class="attach-file-item__index">{{ i + 1 }}.</span>
+            <div class="attach-file-item__meta">
+              <span
+                class="attach-file-item__name"
+                [title]="file.originalFileName || file.fileName"
+              >
+                {{ file.originalFileName || file.fileName }}
+              </span>
+              <span class="attach-file-item__sub">
+                {{ file.createdAt | date: "dd/MM/yyyy" }}
+                &nbsp;&nbsp;
+                {{ formatFileSize(file.fileSize) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Download button -->
+          <button
+            class="attach-file-item__download"
+            type="button"
+            tuiIconButton
+            appearance="flat"
+            size="xs"
+            (click)="downloadFile(i)"
+          >
+            <tui-svg src="tuiIconDownload"></tui-svg>
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="attach-dialog__divider"></div>
+
+    <!-- Footer: download all -->
+    <div class="attach-dialog__footer">
+      <button
+        tuiButton
+        appearance="flat"
+        size="s"
+        type="button"
+        icon="tuiIconDownload"
+        (click)="downloadAll()"
+      >
+        Tải tất cả (ZIP)
+      </button>
+    </div>
+  </div>
+</ng-template>

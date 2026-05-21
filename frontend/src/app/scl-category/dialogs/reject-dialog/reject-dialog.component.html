@@ -1,0 +1,169 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="onDialogChange($event)"
+  [appDialogOptions]="{
+    size: 'auto',
+    dismissible: true,
+    closeable: true,
+  }"
+>
+  <div class="dialog-wrapper">
+    <!-- Header -->
+    <div class="dialog-header">
+      <h2 class="dialog-header__title">{{ title }}</h2>
+    </div>
+
+    <div class="dialog-divider"></div>
+
+    <!-- Body -->
+    <div class="dialog-body">
+      <!-- Thêm select năm vào đây -->
+      <div class="field-group" *ngIf="showSelectYear">
+        <label class="field-label">Năm kế hoạch</label>
+        <app-single-select
+          [options]="yearOptions"
+          [(ngModel)]="selectedYear"
+          placeholder="Chọn năm"
+          size="m"
+        ></app-single-select>
+      </div>
+
+      <!-- Reason textarea -->
+      <div class="field-group" *ngIf="showInputReason">
+        <label class="field-label">
+          Lý do từ chối
+        </label>
+        <tui-textarea
+          class="reason-textarea"
+          [(ngModel)]="reason"
+          [expandable]="true"
+          [rows]="5"
+          [maxLength]="1000"
+          placeholder="Nhập lý do từ chối yêu cầu này..."
+        >
+        </tui-textarea>
+      </div>
+
+      <!-- Attachments section -->
+      <div class="field-group" *ngIf="showInputFile">
+        <!-- Label row: icon + label + attach button (chỉ hiện khi đã có file) -->
+        <div class="field-label-row">
+          <label class="field-label">Tài liệu đính kèm</label>
+          <button
+            *ngIf="attachedFiles.length > 0"
+            type="button"
+            tuiButton
+            appearance="outline"
+            size="xs"
+            icon="tuiIconPaperclip"
+            class="btn-attach"
+            (click)="openFilePicker()"
+          ></button>
+        </div>
+
+        <!-- Drop zone (luôn hiển thị) -->
+        <div
+          class="drop-zone"
+          [class.drop-zone--active]="isDragOver"
+          [class.drop-zone--has-files]="attachedFiles.length > 0"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="attachedFiles.length === 0 && openFilePicker()"
+        >
+          <!-- Empty state -->
+          <ng-container *ngIf="attachedFiles.length === 0">
+            <div class="drop-zone__empty">
+              <tui-svg
+                src="tuiIconUploadCloud"
+                class="drop-zone__icon"
+              ></tui-svg>
+              <p class="drop-zone__primary">Kéo &amp; thả file vào đây</p>
+              <p class="drop-zone__secondary">
+                hoặc
+                <span
+                  class="drop-zone__link"
+                  (click)="$event.stopPropagation(); openFilePicker()"
+                  >chọn file từ máy tính</span
+                >
+              </p>
+              <p class="drop-zone__hint">
+                Hỗ trợ mọi định dạng · Nhiều file cùng lúc
+              </p>
+            </div>
+          </ng-container>
+
+          <!-- Has files: danh sách -->
+          <ng-container *ngIf="attachedFiles.length > 0">
+            <div class="file-list" (click)="$event.stopPropagation()">
+              <div
+                class="file-item"
+                *ngFor="let file of attachedFiles; let i = index"
+              >
+                <div class="file-item__icon">
+                  <tui-svg [src]="getFileIcon(file)"></tui-svg>
+                </div>
+                <div class="file-item__info">
+                  <span class="file-item__name" [title]="file.name">{{
+                    file.name
+                  }}</span>
+                  <span class="file-item__size">{{
+                    formatFileSize(file.size)
+                  }}</span>
+                </div>
+                <button
+                  class="file-item__remove"
+                  type="button"
+                  tuiIconButton
+                  appearance="flat"
+                  size="xs"
+                  icon="tuiIconClose"
+                  (click)="removeFile(i)"
+                ></button>
+              </div>
+            </div>
+
+            <!-- Hint bar ở đáy khi đã có file -->
+            <div class="drop-zone__hint-bar">
+              <tui-svg src="tuiIconUploadCloud"></tui-svg>
+              <span>Kéo thêm file vào đây để đính kèm</span>
+            </div>
+          </ng-container>
+
+          <!-- Drag-over overlay (hiện khi đang kéo) -->
+          <div class="drop-zone__overlay" *ngIf="isDragOver">
+            <tui-svg src="tuiIconUploadCloud"></tui-svg>
+            <span>Thả file để đính kèm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-divider"></div>
+
+    <!-- Footer actions -->
+    <div class="dialog-footer">
+      <button
+        type="button"
+        tuiButton
+        appearance="outline"
+        size="m"
+        class="btn-cancel"
+        (click)="onCancel()"
+      >
+        Huỷ
+      </button>
+
+      <button
+        type="button"
+        tuiButton
+        appearance="primary"
+        size="m"
+        class="btn-confirm"
+        (click)="onConfirm()"
+      >
+        Xác nhận
+      </button>
+    </div>
+  </div>
+</ng-template>

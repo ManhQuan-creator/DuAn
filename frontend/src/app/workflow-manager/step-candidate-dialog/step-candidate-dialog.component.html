@@ -1,0 +1,144 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <h2 class="dialog-title">{{ data.readonly ? 'Xem người duyệt' : 'Cấu hình người duyệt' }}</h2>
+    <span class="dialog-subtitle">Bước: {{ data.stepName }}</span>
+  </div>
+
+  <div class="dialog-body">
+
+    <!-- Danh sách đã cấu hình -->
+    <div class="section-title">
+      Nhóm người duyệt hiện tại
+      <span class="counter">{{ candidates.length }} nhóm</span>
+    </div>
+    <div class="candidate-list">
+      <div *ngIf="candidates.length === 0" class="empty-state">
+        Chưa cấu hình người duyệt cho bước này.
+      </div>
+      <div *ngFor="let c of candidates; let i = index" class="candidate-item">
+        <div class="candidate-item__info">
+          <span class="candidate-item__org">{{ resolveOrgName(c.subjectOrgCode) }}</span>
+          <span class="candidate-item__sep">+</span>
+          <span class="candidate-item__pos">{{ resolvePositionName(c.subjectPositionCode) }}</span>
+        </div>
+        <button *ngIf="!data.readonly" class="candidate-item__remove" (click)="removeCandidate(i)" title="Xóa">&times;</button>
+      </div>
+    </div>
+
+    <!-- Form thêm mới (ẩn khi readonly) -->
+    <ng-container *ngIf="!data.readonly">
+    <div class="section-title">Thêm nhóm người duyệt</div>
+    <div class="form-card">
+
+      <!-- Bước 1: Nhóm tổ chức -->
+      <div class="perm-block">
+        <div class="perm-block__title">Nhóm tổ chức</div>
+        <div class="org-group-list">
+          <label
+            *ngFor="let opt of orgGroupOptions"
+            class="org-group-item"
+            [class.org-group-item--active]="form.orgGroupCode === opt.value"
+          >
+            <input
+              type="radio"
+              name="orgGroup"
+              [value]="opt.value"
+              [(ngModel)]="form.orgGroupCode"
+              (ngModelChange)="onOrgGroupChange()"
+            />
+            <div class="org-group-item__content">
+              <span class="org-group-item__label">{{ opt.label }}</span>
+              <span class="org-group-item__hint">{{ opt.hint }}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Bước 2: Loại nhân sự -->
+      <div *ngIf="showEmployeeKind" class="perm-block step">
+        <div class="perm-block__title">Loại nhân sự</div>
+        <div class="kind-list">
+          <label class="kind-item" [class.kind-item--active]="form.employeeKind === 'TOP'">
+            <input type="radio" name="empKind" value="TOP"
+                   [(ngModel)]="form.employeeKind"
+                   (ngModelChange)="onEmployeeKindChange()" />
+            <div class="kind-item__content">
+              <span class="kind-item__label">{{ topLevelLabel }}</span>
+              <span class="kind-item__hint">HĐTV, TGĐ, P.TGĐ... (không thuộc Ban/Phòng)</span>
+            </div>
+          </label>
+          <label class="kind-item" [class.kind-item--active]="form.employeeKind === 'DEPT'">
+            <input type="radio" name="empKind" value="DEPT"
+                   [(ngModel)]="form.employeeKind"
+                   (ngModelChange)="onEmployeeKindChange()" />
+            <div class="kind-item__content">
+              <span class="kind-item__label">{{ deptLevelLabel }}</span>
+              <span class="kind-item__hint">Trưởng Ban/Phòng, Chuyên viên...</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Bước 3a: Chức danh lãnh đạo (TOP) -->
+      <div *ngIf="isTopLevel" class="step">
+        <div class="form-grid">
+          <div class="field field--span-2">
+            <label class="field-label">Chức danh <span class="req">*</span></label>
+            <select class="field-input" [(ngModel)]="form.subjectPositionCode">
+              <option value="">— Chọn chức danh —</option>
+              <option *ngFor="let p of visiblePositions" [value]="p.positionCode">
+                {{ p.positionName }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bước 3b: Ban/Phòng + Chức danh (DEPT) -->
+      <div *ngIf="isDeptLevel" class="step">
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label">{{ deptLabel }} <span class="req">*</span></label>
+            <select class="field-input"
+                    [(ngModel)]="form.subjectOrgCode"
+                    (ngModelChange)="onDeptChange()">
+              <option value="">— Chọn {{ deptLabel }} —</option>
+              <option *ngFor="let d of visibleDepts" [value]="d.deptTypeCode">
+                {{ d.deptTypeName }}
+              </option>
+            </select>
+          </div>
+
+          <div class="field" *ngIf="showPositionPicker">
+            <label class="field-label">Chức danh</label>
+            <select class="field-input" [(ngModel)]="form.subjectPositionCode">
+              <option value="">— Tất cả chức danh —</option>
+              <option *ngFor="let p of visiblePositions" [value]="p.positionCode">
+                {{ p.positionName }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nút thêm -->
+      <button
+        class="add-btn"
+        [disabled]="!canAdd"
+        (click)="addCandidate()"
+      >
+        + Thêm nhóm người duyệt
+      </button>
+    </div>
+    </ng-container>
+  </div>
+
+  <div class="dialog-footer">
+    <button class="btn btn--cancel" (click)="cancel()">
+      {{ data.readonly ? 'Đóng' : 'Hủy' }}
+    </button>
+    <button *ngIf="!data.readonly" class="btn btn--confirm" (click)="save()">
+      Lưu ({{ candidates.length }} nhóm)
+    </button>
+  </div>
+</div>

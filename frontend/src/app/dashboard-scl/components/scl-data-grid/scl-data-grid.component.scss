@@ -1,0 +1,11 @@
+.scl-grid-host {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+
+  ::ng-deep .cell--warn {
+    color: #b91c1c;
+    font-weight: 600;
+  }
+}

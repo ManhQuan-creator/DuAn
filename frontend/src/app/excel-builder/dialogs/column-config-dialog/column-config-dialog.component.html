@@ -1,0 +1,88 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{ size: 'l', dismissible: true, closeable: true, label: dialogLabel }"
+>
+  <div
+    [formGroup]="columnForm"
+    class="tui-space_top-2"
+    style="min-width: 600px"
+  >
+    <div class="mb-4">
+      <div class="section-label">Kiểu dữ liệu</div>
+      <div tuiGroup class="flex w-full">
+        <label tuiRadioBlock size="m" class="flex-1">
+          <input type="radio" tuiRadio value="number" formControlName="dataType" />
+          Số
+        </label>
+        <label tuiRadioBlock size="m" class="flex-1">
+          <input type="radio" tuiRadio value="text" formControlName="dataType" />
+          Văn bản
+        </label>
+        <label tuiRadioBlock size="m" class="flex-1">
+          <input type="radio" tuiRadio value="date" formControlName="dataType" />
+          Ngày tháng
+        </label>
+      </div>
+    </div>
+
+    <!-- Hàng 1: Tên hiển thị (2) + Mã Cột Excel (1) -->
+    <div class="flex gap-3">
+      <div class="flex-[2]">
+        <tui-input formControlName="headerName">Tên hiển thị <input tuiTextfield /></tui-input>
+        <div class="hint-text">
+          Mẹo: dùng <code>&#36;&#123;N&#125;</code>, <code>&#36;&#123;N-1&#125;</code>, <code>&#36;&#123;N+1&#125;</code>… để chèn năm báo cáo động.
+          VD: <code>Vốn năm &#36;&#123;N-1&#125;</code> → năm 2026 sẽ hiển thị <em>"Vốn năm 2025"</em>.
+        </div>
+      </div>
+      <div class="flex-[1]" *ngIf="columnForm.get('dataType')?.value !== 'date'">
+        <tui-input formControlName="excelCol" style="text-transform: uppercase">Mã Cột (Excel)<input tuiTextfield /></tui-input>
+      </div>
+    </div>
+
+    <!-- Hàng 2: Data Field (2) + Độ rộng cột (1) -->
+    <div class="flex gap-3 mt-3">
+      <div class="flex-[2]">
+        <tui-input formControlName="field">Data Field (Không ký tự đặc biệt) <input tuiTextfield /></tui-input>
+        <ng-container *ngIf="columnForm.get('field') as f">
+          <div *ngIf="f.touched && f.errors?.['pattern']" class="text-red-500 text-xs mt-1">
+            Chỉ chấp nhận chữ và số, không dùng dấu gạch dưới (_)
+          </div>
+          <div *ngIf="f.touched && f.errors?.['required']" class="text-red-500 text-xs mt-1">
+            Vui lòng nhập Data Field
+          </div>
+          <div *ngIf="f.touched && f.errors?.['reserved']" class="text-red-500 text-xs mt-1">
+            Tên này trùng với hàm có sẵn (SUM/IF/AVG/...). Vui lòng chọn tên khác.
+          </div>
+          <div *ngIf="f.touched && f.errors?.['duplicate']" class="text-red-500 text-xs mt-1">
+            Tên cột đã tồn tại (không phân biệt hoa/thường).
+          </div>
+        </ng-container>
+      </div>
+      <div class="flex-[1]">
+        <tui-input formControlName="width">
+          Độ rộng cột (px)
+          <input tuiTextfield type="number" min="40" max="2000" />
+        </tui-input>
+        <div *ngIf="columnForm.get('width')?.invalid && columnForm.get('width')?.touched" class="text-red-500 text-xs mt-1">
+          Hợp lệ: 40 – 2000
+        </div>
+      </div>
+    </div>
+
+    <!-- Công thức (chỉ non-date) -->
+    <div *ngIf="columnForm.get('dataType')?.value !== 'date'" class="mt-3">
+      <tui-text-area formControlName="formula" [expandable]="true">Công thức (không bắt buộc) <textarea tuiTextfield></textarea></tui-text-area>
+      <p class="text-xs text-gray-500 mt-1">
+        Nếu điền công thức, cột sẽ tự động trở thành cột công thức (chỉ đọc, tự tính toán).
+      </p>
+    </div>
+
+    <div class="dialog-actions">
+      <button tuiButton appearance="outline" type="button" (click)="close()">Hủy</button>
+      <button tuiButton type="button" (click)="onSubmit()">
+        {{ editingColumnIndex !== null ? 'Cập nhật' : 'Lưu' }}
+      </button>
+    </div>
+  </div>
+</ng-template>

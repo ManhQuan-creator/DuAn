@@ -1,0 +1,31 @@
+@use '../../../../styles.scss' as *;
+
+.grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.button-group {
+    display: flex;
+    gap: 20px;
+    text-align: center;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 23px;
+    padding: 10px 0;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+}

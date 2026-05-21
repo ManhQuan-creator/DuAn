@@ -1,0 +1,101 @@
+// Thanh tìm kiếm / bộ lọc dùng chung (kết hợp tui-input, tui-select, nút).
+// Gắn class lên wrapper card hoặc div chứa filter.
+
+.app-search-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.app-search-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.app-search-toolbar__field {
+  flex: 0 0 auto;
+}
+
+// Ô tìm kiếm co giãn; giới hạn min/max để không full-width vô hạn trên màn lớn
+.app-search-toolbar__field--grow {
+  flex: 1 1 240px;
+  min-width: 200px;
+  max-width: 420px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Reusable filter/form layout (label on top, equal columns)                   */
+/* Usage:
+  <div class="app-form-grid app-form-grid--3">
+    <div class="app-form-item">
+      <label class="app-form-label">Tìm kiếm</label>
+      <tui-input ...>Tìm kiếm</tui-input>
+    </div>
+  </div>
+*/
+
+.app-form-grid {
+  display: grid;
+  gap: 12px 24px;
+}
+
+.app-form-grid--1 {
+  grid-template-columns: 1fr;
+}
+
+.app-form-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.app-form-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.app-form-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .app-form-grid--3,
+  .app-form-grid--4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-form-grid--2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-form-item {
+  min-width: 0;
+}
+
+.app-form-label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Ensure Taiga input/select fill the grid cell */
+.app-form-item :where(tui-input, tui-select, tui-input-date, tui-input-number) {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Compact, consistent control height */
+.app-form-item :where(tui-input, tui-select, tui-input-date, tui-input-number) {
+  --tui-height: 36px;
+}
+
+/* Improve vertical centering of text/value inside Taiga textfields */
+.app-form-item :where(tui-input, tui-select, tui-input-date, tui-input-number) :where(input, button) {
+  line-height: normal;
+}

@@ -1,0 +1,331 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{ size: 'l', dismissible: true, closeable: true }"
+>
+  <div class="dialog-wrapper">
+    <div class="dialog-header">
+      <h2 class="dialog-title">{{ dialogTitle }}</h2>
+      <span class="dialog-subtitle">Cấu hình hiển thị + phân quyền theo đơn vị / chức danh</span>
+    </div>
+
+    <div class="dialog-body">
+      <!-- ===== SECTION 1: Thông tin menu ===== -->
+      <div class="section-title">Thông tin menu</div>
+      <div class="add-form">
+        <div class="form-grid">
+          <div class="field field--span-2">
+            <label class="field-label">Nhãn hiển thị <span class="req">*</span></label>
+            <input
+              class="field-input"
+              placeholder="VD: Báo cáo tiến độ thực hiện"
+              [(ngModel)]="form.label"
+            />
+          </div>
+
+          <div class="field field--span-2">
+            <label class="field-label">Khóa định danh (menu key) <span class="req">*</span></label>
+            <input
+              class="field-input"
+              placeholder="VD: SCL__BAO_CAO_MOI"
+              [ngModel]="form.menuKey"
+              (ngModelChange)="onMenuKeyChange($event)"
+            />
+          </div>
+
+          <div class="field field--span-2">
+            <label class="field-label">Đường dẫn (path)</label>
+            <input
+              class="field-input"
+              placeholder="VD: /report/scl-bao-cao"
+              [(ngModel)]="form.path"
+            />
+          </div>
+
+          <div class="field field--icon">
+            <label class="field-label">Icon</label>
+            <tui-hosted-dropdown
+              tuiDropdownLimitWidth="fixed"
+              [content]="iconDropdownContent"
+              [(open)]="iconDropdownOpen"
+            >
+              <button
+                type="button"
+                class="field-input field-input--select"
+                [class.field-input--active]="iconDropdownOpen"
+                [class.field-input--placeholder]="!selectedIconOption"
+                (click)="iconDropdownOpen = !iconDropdownOpen"
+              >
+                <span class="icon-select-trigger">
+                  <ng-container *ngIf="selectedIconOption; else iconPlaceholder">
+                    <span class="icon-preview">
+                      <tui-svg [src]="selectedIconOption.icon"></tui-svg>
+                    </span>
+                    <span class="icon-select-trigger__text">{{ selectedIconOption.label }}</span>
+                  </ng-container>
+                  <ng-template #iconPlaceholder>
+                    <span class="icon-select-trigger__text">Chọn icon cho menu</span>
+                  </ng-template>
+                </span>
+                <tui-svg
+                  class="icon-select-caret"
+                  [src]="iconDropdownOpen ? 'tuiIconChevronUp' : 'tuiIconChevronDown'"
+                ></tui-svg>
+              </button>
+            </tui-hosted-dropdown>
+          </div>
+
+          <div class="field field--sort">
+            <label class="field-label">Thứ tự</label>
+            <input
+              class="field-input"
+              type="number"
+              min="0"
+              [(ngModel)]="form.sortOrder"
+            />
+          </div>
+
+          <div *ngIf="mode === 'edit'" class="field">
+            <label class="field-label">Trạng thái</label>
+            <select class="field-input" [(ngModel)]="form.active">
+              <option [ngValue]="true">Hoạt động</option>
+              <option [ngValue]="false">Vô hiệu</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 2: Phân quyền hiển thị ===== -->
+      <div class="section-title">
+        Phân quyền hiển thị
+        <span class="permission-summary">{{ permissionSummary }}</span>
+      </div>
+
+      <div class="permission-form">
+        <!-- 2.1 Org Group radio -->
+        <div class="perm-block">
+          <div class="perm-block__title">Nhóm tổ chức</div>
+          <div class="perm-block__hint">
+            Chọn nhóm user được nhìn thấy menu này. Chọn "Tất cả" để mọi nhóm đều thấy — không cần khai báo Ban/Phòng & Chức danh.
+          </div>
+          <div class="org-group-list">
+            <label
+              *ngFor="let opt of orgGroupOptions"
+              class="org-group-item"
+              [class.org-group-item--active]="form.orgGroupCode === opt.value"
+            >
+              <input
+                type="radio"
+                name="orgGroup"
+                [value]="opt.value"
+                [(ngModel)]="form.orgGroupCode"
+                (ngModelChange)="onOrgGroupChange()"
+              />
+              <div class="org-group-item__content">
+                <span class="org-group-item__label">{{ opt.label }}</span>
+                <span class="org-group-item__hint">{{ opt.hint }}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2.2 Top-level leadership — không thuộc Ban/Phòng nào -->
+        <div *ngIf="isPermissionEnabled && topLevelPositionOptions.length > 0" class="perm-block">
+          <div class="perm-block__title">
+            {{ topLevelSectionTitle }}
+            <span
+              *ngIf="topLevelPositions.size > 0"
+              class="perm-block__counter"
+            >{{ topLevelPositions.size }} chức danh</span>
+          </div>
+          <div class="perm-block__hint">
+            Các chức danh này không trực thuộc Ban/Phòng nào — tick để cho phép họ xem menu.
+          </div>
+
+          <div class="perm-actions">
+            <button
+              type="button"
+              class="perm-chip perm-chip--action"
+              (click)="selectAllTopLevel()"
+            >
+              + Chọn tất cả lãnh đạo
+            </button>
+            <button
+              *ngIf="topLevelPositions.size > 0"
+              type="button"
+              class="perm-chip perm-chip--clear"
+              (click)="clearTopLevel()"
+            >
+              × Bỏ chọn lãnh đạo
+            </button>
+          </div>
+
+          <div class="position-chip-list">
+            <label
+              *ngFor="let p of topLevelPositionOptions; trackBy: trackByPosition"
+              class="position-chip"
+              [class.position-chip--active]="isTopLevelSelected(p.positionCode)"
+            >
+              <input
+                type="checkbox"
+                [checked]="isTopLevelSelected(p.positionCode)"
+                (change)="toggleTopLevelPosition(p.positionCode)"
+              />
+              <span class="position-chip__label">{{ p.positionName }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2.3 Per-dept rules — chỉ hiển thị khi đã chọn EVNNPC hoặc PC_COMPANY -->
+        <div *ngIf="isPermissionEnabled" class="perm-block">
+          <div class="perm-block__title">
+            Quy tắc theo Ban / Phòng + Chức danh
+            <span class="perm-block__counter">{{ rules.size }} quy tắc</span>
+          </div>
+          <div class="perm-block__hint">
+            Tick chọn Ban/Phòng được phép xem menu, sau đó chọn các chức danh áp dụng. Để trống chức danh trong 1 dòng = mọi chức danh thuộc Ban/Phòng đó.
+          </div>
+
+          <div class="perm-actions">
+            <button
+              type="button"
+              class="perm-chip perm-chip--action"
+              (click)="selectAllVisibleDepts()"
+            >
+              + Chọn tất cả {{ form.orgGroupCode === 'EVNNPC' ? 'Ban TCT' : 'Phòng PC' }}
+            </button>
+            <button
+              *ngIf="rules.size > 0"
+              type="button"
+              class="perm-chip perm-chip--clear"
+              (click)="clearAllRules()"
+            >
+              × Xóa toàn bộ quy tắc
+            </button>
+          </div>
+
+          <div *ngIf="loadingLookup && visibleDepts.length === 0" class="perm-loading">
+            Đang tải danh sách...
+          </div>
+
+          <div *ngIf="visibleDepts.length === 0 && !loadingLookup" class="perm-empty">
+            Chưa có dữ liệu loại đơn vị cho nhóm đã chọn.
+          </div>
+
+          <div class="dept-rule-list">
+            <div
+              *ngFor="let dept of visibleDepts; trackBy: trackByDept"
+              class="dept-rule"
+              [class.dept-rule--active]="isDeptSelected(dept.deptTypeCode)"
+            >
+              <label class="dept-rule__head">
+                <input
+                  type="checkbox"
+                  [checked]="isDeptSelected(dept.deptTypeCode)"
+                  (change)="toggleDept(dept.deptTypeCode)"
+                />
+                <span class="dept-rule__name">{{ dept.deptTypeName }}</span>
+                <span class="dept-rule__code">{{ dept.deptTypeCode }}</span>
+                <span
+                  *ngIf="isDeptSelected(dept.deptTypeCode)"
+                  class="dept-rule__pos-count"
+                >
+                  {{
+                    positionsCountForDept(dept.deptTypeCode) === 0
+                      ? 'Mọi chức danh'
+                      : positionsCountForDept(dept.deptTypeCode) + ' chức danh'
+                  }}
+                </span>
+              </label>
+
+              <div *ngIf="isDeptSelected(dept.deptTypeCode)" class="dept-rule__positions">
+                <div class="dept-rule__positions-label">Chức danh áp dụng:</div>
+                <div class="position-chip-list">
+                  <label
+                    *ngFor="let p of positionsForDept(dept.deptTypeCode); trackBy: trackByPosition"
+                    class="position-chip"
+                    [class.position-chip--active]="isPositionSelected(dept.deptTypeCode, p.positionCode)"
+                  >
+                    <input
+                      type="checkbox"
+                      [checked]="isPositionSelected(dept.deptTypeCode, p.positionCode)"
+                      (change)="togglePosition(dept.deptTypeCode, p.positionCode)"
+                    />
+                    <span class="position-chip__label">{{ p.positionName }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <button tuiButton appearance="outline" size="s" (click)="onClose()">Hủy</button>
+      <button
+        tuiButton
+        appearance="primary"
+        size="s"
+        [disabled]="!canSave()"
+        (click)="save()"
+      >
+        {{ mode === 'edit' ? 'Lưu thay đổi' : 'Tạo menu' }}
+      </button>
+    </div>
+
+    <!-- Icon dropdown content -->
+    <ng-template #iconDropdownContent>
+      <div class="icon-dropdown">
+        <div class="icon-dropdown__search">
+          <input
+            class="field-input"
+            placeholder="Tìm icon theo tên, nhóm hoặc mã"
+            [(ngModel)]="iconSearch"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="icon-option icon-option--clear"
+          [class.icon-option--active]="!form.icon"
+          (click)="clearIcon()"
+        >
+          <span class="icon-option__swatch icon-option__swatch--empty">-</span>
+          <span class="icon-option__content">
+            <span class="icon-option__label">Không dùng icon</span>
+            <span class="icon-option__meta">Menu chỉ hiển thị nhãn</span>
+          </span>
+          <tui-svg *ngIf="!form.icon" src="tuiIconCheck" class="icon-option__check"></tui-svg>
+        </button>
+
+        <div *ngIf="filteredIconOptions.length > 0; else emptyIconResult" class="icon-dropdown__list">
+          <button
+            *ngFor="let option of filteredIconOptions; trackBy: trackByIcon"
+            type="button"
+            class="icon-option"
+            [class.icon-option--active]="form.icon === option.icon"
+            (click)="selectIcon(option)"
+          >
+            <span class="icon-option__swatch">
+              <tui-svg [src]="option.icon"></tui-svg>
+            </span>
+            <span class="icon-option__content">
+              <span class="icon-option__label">{{ option.label }}</span>
+              <span class="icon-option__meta">{{ option.category }}</span>
+            </span>
+            <tui-svg
+              *ngIf="form.icon === option.icon"
+              src="tuiIconCheck"
+              class="icon-option__check"
+            ></tui-svg>
+          </button>
+        </div>
+
+        <ng-template #emptyIconResult>
+          <div class="icon-dropdown__empty">Không tìm thấy icon phù hợp</div>
+        </ng-template>
+      </div>
+    </ng-template>
+  </div>
+</ng-template>

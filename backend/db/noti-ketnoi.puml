@@ -1,0 +1,79 @@
+@startuml
+!theme vibrant
+autonumber
+hide footbox
+
+actor "User" as User
+participant "Angular (Client)" as Client
+participant "Nginx Gateway" as Nginx
+participant "Backend (Node A)" as Backend
+participant "Oracle DB" as DB
+participant "Redis" as Redis
+
+== Phase 1: Tab Active (Mở App / Chuyển Tab) ==
+User -> Client: Mở Tab (Active)
+activate Client
+
+Client -> Client: check `!document.hidden`
+Client -> Client: Lấy `lastEventId` từ LocalStorage
+
+Client -> Nginx: GET /stream/USER_01?lastEventId=100
+note right: Header: Cache-Control: no-cache
+
+Nginx -> Backend: Proxy Request
+activate Backend
+
+Backend -> Backend: Tạo SseEmitter (Timeout 5p)
+Backend -> Backend: localEmitters.put("USER_01", emitter)
+Backend -> Redis: HSET "user_locations" "USER_01" "NODE_A"
+note right: Đánh dấu User đang ở Node A
+
+Backend --> Client: HTTP 200 OK (EventStream)
+Client -> Client: resetWatchdog() (Hẹn giờ 45s)
+
+group Sync Data (Lấy bù tin nhắn lỡ)
+    Backend -> DB: SELECT * FROM Noti WHERE ID > 100
+    DB --> Backend: List [Noti_101, Noti_102]
+    loop Từng thông báo
+        Backend -> Client: SSE Event: NEW_NOTIFICATION
+        Client -> Client: Update UI & LocalStorage
+    end
+end
+
+group Heartbeat Loop (Server còn sống)
+    loop Every 30s [Scheduled]
+        Backend -> Client: SSE Event: ping
+        Client -> Client: resetWatchdog() (Reset về 0)
+    end
+end
+
+== Phase 2: Tab Ẩn (Tiết kiệm tài nguyên) ==
+User -> Client: Chuyển sang Tab khác / Minimize
+Client -> Client: onVisibilityChange(hidden)
+
+Client -> Client: disconnect()
+note right: 1. Close EventSource\n2. Clear Watchdog
+Client -x Nginx: Đóng kết nối TCP
+
+Backend -> Backend: onCompletion()
+Backend -> Redis: HDEL "user_locations" "USER_01"
+note right: Xóa vị trí khỏi Redis
+deactivate Backend
+
+== Phase 3: Watchdog (Tự phục hồi khi Server chết) ==
+User -> Client: Quay lại Tab (Active)
+Client -> Nginx: Reconnect... (Vào lại Phase 1)
+activate Backend
+
+... Kết nối đang chạy ...
+Backend -x Client: (Node A bị Crash / Mất mạng)
+note right of Backend: Không gửi được ping
+
+Client -> Client: Watchdog đếm ngược... 30s... 40s...
+Client -> Client: 45s Timeout! (Server chết)
+
+Client -> Client: Force Reconnect()
+Client -> Nginx: GET /stream/USER_01...
+note right: Nginx tự điều hướng sang Node B (Sống)
+
+@enduml

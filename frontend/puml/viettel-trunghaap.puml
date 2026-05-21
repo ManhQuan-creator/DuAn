@@ -1,0 +1,95 @@
+@startuml
+title Quy trình Lập và Giao KH ĐTXD Trung hạ thế, VT&CNTT và ĐT khác
+autonumber
+
+actor "Đơn vị cấp 3" as DV
+participant "Hệ thống/Kho dữ liệu" as Sys
+participant "Ban Kế hoạch (BKH)" as BKH
+participant "Ban Chuyên môn\n(KT, CNTT...)" as BCM
+participant "Ban TGĐ/P.TGĐ" as TGD
+participant "HĐTV" as HDTV
+actor "Tập đoàn EVN" as EVN
+
+== Giai đoạn 1: Phân bổ vốn & Lập phương án (Đầu năm N-1) ==
+
+note over BKH, Sys: Chỉ áp dụng phân bổ vốn với Trung Hạ thế (THA)
+BKH -> Sys: Chạy mô hình phân bổ vốn (THA)
+activate Sys
+Sys -> Sys: Tự động lấy số liệu (N-3, N-1)\nTính TMĐT theo tiêu chí
+Sys --> BKH: File phân bổ ĐTXD THA (Dự kiến)
+deactivate Sys
+
+BKH -> TGD: Trình phương án phân bổ
+TGD -> HDTV: Trình phê duyệt chủ trương
+activate HDTV
+HDTV --> BKH: Thông qua phương án phân bổ
+deactivate HDTV
+
+BKH -> DV: Thông báo phân bổ vốn & Yêu cầu lập PAĐT (Trước 30/3)
+
+activate DV
+note right of DV: Căn cứ hạn mức (THA) và nhu cầu (CNTT/Khác)
+DV -> DV: Lập Phương án ĐTXD
+DV -> Sys: Nộp hồ sơ & Biểu mẫu (PL76, BM1...)
+deactivate DV
+note right of Sys: Hệ thống tự động lấy số liệu thực hiện\nvà tính toán các công thức
+
+== Giai đoạn 2: Thẩm định & Tạm giao kế hoạch ==
+
+BKH -> Sys: Tổng hợp danh mục toàn TCT
+Sys --> BKH: File tổng hợp (THA, CNTT, Khác)
+
+BKH -> BCM: Phân phối & Yêu cầu thẩm định (Trước 30/4)
+activate BCM
+BCM -> Sys: Nhập ý kiến thẩm định
+BCM --> BKH: Kết quả thẩm định
+deactivate BCM
+
+alt Có yêu cầu chỉnh sửa
+    BKH -> DV: Yêu cầu giải trình/hiệu chỉnh
+    DV -> Sys: Cập nhật danh mục
+end
+
+BKH -> TGD: Trình danh mục sau thẩm định
+TGD -> HDTV: Trình phê duyệt (Trước 30/5)
+activate HDTV
+HDTV --> BKH: Nghị quyết thông qua
+deactivate HDTV
+
+BKH -> DV: Quyết định giao danh mục & Tạm giao vốn (Trước 30/5)
+note left of DV: Giao A
+
+== Giai đoạn 3: Đăng ký & Giao kế hoạch chính thức ==
+
+DV -> DV: Chuẩn bị đầu tư & Phê duyệt thủ tục
+DV -> Sys: Đăng ký vốn chính thức (Công trình chuyển tiếp/Mới)
+Sys --> BKH: Tổng hợp nhu cầu vốn chính thức
+
+BKH -> EVN: (Đăng ký kế hoạch với Tập đoàn)
+activate EVN
+EVN --> BKH: Quyết định giao kế hoạch cho TCT
+deactivate EVN
+
+BKH -> TGD: Trình phương án phân bổ chính thức
+TGD -> HDTV: Trình HĐTV thông qua
+activate HDTV
+HDTV --> BKH: Nghị quyết phê duyệt
+deactivate HDTV
+
+BKH -> DV: Quyết định giao KH chính thức (Theo QĐ 1853)
+
+== Giai đoạn 4: Thực hiện, Báo cáo & Điều chỉnh ==
+
+DV -> DV: Triển khai thực hiện
+DV -> Sys: Báo cáo tiến độ/giám sát/hiệu quả
+Sys -> BKH: Dashboard đánh giá thực hiện
+
+opt Bổ sung danh mục / Thay đổi TMĐT
+    DV -> BKH: Đề xuất điều chỉnh (Các biểu mẫu đăng ký lại)
+    BKH -> TGD: Trình phê duyệt điều chỉnh
+    TGD -> HDTV: Báo cáo/Xin phê duyệt
+    HDTV --> BKH: Thông qua
+    BKH -> DV: Văn bản điều chỉnh
+end
+
+@enduml

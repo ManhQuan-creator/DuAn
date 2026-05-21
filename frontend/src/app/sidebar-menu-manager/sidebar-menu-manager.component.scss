@@ -1,0 +1,288 @@
+.menu-manager-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px 24px;
+  gap: 16px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+}
+
+.menu-tree-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.tree-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tree-toolbar-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  // Nới chiều rộng cố định 130px của .buttons vì label "Thu gọn tất cả" dài hơn
+  .buttons {
+    width: auto;
+    min-width: 140px;
+  }
+}
+
+.tree-toolbar-right{
+  width: unset;
+}
+
+// Nút toggle all — cho icon xoay mượt khi đổi state (dù Taiga đã swap src,
+// transition nhẹ này vẫn giúp cảm giác "pressed" rõ ràng hơn).
+.tree-toggle-all ::ng-deep tui-svg {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tree-loading,
+.tree-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.tree-list {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef0f3;
+  transition: background 0.15s;
+  // Cho phép Angular animation co height về 0 mượt mà (không bị border 1px
+  // "đột ngột biến mất" ở cuối transition).
+  box-sizing: border-box;
+  will-change: height, opacity, transform;
+}
+
+.tree-row:last-child {
+  border-bottom: none;
+}
+
+.tree-row:hover {
+  background: #eef4ff;
+}
+
+.tree-row--inactive {
+  opacity: 0.55;
+}
+
+.tree-toggle {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #4574c0;
+  flex-shrink: 0;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: rgba(69, 116, 192, 0.12);
+  }
+}
+
+.tree-toggle--invisible {
+  visibility: hidden;
+  cursor: default;
+}
+
+// Chevron luôn render là ChevronRight, khi expanded thì xoay 90° bằng CSS
+// thay vì swap SVG — cho phép transition mượt.
+.tree-toggle__icon {
+  display: inline-flex;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.tree-toggle--expanded .tree-toggle__icon {
+  transform: rotate(90deg);
+}
+
+.tree-row__icon {
+  flex-shrink: 0;
+  color: #4574c0;
+  width: 18px;
+  height: 18px;
+}
+
+.tree-row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-row__label-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tree-row__label {
+  font-weight: 600;
+  color: #111827;
+  font-size: 14px;
+}
+
+.tree-row__key {
+  font-size: 12px;
+  color: #6b7280;
+  font-family: monospace;
+  background: #f3f4f6;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.tree-row__path {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+  font-family: monospace;
+}
+
+.tree-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.tree-badge--orggroup {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.tree-badge--rules {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.tree-badge--top {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.tree-badge--public {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.tree-badge--inactive {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.tree-row__actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.tree-row:hover .tree-row__actions {
+  opacity: 1;
+}
+
+.tree-action--danger ::ng-deep [tuiwrapper] {
+  color: #dc2626 !important;
+}
+
+// ===== Drag & drop =====
+
+.tree-drag-handle {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: rgba(69, 116, 192, 0.12);
+    color: #4574c0;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  tui-svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Ghost preview (item nhân bản bay theo con trỏ khi đang kéo).
+.cdk-drag-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  border: 1px solid #d0d7e2;
+  box-sizing: border-box;
+  opacity: 0.96;
+}
+
+// Ô trống chừa chỗ tại vị trí nguồn khi đang kéo — dùng dashed border để nhấn
+// mạnh "đây là chỗ đang trống".
+.tree-drag-placeholder {
+  height: 44px;
+  background: #eef4ff;
+  border: 1px dashed #4574c0;
+  border-radius: 6px;
+  margin: 4px 0;
+  transition: all 0.2s ease;
+}
+
+// Khi đang kéo, các row khác nhường chỗ mượt mà.
+.cdk-drag-animating {
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tree-list.cdk-drop-list-dragging .tree-row:not(.cdk-drag-placeholder) {
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Row đang được kéo — giữ layout nhưng làm mờ nhẹ để UX rõ ràng.
+.tree-row.cdk-drag-preview {
+  // Preview là node clone — dùng chung style trên nhưng cần giữ action icons ẩn
+  .tree-row__actions {
+    opacity: 0;
+  }
+}

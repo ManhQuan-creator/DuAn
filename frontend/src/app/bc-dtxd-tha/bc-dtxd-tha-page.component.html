@@ -1,0 +1,81 @@
+<div class="page-root">
+
+  <!-- Header: title + 2 filter (Năm + Đơn vị) -->
+  <header class="page-header">
+    <div class="title-block">
+      <h1>Báo cáo ĐTXD THA &amp; Khác</h1>
+      <p class="subtitle">Tổng công ty Điện lực miền Bắc · Tổng hợp tình hình thực hiện đầu tư xây dựng cấp Tổng công ty</p>
+    </div>
+    <div class="filter-block">
+      <div class="field">
+        <label>Năm</label>
+        <app-single-select
+          [options]="yearOptions"
+          [ngModel]="selectedYear"
+          (ngModelChange)="onYearChange($event)"
+          placeholder="Chọn năm">
+        </app-single-select>
+      </div>
+      @if (hasUnitFilter()) {
+        <div class="field">
+          <label>Đơn vị</label>
+          <app-single-select
+            class="unit-select"
+            [options]="unitOptions()"
+            [ngModel]="selectedUnit()"
+            (ngModelChange)="onUnitChange($event)"
+            placeholder="Tất cả đơn vị">
+          </app-single-select>
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- Tab bar -->
+  <nav class="tab-bar" role="tablist">
+    @for (tab of tabs; track tab.key) {
+      <button
+        role="tab"
+        class="tab-btn"
+        [class.active]="activeTab() === tab.key"
+        [attr.aria-selected]="activeTab() === tab.key"
+        (click)="selectTab(tab.key)">
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  <!-- Tab content -->
+  <div class="tab-content">
+    @switch (activeTab()) {
+      @case ('pl179') {
+        <app-pl179-dashboard
+          [year]="selectedYear"
+          [selectedUnit]="selectedUnit()"
+          (unitsAvailable)="onUnitsAvailable($event)">
+        </app-pl179-dashboard>
+      }
+      @case ('pl180') {
+        <app-pl180-dashboard
+          [year]="selectedYear"
+          [selectedUnit]="selectedUnit()"
+          (unitsAvailable)="onUnitsAvailable($event)">
+        </app-pl180-dashboard>
+      }
+      @case ('pl181') {
+        <app-pl181-dashboard [year]="selectedYear"></app-pl181-dashboard>
+      }
+      @case ('pl182') {
+        <app-pl182-dashboard [year]="selectedYear"></app-pl182-dashboard>
+      }
+      @case ('pl183') {
+        <app-pl183-dashboard
+          [year]="selectedYear"
+          [selectedUnit]="selectedUnit()"
+          (unitsAvailable)="onUnitsAvailable($event)">
+        </app-pl183-dashboard>
+      }
+    }
+  </div>
+
+</div>

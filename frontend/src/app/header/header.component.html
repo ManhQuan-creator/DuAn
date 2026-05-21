@@ -1,0 +1,84 @@
+<header class="app-header">
+  <div class="header-brand">
+    <span class="brand-logo">
+        <img src="assets/icons/logo.svg" alt="logo" class="brand-logo-img">
+    </span>    
+  </div>
+
+  <span class="brand-tagline">PHẦN MỀM QUẢN LÝ KẾ HOẠCH</span>
+
+  <div class="header-actions">
+    <!-- Bell -->
+    <tui-hosted-dropdown [content]="dropdown">
+      <div class="bell-wrap">
+        <button
+          tuiIconButton
+          icon="tuiIconBellLarge"
+          appearance="flat"
+          class="bell-btn"
+          (click)="onBellClick()"
+        ></button>
+
+        <span
+          class="conn-dot"
+          [class.conn-online]="(status$ | async) === 'CONNECTED'"
+          [class.conn-connecting]="(status$ | async) === 'CONNECTING'"
+          [class.conn-offline]="(status$ | async) === 'DISCONNECTED'"
+          [title]="(status$ | async)"
+        >
+        </span>
+
+        <span
+          class="bell-badge"
+          *ngIf="(unreadCount$ | async)! > 0"
+          [class.bell-badge--wide]="(unreadCount$ | async)! > 9"
+        >
+          {{ (unreadCount$ | async)! > 99 ? '99+' : (unreadCount$ | async) }}
+        </span>
+      </div>
+    </tui-hosted-dropdown>
+
+    <!-- Task badge -->
+    <a routerLink="/workflow/tasks" class="task-badge-wrap" title="Công việc của tôi">
+      <button tuiIconButton icon="tuiIconCheckCircleLarge" appearance="flat" class="task-btn"></button>
+      <span
+        class="task-badge"
+        *ngIf="(taskCount$ | async)! > 0"
+        [class.task-badge--wide]="(taskCount$ | async)! > 9"
+      >
+        {{ (taskCount$ | async)! > 99 ? '99+' : (taskCount$ | async) }}
+      </span>
+    </a>
+
+    <!-- Separator -->
+    <span class="actions-divider"></span>
+
+    <!-- User -->
+    <div class="user-chip" [title]="auth.currentUser?.username || ''">
+      <span class="user-avatar">{{ userInitials }}</span>
+      <span class="user-name">{{ auth.currentUser?.fullName || auth.currentUser?.username }}</span>
+      <span class="user-org" *ngIf="userOrgCode">{{ userOrgCode }}</span>
+    </div>
+
+    <!-- Logout -->
+    <button
+      tuiIconButton
+      icon="tuiIconLogOutLarge"
+      appearance="flat"
+      class="logout-btn"
+      title="Đăng xuất"
+      (click)="onLogout()"
+    ></button>
+  </div>
+</header>
+
+<ng-template #dropdown>
+  <div class="noti-dropdown">
+    <div class="noti-dropdown-header">
+      <span class="noti-dropdown-title">Thông báo</span>
+      <button type="button" class="noti-mark-all" (click)="markAllRead()">Đọc tất cả</button>
+    </div>
+    <app-notification-list></app-notification-list>
+    <a class="noti-dropdown-footer" routerLink="/notifications">Xem tất cả thông báo</a>
+  </div>
+</ng-template>

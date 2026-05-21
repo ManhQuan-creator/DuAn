@@ -1,0 +1,43 @@
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050; // cao hơn dialog (10001) + dropdown (10002) — xem styles.scss
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.35); // slate-900 / 35%
+  backdrop-filter: blur(1px);
+  pointer-events: all;
+}
+
+.loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.4rem 2rem;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+  min-width: 180px;
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid #e2e8f0;
+  border-top-color: #4574c0; // primary accent
+  animation: app-loading-spin 0.8s linear infinite;
+}
+
+.loading-message {
+  font-size: 0.875rem;
+  color: #334155;
+  font-weight: 500;
+  text-align: center;
+}
+
+@keyframes app-loading-spin {
+  to { transform: rotate(360deg); }
+}

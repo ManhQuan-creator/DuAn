@@ -1,0 +1,83 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <h2 class="dialog-title">{{ title }}</h2>
+    <span *ngIf="isReadonly" class="dialog-subtitle">
+      Chỉ xem, không chỉnh sửa.
+    </span>
+  </div>
+
+  <div class="dialog-body">
+    <div class="section">
+      <div class="section-title">
+        <span class="section-badge">1</span>
+        Loại Service Task
+      </div>
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="field field--span-2">
+            <label class="field-label">Chọn loại <span class="req" *ngIf="!isReadonly">*</span></label>
+            <select *ngIf="!isReadonly" class="field-input" [(ngModel)]="form.type" (ngModelChange)="onTypeChange()">
+              <option *ngFor="let opt of typeOptions" [value]="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
+            <div *ngIf="isReadonly" class="field-readonly">
+              {{ selectedTypeLabel }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" *ngIf="form.type === 'UPDATE_STATUS'">
+      <div class="section-title">
+        <span class="section-badge">2</span>
+        Cấu hình cập nhật trạng thái
+      </div>
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="field field--span-2">
+            <label class="field-label">targetStatus <span class="req" *ngIf="!isReadonly">*</span></label>
+            <input *ngIf="!isReadonly" class="field-input" placeholder="vd: SUBMITTED / BKH_REVIEWED / APPROVED"
+                   [(ngModel)]="form.targetStatus" />
+            <div *ngIf="isReadonly" class="field-readonly">{{ form.targetStatus || '—' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" *ngIf="form.type === 'NOTIFY'">
+      <div class="section-title">
+        <span class="section-badge">2</span>
+        Cấu hình thông báo
+      </div>
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="field field--span-2">
+            <label class="field-label">targetGroup <span class="req" *ngIf="!isReadonly">*</span></label>
+            <input *ngIf="!isReadonly" class="field-input" placeholder="vd: SUBMITTER / PLANNER / APPROVE:1"
+                   [(ngModel)]="form.targetGroup" />
+            <div *ngIf="isReadonly" class="field-readonly">{{ form.targetGroup || '—' }}</div>
+          </div>
+
+          <div class="field field--span-2">
+            <label class="field-label">message <span class="req" *ngIf="!isReadonly">*</span></label>
+            <textarea *ngIf="!isReadonly" class="field-input field-input--textarea" rows="3"
+                      placeholder="Nội dung thông báo" [(ngModel)]="form.message"></textarea>
+            <div *ngIf="isReadonly" class="field-readonly field-readonly--multiline">{{ form.message || '—' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="dialog-footer">
+    <button class="btn btn--cancel" (click)="cancel()">
+      {{ isReadonly ? 'Đóng' : 'Hủy' }}
+    </button>
+    <button *ngIf="!isReadonly" class="btn btn--confirm" [disabled]="!canSubmit" (click)="submit()">
+      Lưu
+    </button>
+  </div>
+</div>

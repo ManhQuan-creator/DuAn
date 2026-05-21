@@ -1,0 +1,646 @@
+<div class="scl-category-detail">
+  <app-page-header
+    [breadcrumbs]="breadcrumbs"
+    [title]="headerTitle"
+    [customButtons]="customButtons"
+    (customBtnClick)="onCustomBtnClick($event)"
+  />
+
+  <form [formGroup]="form">
+    <!-- ── Summary card ───────────────────────────────────────────────── -->
+    <div class="card summary-card">
+      <div class="card-title">
+        <span class="card-title__value">
+          Hạng mục: {{ categoryDetail?.categoryName || "" }}
+        </span>
+      </div>
+
+      <div class="summary-grid summary-grid--single">
+        <div class="grid-col">
+          <label class="field-label">Nội dung SC chủ yếu</label>
+          <tui-textarea
+            formControlName="scContent"
+            class="sc-content-textarea"
+            [expandable]="true"
+            [tuiTextfieldLabelOutside]="true"
+            [tuiTextfieldSize]="'m'"
+          >
+            Nhập nội dung
+          </tui-textarea>
+        </div>
+      </div>
+
+      <div class="summary-grid summary-grid--four">
+        <div class="grid-col">
+          <label class="field-label">Phân loại</label>
+          <app-single-select
+            formControlName="assetType"
+            [options]="assetTypeSelectOptions"
+            placeholder="Chọn phân loại"
+            size="m"
+          ></app-single-select>
+        </div>
+
+        <div class="grid-col">
+          <label class="field-label">Loại kế hoạch</label>
+          <app-single-select
+            formControlName="planType"
+            [options]="planTypeSelectOptions"
+            placeholder="Chọn loại kế hoạch"
+            size="m"
+          ></app-single-select>
+        </div>
+
+        <div class="grid-col">
+          <label class="field-label">Thực hiện SCL theo</label>
+          <tui-input
+            formControlName="sclPerform"
+            tuiTextfieldSize="m"
+            [tuiTextfieldLabelOutside]="true"
+          >
+            Nhập thực hiện SCL
+          </tui-input>
+        </div>
+
+        <div class="grid-col">
+          <label class="field-label">Mã số trên SSKT</label>
+          <tui-input
+            formControlName="ssktCode"
+            tuiTextfieldSize="m"
+            [tuiTextfieldLabelOutside]="true"
+          >
+            Nhập mã số SSKT
+          </tui-input>
+        </div>
+      </div>
+
+      <div class="summary-grid summary-grid--four">
+        <div class="grid-col">
+          <label class="field-label">Tiến độ</label>
+          <app-single-select
+            formControlName="progress"
+            [options]="progressSelectOptions"
+            placeholder="Chọn tiến độ"
+            size="m"
+          ></app-single-select>
+        </div>
+
+        <div class="grid-col">
+          <label class="field-label">Trạng thái</label>
+          <app-single-select
+            formControlName="status"
+            [options]="editableStatusOptions"
+            placeholder="Chọn trạng thái"
+            size="m"
+          ></app-single-select>
+        </div>
+
+        <div class="grid-col">
+          <label class="field-label"
+            >Ngày hoàn thành theo hợp đồng xây lắp</label
+          >
+          <app-date-picker
+            formControlName="dateCompleteContract"
+            placeholder="Chọn ngày"
+            size="m"
+          ></app-date-picker>
+        </div>
+        <div class="grid-col"></div>
+      </div>
+    </div>
+
+    <!-- ── Detail card ────────────────────────────────────────────────── -->
+    <div class="card detail-card">
+      <div class="card-header">
+        <span class="card-header__title">Hiển thị chi tiết</span>
+      </div>
+
+      <div class="detail-grid">
+        <!-- Section 1 -->
+        <div class="section-title">Thông tin chung</div>
+        <div class="section-title">Phê duyệt</div>
+
+        <div class="section-body split-left">
+          <div class="form-row">
+            <label class="form-row__label" for="approvedCategoryId">
+              Thông qua danh mục tại văn bản/ QĐ
+            </label>
+            <tui-input
+              id="approvedCategoryId"
+              class="form-row__control"
+              formControlName="approvedCategory"
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập số văn bản
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="approvalLevelId">
+              Phân cấp phê duyệt PAKT - DT
+            </label>
+            <tui-input
+              id="approvalLevelId"
+              class="form-row__control"
+              formControlName="approvalLevel"
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập phân cấp
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="executionMethodId">
+              Hình thức thực hiện
+            </label>
+            <tui-input
+              id="executionMethodId"
+              class="form-row__control"
+              formControlName="executionMethod"
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập hình thức
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="accumulatedProgressId">
+              KL thực hiện lũy kế (%)
+            </label>
+            <tui-input
+              id="accumulatedProgressId"
+              class="form-row__control"
+              formControlName="accumulatedProgress"
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập % lũy kế
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="nextMonthPlanId">
+              Kế hoạch thực hiện tháng tiếp theo
+            </label>
+            <tui-input
+              id="nextMonthPlanId"
+              class="form-row__control"
+              formControlName="nextMonthPlan"
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập kế hoạch
+            </tui-input>
+          </div>
+        </div>
+
+        <div class="section-body split-right no-padding">
+          <div class="sub-split">
+            <div class="sub-col">
+              <div class="sub-title">Phê duyệt PAKT</div>
+              <div class="sub-col-content">
+                <div class="form-row">
+                  <label class="form-row__label" for="decisionNoPaktId"
+                    >Số QĐ</label
+                  >
+                  <tui-input
+                    id="decisionNoPaktId"
+                    class="form-row__control"
+                    formControlName="decisionNoPakt"
+                    tuiTextfieldSize="m"
+                    [tuiTextfieldLabelOutside]="true"
+                  >
+                    Nhập số QĐ
+                  </tui-input>
+                </div>
+
+                <div class="form-row">
+                  <label class="form-row__label" for="approvalDatePaktId"
+                    >Ngày phê duyệt</label
+                  >
+                  <app-date-picker
+                    id="approvalDatePaktId"
+                    class="form-row__control"
+                    formControlName="approvalDatePakt"
+                    placeholder="Chọn ngày"
+                    size="m"
+                  ></app-date-picker>
+                </div>
+              </div>
+            </div>
+
+            <div class="sub-col border-left">
+              <div class="sub-title">Phê duyệt dự toán</div>
+              <div class="sub-col-content">
+                <div class="form-row">
+                  <label class="form-row__label" for="decisionNoEstimateId"
+                    >Số QĐ</label
+                  >
+                  <tui-input
+                    id="decisionNoEstimateId"
+                    class="form-row__control"
+                    formControlName="decisionNoEstimate"
+                    tuiTextfieldSize="m"
+                    [tuiTextfieldLabelOutside]="true"
+                  >
+                    Nhập số QĐ
+                  </tui-input>
+                </div>
+
+                <div class="form-row">
+                  <label class="form-row__label" for="approvalDateEstimateId"
+                    >Ngày phê duyệt</label
+                  >
+                  <app-date-picker
+                    id="approvalDateEstimateId"
+                    class="form-row__control"
+                    formControlName="approvalDateEstimate"
+                    placeholder="Chọn ngày"
+                    size="m"
+                  ></app-date-picker>
+                </div>
+
+                <div class="form-row">
+                  <label class="form-row__label" for="valueVatId"
+                    >Giá trị trước VAT</label
+                  >
+                  <tui-input
+                    id="valueVatId"
+                    class="form-row__control"
+                    formControlName="valueVat"
+                    appVnNumberFormat
+                    tuiTextfieldSize="m"
+                    [tuiTextfieldLabelOutside]="true"
+                  >
+                    Nhập giá trị
+                  </tui-input>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="section-title">Giá trị</div>
+        <div class="section-title">Tiến độ hoàn thành</div>
+
+        <div class="section-body split-left">
+          <div class="form-row">
+            <label class="form-row__label" for="approvedEstimatedCostId">
+              Giá trị khái toán đã thông qua
+            </label>
+            <tui-input
+              id="approvedEstimatedCostId"
+              class="form-row__control"
+              formControlName="approvedEstimatedCost"
+              appVnNumberFormat
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập giá trị
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="assignedSclCostId"
+              >Giá trị chi phí SCL giao</label
+            >
+            <tui-input
+              id="assignedSclCostId"
+              class="form-row__control"
+              formControlName="assignedSclCost"
+              appVnNumberFormat
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập giá trị
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="totalContractValueId">
+              Tổng giá trị hợp đồng các gói thầu (trước VAT)
+            </label>
+            <tui-input
+              id="totalContractValueId"
+              class="form-row__control"
+              formControlName="totalContractValue"
+              appVnNumberFormat
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập giá trị
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="monthAccountingValueId"
+              >Giá trị hạch toán tháng</label
+            >
+            <tui-input
+              id="monthAccountingValueId"
+              class="form-row__control"
+              formControlName="monthAccountingValue"
+              appVnNumberFormat
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập giá trị
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="accumulatedAccountingValueId">
+              Giá trị đã hạch toán đến thời điểm hiện tại
+            </label>
+            <tui-input
+              id="accumulatedAccountingValueId"
+              class="form-row__control"
+              formControlName="accumulatedAccountingValue"
+              appVnNumberFormat
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập giá trị
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="projectValueId">
+              Giá trị công trình HM (trước VAT)
+            </label>
+            <tui-input
+              id="projectValueId"
+              class="form-row__control"
+              formControlName="projectValue"
+              appVnNumberFormat
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập giá trị
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="itemAccountingValueId"
+              >Giá trị hạch toán hạng mục</label
+            >
+            <tui-input
+              id="itemAccountingValueId"
+              class="form-row__control"
+              formControlName="itemAccountingValue"
+              appVnNumberFormat
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập giá trị
+            </tui-input>
+          </div>
+        </div>
+
+        <div class="section-body split-right">
+          <div class="form-row">
+            <label class="form-row__label" for="deliveryPlanId"
+              >Kế hoạch giao</label
+            >
+            <app-date-picker
+              id="deliveryPlanId"
+              class="form-row__control"
+              formControlName="deliveryPlan"
+              placeholder="Chọn ngày"
+              size="m"
+            ></app-date-picker>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="plannedCompletionDateId">
+              Ngày hoàn thành theo kế hoạch xây lắp
+            </label>
+            <app-date-picker
+              id="plannedCompletionDateId"
+              class="form-row__control"
+              formControlName="plannedCompletionDate"
+              placeholder="Chọn ngày"
+              size="m"
+            ></app-date-picker>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="actualId">Thực tế</label>
+            <app-date-picker
+              id="actualId"
+              class="form-row__control"
+              formControlName="actual"
+              placeholder="Chọn ngày"
+              size="m"
+            ></app-date-picker>
+          </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="section-title">Ước khối lượng thực hiện tháng</div>
+        <div class="section-title">Điểm chỉ thiết bị</div>
+
+        <div class="section-body split-left">
+          <div class="form-row">
+            <label class="form-row__label" for="percentageId"
+              >Phần trăm (%)</label
+            >
+            <tui-input
+              id="percentageId"
+              class="form-row__control"
+              formControlName="percentage"
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập %
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="valueCostEquivalentId">
+              Giá trị (Tính thành chi phí)
+            </label>
+            <tui-input
+              id="valueCostEquivalentId"
+              class="form-row__control"
+              formControlName="valueCostEquivalent"
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập giá trị
+            </tui-input>
+          </div>
+        </div>
+
+        <div class="section-body split-right">
+          <!-- <div class="form-row">
+            <label class="form-row__label" for="equipmentBeforeSclId"
+              >Trước SCL</label
+            >
+            <tui-input
+              id="equipmentBeforeSclId"
+              class="form-row__control"
+              formControlName="equipmentBeforeScl"
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập điểm chỉ
+            </tui-input>
+          </div>
+
+          <div class="form-row">
+            <label class="form-row__label" for="equipmentAfterSclId"
+              >Sau SCL</label
+            >
+            <tui-input
+              id="equipmentAfterSclId"
+              class="form-row__control"
+              formControlName="equipmentAfterScl"
+              tuiTextfieldSize="m"
+              [tuiTextfieldLabelOutside]="true"
+            >
+              Nhập điểm chỉ
+            </tui-input>
+          </div> -->
+
+          
+          <span class="view-detail">Xem chi tiết</span>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="section-title">Khó khăn vướng mắc</div>
+        <div class="section-title">Ghi chú</div>
+
+        <div class="section-body split-left">
+          <tui-textarea
+            formControlName="issues"
+            class="textarea-field"
+            tuiTextfieldSize="m"
+            [tuiTextfieldLabelOutside]="true"
+            [expandable]="true"
+            [rows]="4"
+          >
+            Nhập khó khăn vướng mắc
+          </tui-textarea>
+        </div>
+
+        <div class="section-body split-right">
+          <tui-textarea
+            formControlName="note"
+            class="textarea-field"
+            tuiTextfieldSize="m"
+            [tuiTextfieldLabelOutside]="true"
+            [expandable]="true"
+            [rows]="4"
+          >
+            Nhập ghi chú
+          </tui-textarea>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  @if (showCommentAssessment) {
+    <div class="card detail-card comments-card">
+      <div class="card-header">
+        <span class="card-header__title">Góp ý</span>
+      </div>
+      <app-comment-section
+        [currentUser]="thread?.currentUser || null"
+        [users]="thread?.userComments || null"
+        [comments]="thread?.commentContents || null"
+        [attachments]="thread?.attachComments || null"
+        [showInputNewComment]="showInputNewComment"
+        (submitComment)="onHandleSendComment($event)"
+        (saveEdit)="onHandleSaveEdit($event)"
+        (deleteComment)="onHandleDeleteComment($event)"
+      />
+    </div>
+  } @else {
+    @for (unitComments of listUnitComments; track unitComments.id) {
+      <div class="card detail-card comments-card">
+        <div
+          class="card-header card-header--clickable"
+          (click)="toggleAccordion(unitComments.id)"
+        >
+          <span class="card-header__title">
+            {{ unitComments.assessmentDeptName }}
+            <span
+              class="status-badge"
+              [ngClass]="getStatusCommentClass(unitComments.status)"
+            >
+              {{ getStatusCommentLabel(unitComments.status) }}
+            </span>
+          </span>
+
+          <span class="card-header__icon">
+            <tui-svg
+              [src]="
+                isOpenCommnents(unitComments.id)
+                  ? 'tuiIconChevronUp'
+                  : 'tuiIconChevronDown'
+              "
+            ></tui-svg>
+          </span>
+        </div>
+        @if (isOpenCommnents(unitComments.id)) {
+          <app-comment-section
+            [currentUser]="listThread?.currentUser || null"
+            [comments]="unitComments.commentContents || null"
+            [users]="listThread?.userComments || null"
+            [attachments]="listThread?.attachComments || null"
+            [showInputNewComment]="false"
+            (submitComment)="onHandleSendComment($event)"
+            (saveEdit)="onHandleSaveEdit($event)"
+            (deleteComment)="onHandleDeleteComment($event)"
+          />
+        }
+      </div>
+    }
+  }
+</div>
+
+<app-show-history-dialog
+  [isOpen]="isShowHistoryDialogOpen"
+  [dialogLabel]="categoryDetail?.categoryName || ''"
+  [sclCategoryId]="categoryId ?? null"
+  (isOpenChange)="isShowHistoryDialogOpen = $event"
+/>
+
+<app-send-assesment-dialog
+  [(isOpen)]="isOpenAssessment"
+  [(selectedUnits)]="selectedUnits"
+  (isOpenChange)="handleDialogOpenChange($event)"
+  [dialogLabel]="'Gửi thẩm định'"
+  [unitOptions]="unitOptions"
+  (confirmed)="sendAssessment()"
+  (cancelled)="closeDialog()"
+></app-send-assesment-dialog>
+
+<app-accept-dialog
+  [(isOpen)]="isOpen"
+  [dataInput]="dialogData"
+  (confirmed)="handleAcceptEvent()"
+  (cancelled)="onCancel()"
+></app-accept-dialog>
+
+<app-reject-dialog
+  [(isOpen)]="isOpenReject"
+  [title]="rejectDialogTitle"
+  [showInputReason]="showRejectInputReason"
+  [showInputFile]="showRejectInputFile"
+  [showSelectYear]="showRejectSelectYear"
+  (confirmed)="onConfirmReject($event)"
+  (cancelled)="onCancelReject()"
+></app-reject-dialog>
+
+<app-change-status
+  [(isOpen)]="isOpenUpdateStatus"
+  [statusOptions]="statusOptions || []"
+  (confirmed)="onChangeStatusConfirmed($event)"
+  (cancelled)="onCancelReject()"
+></app-change-status>

@@ -1,0 +1,42 @@
+<div class="grid-zoom-host" [style.--zoom]="zoomLevel">
+  <!-- Zoom toolbar -->
+  <div class="grid-zoom-bar" *ngIf="enableZoom">
+    <button class="zoom-btn" (click)="zoomOut()" [disabled]="zoomLevel <= 0.5" title="Thu nhỏ">−</button>
+    <span class="zoom-label" (click)="resetZoom()" title="Nhấn để reset 100%">{{ zoomPercent }}%</span>
+    <button class="zoom-btn" (click)="zoomIn()" [disabled]="zoomLevel >= 1.5" title="Phóng to">+</button>
+  </div>
+
+  <!-- Grid container -->
+  <div class="grid-zoom-container" [style.transform]="'scale(' + zoomLevel + ')'" [style.transform-origin]="'top left'"
+       [style.width]="zoomLevel !== 1 ? (100 / zoomLevel) + '%' : '100%'">
+    <ag-grid-angular
+      [class]="theme"
+      [theme]="'legacy'"
+      [rowData]="rowData"
+      [columnDefs]="columnDefs"
+      [defaultColDef]="defaultColDef"
+      [animateRows]="animateRows"
+      [pagination]="pagination"
+      [paginationPageSize]="paginationPageSize"
+      [suppressCellFocus]="effectiveSuppressCellFocus"
+      [rowSelection]="rowSelection"
+      [suppressRowClickSelection]="suppressRowClickSelection"
+      [headerHeight]="headerHeight"
+      [rowHeight]="rowHeight"
+      [style.width]="width"
+      [style.height]="height"
+      [getRowStyle]="getRowStyle"
+      [domLayout]="domLayout"
+      [rowDragManaged]="rowDragManaged"
+      [tooltipShowDelay]="tooltipShowDelay"
+      [tooltipHideDelay]="tooltipHideDelay"
+      (gridReady)="onGridReady($event)"
+      (selectionChanged)="onSelectionChanged()"
+      (cellValueChanged)="onCellValueChanged($event)"
+      (rowDragEnd)="onRowDragEnd($event)"
+      (rowDoubleClicked)="onRowDoubleClicked($event)"
+      (columnResized)="onColumnResized($event)"
+    >
+    </ag-grid-angular>
+  </div>
+</div>

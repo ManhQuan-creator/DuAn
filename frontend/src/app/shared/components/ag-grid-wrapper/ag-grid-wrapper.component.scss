@@ -1,0 +1,171 @@
+/* ===== Zoom host ===== */
+.grid-zoom-host {
+  position: relative;
+  width: 100%;
+  min-height: 400px;
+  height: 100%;
+}
+
+.grid-zoom-container {
+  width: 100%;
+  height: 100%;
+}
+
+.grid-zoom-bar {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 2px 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  user-select: none;
+}
+
+.zoom-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) {
+    background: #f1f5f9;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+.zoom-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #64748b;
+  min-width: 36px;
+  text-align: center;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+}
+
+/* ===== AG Grid overrides ===== */
+:host ::ng-deep .ag-header,
+:host ::ng-deep .ag-header-viewport,
+:host ::ng-deep .ag-pinned-left-header,
+:host ::ng-deep .ag-pinned-right-header {
+    background-color: #4574C0 !important;
+}
+
+:host ::ng-deep .ag-header-cell {
+    background-color: #4574C0 !important;
+    color: #ffffff !important;
+}
+
+/* Group header cells (khi có column groups) */
+:host ::ng-deep .ag-header-group-cell {
+    background-color: #4574C0 !important;
+    color: #ffffff !important;
+}
+
+:host ::ng-deep .ag-header-group-cell-label {
+    justify-content: center !important;
+}
+
+:host ::ng-deep .ag-header-group-text {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+:host ::ng-deep .ag-header-cell-text {
+    text-align: center !important;
+    width: 100% !important;
+    font-weight: 500 !important;
+}
+
+/* KHÔNG override width của .ag-header-container / .ag-header-row.
+   AG Grid v35 tự tính width = SUM của tất cả column widths để align với body
+   container. Ép `width: 100% !important` (= viewport width) phá tính toán này:
+   khi tổng cột > viewport, scroll chạm biên phải sẽ thấy header và body lệch
+   hàng do `translateX` của 2 container reference 2 width khác nhau.
+   Background xanh header đã được apply ở `.ag-header` + `.ag-header-viewport`
+   (full viewport width sẵn), không cần forced width. */
+
+/* Center cell content vertically */
+:host ::ng-deep .ag-cell {
+    display: flex !important;
+    align-items: center !important;
+}
+
+:host ::ng-deep .ag-pinned-right-header .ag-header-cell,
+:host ::ng-deep .ag-pinned-right-header .ag-header-row {
+    width: 100% !important;
+}
+
+:host ::ng-deep .ag-root-wrapper,
+:host ::ng-deep .ag-root {
+    height: 100% !important;
+}
+
+:host ::ng-deep .ag-body-viewport {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: calc(100%) !important;
+}
+
+/* Border dọc giữa các cột — đường kẻ phân tách giúp đọc grid Excel-like.
+   Tên CSS variable hơi confusing: "cell-horizontal-border" của AG Grid
+   = đường vertical separating cells trong cùng row (= border dọc). */
+:host ::ng-deep .ag-theme-quartz {
+    --ag-cell-horizontal-border: solid 1px #e2e8f0;
+}
+
+/* Header có nền xanh #4574C0 — dùng border trắng nhạt để vẫn nhìn thấy
+   được mà không quá đậm. */
+:host ::ng-deep .ag-theme-quartz .ag-header-cell,
+:host ::ng-deep .ag-theme-quartz .ag-header-group-cell {
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
+}
+:host ::ng-deep .ag-theme-quartz .ag-header-cell:last-child,
+:host ::ng-deep .ag-theme-quartz .ag-header-group-cell:last-child {
+    border-right: none;
+}
+
+/* AG Grid v35 default thêm `border: 1px solid` cho `.ag-cell-focus:focus-within`
+   (single-cell focus indicator dành cho ENTERPRISE range selection feature mà ta
+   không dùng). Border này stack với validation outline + bị `.ag-row` border-bottom
+   1px gray (row separator ngay dưới cell) làm visual lệch giữa các cạnh.
+
+   Override:
+   1. Set `border-color: transparent` (giữ space 1px nhưng không hiển thị) +
+      `border-right-color: theme` (giữ đường dọc cột).
+   2. Focus indicator dùng `box-shadow inset` (KHÔNG dùng outline) — inner shadow
+      vẽ TRÊN bề mặt cell từ outer edge vào trong, đảm bảo 2px ĐỀU 4 cạnh không
+      bị tương tác với row border-bottom + không bị browser z-index clip ở bottom.
+   3. Validation invalid outline (cellStyle inline) vẫn vẽ ON TOP — inline higher
+      specificity, override box-shadow này khi cell đỏ. */
+:host ::ng-deep .ag-ltr .ag-cell-focus:not(.ag-cell-range-selected):focus-within,
+:host ::ng-deep .ag-rtl .ag-cell-focus:not(.ag-cell-range-selected):focus-within {
+    border-color: transparent;
+    border-right-color: var(--ag-row-border-color, #e2e8f0);
+    outline: none;
+    box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.6);
+}

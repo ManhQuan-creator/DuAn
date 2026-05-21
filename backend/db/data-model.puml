@@ -1,0 +1,301 @@
+@startuml ExcelPro Data Model
+!theme plain
+skinparam linetype ortho
+skinparam roundcorner 8
+skinparam classFontSize 12
+skinparam classAttributeFontSize 11
+
+title ExcelPro — Data Model (cập nhật 2026-04-05)
+
+' ══════════════════════════════════════════════════════
+' ORGANIZATION LAYER
+' ══════════════════════════════════════════════════════
+
+entity ORGANIZATION {
+  * ID          : NUMBER (PK, identity)
+  --
+  * ORG_CODE    : VARCHAR2(50) UNIQUE   <<orgLevel = 'EVNNPC'>>\n<<orgLevel = 'HQ_DEPT'>>\n<<orgLevel = 'PC_COMPANY'>>
+  * ORG_LEVEL   : VARCHAR2(20)          'EVNNPC' | 'HQ_DEPT' | 'PC_COMPANY'
+  * ORG_NAME    : VARCHAR2(200)
+    PARENT_ORG_CODE : VARCHAR2(50)      FK → ORGANIZATION.ORG_CODE
+  * ACTIVE      : NUMBER(1)
+}
+
+note right of ORGANIZATION
+  3 cấp:
+  · EVNNPC (1 row)
+  · HQ_DEPT (14 ban TCT)
+  · PC_COMPANY (24 điện lực)
+  Không có cấp PC_DEPT trong bảng này
+  → dùng DEPT_TYPE cho cơ cấu phòng PC
+end note
+
+entity DEPT_TYPE {
+  * DEPT_TYPE_CODE : VARCHAR2(50) PK
+  --
+  * DEPT_TYPE_NAME  : VARCHAR2(200)
+  * ORG_LEVEL_SCOPE : VARCHAR2(20)     'HQ_DEPT' | 'PC_DEPT'
+    SORT_ORDER       : NUMBER
+  * ACTIVE           : NUMBER(1)
+}
+
+note right of DEPT_TYPE
+  HQ_DEPT: BAN_KH, BAN_KT, BAN_AT, ...
+  PC_DEPT: PHONG_KH, PHONG_KT, PHONG_AT, ...
+  (dùng chung cho tất cả PC)
+end note
+
+entity POSITION {
+  * ID              : NUMBER (PK, identity)
+  --
+  * POSITION_CODE   : VARCHAR2(50) UNIQUE
+  * POSITION_NAME   : VARCHAR2(100)
+  * POSITION_RANK   : NUMBER
+  * ORG_LEVEL_SCOPE : VARCHAR2(20)
+  * ACTIVE          : NUMBER(1)
+}
+
+note right of POSITION
+  EVNNPC:     TGD, PTGD, HDTV
+  HQ_DEPT:    TRUONG_BAN, PHO_BAN, CHUYEN_VIEN_BAN
+  PC_COMPANY: GD, PGD
+  PC_DEPT:    TRUONG_PHONG, PHO_PHONG, CHUYEN_VIEN_PHONG
+end note
+
+' ══════════════════════════════════════════════════════
+' USER + ROLE
+' ══════════════════════════════════════════════════════
+
+entity APP_USER {
+  * ID             : NUMBER (PK, identity)
+  --
+  * USERNAME       : VARCHAR2(50) UNIQUE
+  * PASSWORD       : VARCHAR2(255) (BCrypt)
+    FULL_NAME      : VARCHAR2(100)
+    EMAIL          : VARCHAR2(100)
+    PHONE          : VARCHAR2(20)
+  * ORG_GROUP_CODE : VARCHAR2(20)    'EVNNPC' | 'PC_COMPANY'
+    COMPANY_CODE   : VARCHAR2(50)    FK → ORGANIZATION.ORG_CODE (PC_COMPANY level)
+    DEPT_CODE      : VARCHAR2(50)    FK → DEPT_TYPE.DEPT_TYPE_CODE
+    POSITION_CODE  : VARCHAR2(50)    FK → POSITION.POSITION_CODE
+  * ACTIVE         : NUMBER(1)
+  * CREATED_BY     : VARCHAR2(50)
+  * CREATED_AT     : TIMESTAMP
+    UPDATED_BY     : VARCHAR2(50)
+    UPDATED_AT     : TIMESTAMP
+}
+
+note right of APP_USER
+  ORG_GROUP_CODE = nhóm phân quyền
+    EVNNPC → cán bộ TCT + các Ban
+    PC_COMPANY → tất cả điện lực thành viên
+  COMPANY_CODE = công ty cụ thể
+    VD: PCND, PCBN (chỉ PC users)
+end note
+
+entity APP_ROLE {
+  * ID          : NUMBER (PK, identity)
+  --
+  * ROLE_CODE   : VARCHAR2(50) UNIQUE  ADMIN|EDITOR|VIEWER|...
+  * ROLE_NAME   : VARCHAR2(100)
+    DESCRIPTION : VARCHAR2(500)
+  * ACTIVE      : NUMBER(1)
+}
+
+entity APP_USER_ROLE {
+  * USER_ID : NUMBER  FK → APP_USER.ID
+  * ROLE_ID : NUMBER  FK → APP_ROLE.ID
+}
+
+' ══════════════════════════════════════════════════════
+' TEMPLATE
+' ══════════════════════════════════════════════════════
+
+entity GRID_TEMPLATE {
+  * ID                     : NUMBER (PK, identity)
+  --
+  * CODE                   : VARCHAR2(50) UNIQUE
+  * NAME                   : VARCHAR2(200)
+    DESCRIPTION            : VARCHAR2(1000)
+    COLUMN_CONFIGS         : CLOB
+    COLUMN_GROUPS          : CLOB
+  * STATUS                 : VARCHAR2(20)    DRAFT|PUBLISHED|ARCHIVED
+  * VERSION                : NUMBER
+    PROCESS_DEFINITION_KEY : VARCHAR2(50)    FK → Camunda
+    OWNER_DEPT_CODE        : VARCHAR2(50)    FK → ORGANIZATION.ORG_CODE (HQ_DEPT)
+  * CREATED_BY             : VARCHAR2(50)
+  * CREATED_AT             : TIMESTAMP
+    UPDATED_BY             : VARCHAR2(50)
+    UPDATED_AT             : TIMESTAMP
+}
+
+entity TEMPLATE_ACCESS {
+  * ID               : NUMBER (PK, identity)
+  --
+  * TEMPLATE_ID      : NUMBER     FK → GRID_TEMPLATE.ID
+  * ACTION_KEY       : VARCHAR2(50) VIEW|EDIT|SUBMIT|APPROVE:N
+    SUBJECT_USER     : VARCHAR2(50)    username cụ thể (ưu tiên cao nhất)
+    SUBJECT_ORG_GROUP: VARCHAR2(20)    'EVNNPC' | 'PC_COMPANY'
+    SUBJECT_DEPT_CODE: VARCHAR2(50)    BAN_KH | PHONG_KH | ...
+    SUBJECT_POSITION : VARCHAR2(50)    TGD | TRUONG_PHONG | ...
+  * ACTIVE           : NUMBER(1)
+    CREATED_BY       : VARCHAR2(50)
+    CREATED_AT       : TIMESTAMP
+}
+
+note right of TEMPLATE_ACCESS
+  Quyền = SUBJECT_USER khớp
+  HOẶC (ORG_GROUP + DEPT_CODE + POSITION) khớp
+  (null = wildcard — khớp tất cả)
+  VD: (PC_COMPANY, PHONG_KH, null) + EDIT
+  → tất cả cán bộ Phòng KH bất kỳ PC được nhập liệu
+end note
+
+entity TEMPLATE_BUTTON {
+  * ID           : NUMBER (PK, identity)
+  --
+  * TEMPLATE_ID  : NUMBER     FK → GRID_TEMPLATE.ID
+  * BUTTON_KEY   : VARCHAR2(50)   trùng với ACTION_KEY
+  * BUTTON_LABEL : VARCHAR2(100)
+    BUTTON_ICON  : VARCHAR2(100)
+    SORT_ORDER   : NUMBER
+  * ACTIVE       : NUMBER(1)
+    CREATED_BY   : VARCHAR2(50)
+    CREATED_AT   : TIMESTAMP
+}
+
+entity GRID_PERMISSION {
+  * ID          : NUMBER (PK, identity)
+  --
+  * TEMPLATE_ID : NUMBER
+  * USER_ID     : NUMBER
+    ROLE_CODE   : VARCHAR2(50)
+    ACTION_KEY  : VARCHAR2(50)
+  * ACTIVE      : NUMBER(1)
+}
+
+' ══════════════════════════════════════════════════════
+' DATA ENTRY
+' ══════════════════════════════════════════════════════
+
+entity GRID_DATA_ENTRY {
+  * ID           : NUMBER (PK, identity)
+  --
+  * TEMPLATE_ID  : NUMBER     FK → GRID_TEMPLATE.ID
+  * ENTRY_CODE   : VARCHAR2(50) UNIQUE per template
+  * ENTRY_NAME   : VARCHAR2(200)
+  * YEAR         : NUMBER
+    MONTH        : NUMBER
+  * ORG_CODE     : VARCHAR2(50)    FK → ORGANIZATION.ORG_CODE (PC_COMPANY)
+  * STATUS       : VARCHAR2(50)    DRAFT|SUBMITTED|...
+    PROCESS_INSTANCE_ID : VARCHAR2(100)
+  * CREATED_BY   : VARCHAR2(50)
+  * CREATED_AT   : TIMESTAMP
+    UPDATED_BY   : VARCHAR2(50)
+    UPDATED_AT   : TIMESTAMP
+}
+
+note right of GRID_DATA_ENTRY
+  ORG_CODE = PC company đã nộp biểu mẫu
+  EVNNPC users chọn qua dropdown
+  PC users → auto-fill từ companyCode
+end note
+
+entity GRID_ROW {
+  * ID         : NUMBER (PK, identity)
+  --
+  * ENTRY_ID   : NUMBER    FK → GRID_DATA_ENTRY.ID
+  * ROW_CODE   : VARCHAR2(100)
+    CELLS      : CLOB      (JSON map<colId, value>)
+  * SORT_ORDER : NUMBER
+}
+
+' ══════════════════════════════════════════════════════
+' CATALOG
+' ══════════════════════════════════════════════════════
+
+entity MASTER_CATALOG_TYPE {
+  * TYPE        : VARCHAR2(50) PK
+  --
+  * NAME        : VARCHAR2(100)
+    DESCRIPTION : VARCHAR2(500)
+    ICON        : VARCHAR2(100)
+    SORT_ORDER  : NUMBER
+  * ACTIVE      : NUMBER(1)
+}
+
+entity MASTER_CATALOG {
+  * ID         : VARCHAR2(50) PK
+  --
+  * TYPE        : VARCHAR2(50)  FK → MASTER_CATALOG_TYPE.TYPE
+  * NAME        : VARCHAR2(200)
+    NOTE        : VARCHAR2(500)
+    SORT_ORDER  : NUMBER
+  * ACTIVE      : NUMBER(1)
+}
+
+' ══════════════════════════════════════════════════════
+' WORKFLOW
+' ══════════════════════════════════════════════════════
+
+entity WORKFLOW_DEFINITION {
+  * ID           : NUMBER (PK, identity)
+  --
+  * WORKFLOW_KEY : VARCHAR2(50) UNIQUE
+  * NAME         : VARCHAR2(200)
+    DESCRIPTION  : VARCHAR2(1000)
+    STATUS       : VARCHAR2(20)    DRAFT|DEPLOYED
+    CREATED_BY   : VARCHAR2(50)
+    CREATED_AT   : TIMESTAMP
+}
+
+entity WORKFLOW_STEP {
+  * ID                      : NUMBER (PK, identity)
+  --
+  * WORKFLOW_DEFINITION_ID  : NUMBER  FK → WORKFLOW_DEFINITION.ID
+  * STEP_ORDER              : NUMBER
+  * STEP_KEY                : VARCHAR2(50)
+  * STEP_NAME               : VARCHAR2(200)
+  * CANDIDATE_ACTION_KEY    : VARCHAR2(50)
+    STATUS_AFTER_APPROVE    : VARCHAR2(50)
+    RETURN_TARGET           : VARCHAR2(50)
+    NOTIFY_MESSAGE          : VARCHAR2(500)
+}
+
+entity NOTIFICATION {
+  * ID          : NUMBER (PK, identity)
+  --
+  * RECIPIENT   : VARCHAR2(50)
+  * TITLE       : VARCHAR2(200)
+  * CONTENT     : VARCHAR2(1000)
+    TYPE        : VARCHAR2(50)
+    STATUS      : VARCHAR2(20)   READ|UNREAD
+    CREATED_AT  : TIMESTAMP
+}
+
+' ══════════════════════════════════════════════════════
+' RELATIONSHIPS
+' ══════════════════════════════════════════════════════
+
+APP_USER        }o--o{ APP_USER_ROLE : "n:m"
+APP_ROLE        }o--o{ APP_USER_ROLE : "n:m"
+
+APP_USER::COMPANY_CODE      }o--|| ORGANIZATION : "companyCode → orgCode"
+APP_USER::DEPT_CODE         }o--o| DEPT_TYPE    : "deptCode → deptTypeCode"
+APP_USER::POSITION_CODE     }o--o| POSITION     : "positionCode → positionCode"
+
+GRID_TEMPLATE::OWNER_DEPT_CODE }o--o| ORGANIZATION : "ownerDeptCode → orgCode"
+GRID_TEMPLATE                  ||--o{ TEMPLATE_ACCESS
+GRID_TEMPLATE                  ||--o{ TEMPLATE_BUTTON
+GRID_TEMPLATE                  ||--o{ GRID_DATA_ENTRY
+GRID_TEMPLATE                  ||--o{ GRID_PERMISSION
+
+GRID_DATA_ENTRY::ORG_CODE      }o--|| ORGANIZATION : "orgCode → orgCode"
+GRID_DATA_ENTRY                ||--o{ GRID_ROW
+
+MASTER_CATALOG }o--|| MASTER_CATALOG_TYPE
+
+WORKFLOW_DEFINITION ||--o{ WORKFLOW_STEP
+WORKFLOW_DEFINITION::WORKFLOW_KEY }o--o| GRID_TEMPLATE : "processDefinitionKey"
+
+@enduml

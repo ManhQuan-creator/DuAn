@@ -1,0 +1,51 @@
+<div class="approval-dialog">
+  <h3 class="dialog-title">Xử lý phê duyệt</h3>
+  <p class="dialog-subtitle">{{ data.taskName }}</p>
+
+  <div class="action-group">
+    <label class="action-option" [class.selected]="selectedAction === 'APPROVE'">
+      <input type="radio" name="action" value="APPROVE" [(ngModel)]="selectedAction" />
+      <span class="action-icon approve-icon">&#10003;</span>
+      <span>Duyệt</span>
+    </label>
+    <label class="action-option" [class.selected]="selectedAction === 'RETURN'">
+      <input type="radio" name="action" value="RETURN" [(ngModel)]="selectedAction" />
+      <span class="action-icon return-icon">&#8634;</span>
+      <span>Trả lại</span>
+    </label>
+    <label class="action-option" [class.selected]="selectedAction === 'REJECT'">
+      <input type="radio" name="action" value="REJECT" [(ngModel)]="selectedAction" />
+      <span class="action-icon reject-icon">&#10007;</span>
+      <span>Từ chối</span>
+    </label>
+  </div>
+
+  <div class="comment-section">
+    <label class="comment-label">
+      Ghi chú
+      <span class="required" *ngIf="selectedAction === 'RETURN' || selectedAction === 'REJECT'">*</span>
+    </label>
+    <textarea
+      [(ngModel)]="comment"
+      rows="3"
+      placeholder="Nhập ghi chú..."
+      class="comment-textarea"
+    ></textarea>
+    <span class="error-msg" *ngIf="showError">
+      Ghi chú là bắt buộc khi trả lại hoặc từ chối
+    </span>
+  </div>
+
+  <div class="dialog-actions">
+    <button tuiButton appearance="flat" size="s" (click)="onCancel()">Hủy</button>
+    <button
+      tuiButton
+      appearance="primary"
+      size="s"
+      [disabled]="!selectedAction"
+      (click)="onConfirm()"
+    >
+      Xác nhận
+    </button>
+  </div>
+</div>

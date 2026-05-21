@@ -1,0 +1,129 @@
+<div class="ft-toolbar" [class.ft-disabled]="disabled">
+  <button
+    type="button"
+    class="ft-btn"
+    [class.active]="isBoolActive('bold')"
+    [disabled]="disabled"
+    (click)="toggleBoolean('bold')"
+    title="Bold (Ctrl+B)"
+  ><b>B</b></button>
+
+  <button
+    type="button"
+    class="ft-btn ft-italic"
+    [class.active]="isBoolActive('italic')"
+    [disabled]="disabled"
+    (click)="toggleBoolean('italic')"
+    title="Italic (Ctrl+I)"
+  ><i>I</i></button>
+
+  <div class="ft-color-wrap">
+    <button
+      type="button"
+      class="ft-btn ft-color-btn"
+      [class.active]="openPicker === 'fill'"
+      [disabled]="disabled"
+      (click)="togglePicker('fill', $event)"
+      title="Đổ màu nền"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 11l-8-8-8 8 8 8 8-8z"/>
+        <path d="M3 11l8 8"/>
+        <path d="M19 16c0 2-2 4-2 4s-2-2-2-4a2 2 0 0 1 4 0z" fill="currentColor"/>
+      </svg>
+      <span class="ft-color-stripe" [style.backgroundColor]="unifiedColor('fillColor') || 'transparent'"></span>
+    </button>
+    <app-color-picker-popup
+      *ngIf="openPicker === 'fill'"
+      [currentColor]="unifiedColor('fillColor')"
+      (colorPicked)="onFillPicked($event)"
+      (closed)="closePicker()"
+    ></app-color-picker-popup>
+  </div>
+
+  <div class="ft-color-wrap">
+    <button
+      type="button"
+      class="ft-btn ft-color-btn"
+      [class.active]="openPicker === 'text'"
+      [disabled]="disabled"
+      (click)="togglePicker('text', $event)"
+      title="Màu chữ"
+    >
+      <span class="ft-text-icon">A</span>
+      <span class="ft-color-stripe" [style.backgroundColor]="unifiedColor('textColor') || 'transparent'"></span>
+    </button>
+    <app-color-picker-popup
+      *ngIf="openPicker === 'text'"
+      [currentColor]="unifiedColor('textColor')"
+      (colorPicked)="onTextPicked($event)"
+      (closed)="closePicker()"
+    ></app-color-picker-popup>
+  </div>
+
+  <div class="ft-divider"></div>
+
+  <button
+    type="button"
+    class="ft-btn ft-numfmt"
+    [class.active]="isBoolActive('percent')"
+    [disabled]="disabled"
+    (click)="togglePercent()"
+    title="Format phần trăm (×100, suffix %)"
+  >%</button>
+
+  <button
+    type="button"
+    class="ft-btn ft-numfmt"
+    [disabled]="disabled"
+    (click)="increaseDecimal()"
+    title="Tăng số chữ số thập phân"
+  >.0&larr;</button>
+
+  <button
+    type="button"
+    class="ft-btn ft-numfmt"
+    [disabled]="disabled"
+    (click)="decreaseDecimal()"
+    title="Giảm số chữ số thập phân"
+  >.0&rarr;</button>
+
+  <button
+    type="button"
+    class="ft-btn ft-numfmt"
+    [class.active]="isIntegerOnlyActive()"
+    [disabled]="disabled"
+    (click)="formatIntegerOnly()"
+    title="Chỉ hiển thị phần nguyên (ẩn thập phân — round về integer)"
+  >INT</button>
+
+  <div class="ft-divider"></div>
+
+  <button
+    type="button"
+    class="ft-btn ft-merge"
+    [disabled]="disabled || !canMerge()"
+    (click)="mergeRange()"
+    title="Gộp ô — vùng đang chọn"
+  >
+    <svg width="16" height="14" viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1" y="1" width="22" height="16" rx="1"/>
+      <path d="M8 1v16M16 1v16" stroke-dasharray="2 2" opacity="0.5"/>
+      <path d="M10 9h4M12 7l2 2-2 2"/>
+    </svg>
+  </button>
+
+  <button
+    type="button"
+    class="ft-btn ft-merge"
+    [disabled]="disabled || !canUnmerge()"
+    (click)="unmergeRange()"
+    title="Bỏ gộp ô đang chọn"
+  >
+    <svg width="16" height="14" viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1" y="1" width="22" height="16" rx="1"/>
+      <path d="M12 1v16"/>
+      <path d="M14 9h-4M12 7l-2 2 2 2"/>
+    </svg>
+  </button>
+</div>

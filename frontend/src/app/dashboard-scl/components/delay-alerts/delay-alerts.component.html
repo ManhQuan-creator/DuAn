@@ -1,0 +1,51 @@
+<div *ngIf="alerts.length === 0" class="empty-state">
+  <span class="empty-state__icon">✨</span>
+  Không có đơn vị nào bị chậm hoàn thành sau 30/6.
+</div>
+
+<div *ngIf="alerts.length > 0" class="alert-list">
+  <div
+    *ngFor="let a of alerts"
+    class="alert-card"
+    [class.alert-card--high]="a.severity === 'high'"
+    [class.alert-card--medium]="a.severity === 'medium'"
+    [class.alert-card--low]="a.severity === 'low'"
+  >
+    <div class="alert-card__header">
+      <div class="alert-card__title">{{ a.donVi }}</div>
+      <div class="alert-card__count-badge">
+        <span class="count-badge__num">{{ a.htSauTong }}</span>
+        <span class="count-badge__label">hạng mục chậm</span>
+      </div>
+    </div>
+
+    <div class="alert-card__breakdown">
+      <span class="breakdown-chip breakdown-chip--110kv" *ngIf="a.htSau110kv > 0">
+        110kV: {{ a.htSau110kv }}
+      </span>
+      <span class="breakdown-chip breakdown-chip--tht" *ngIf="a.htSauTht > 0">
+        THT: {{ a.htSauTht }}
+      </span>
+      <span class="breakdown-chip breakdown-chip--khac" *ngIf="a.htSauKhac > 0">
+        Khác: {{ a.htSauKhac }}
+      </span>
+      <span *ngIf="a.duKienHoanThanh" class="breakdown-chip breakdown-chip--date">
+        Dự kiến HT: {{ a.duKienHoanThanh }}
+      </span>
+    </div>
+
+    <div *ngIf="a.ghiChu" class="alert-card__note">
+      <div class="alert-card__note-text" [class.alert-card__note-text--clamped]="!isExpanded(a.donVi) && isLongNote(a.ghiChu)">
+        {{ a.ghiChu }}
+      </div>
+      <button
+        *ngIf="isLongNote(a.ghiChu)"
+        type="button"
+        class="alert-card__note-toggle"
+        (click)="toggle(a.donVi)"
+      >
+        {{ isExpanded(a.donVi) ? 'Thu gọn' : 'Xem thêm' }}
+      </button>
+    </div>
+  </div>
+</div>

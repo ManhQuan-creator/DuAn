@@ -1,0 +1,181 @@
+<div class="catalog-manager-container">
+  <app-page-header
+    [breadcrumbs]="displayBreadcrumbs"
+  >
+  </app-page-header>
+
+  <div class="catalog-layout">
+    <!-- Sidebar: Catalog Types -->
+    <aside class="cm-sidebar card">
+      <div class="cm-sidebar-header">
+        <h3 class="cm-sidebar-title">Loại danh mục</h3>
+        <button
+          type="button"
+          tuiButton
+          appearance="primary"
+          size="s"
+          icon="tuiIconPlus"
+          (click)="addType()"
+        >
+          Thêm loại
+        </button>
+      </div>
+
+      <div class="cm-sidebar-search">
+        <tui-input
+          [(ngModel)]="typeSearch"
+          [tuiTextfieldLabelOutside]="true"
+          tuiTextfieldSize="m"
+          class="search-input"
+        >
+          Tìm loại danh mục...
+        </tui-input>
+      </div>
+
+      <div class="cm-type-list" *ngIf="!typesLoading">
+        <div
+          *ngFor="let type of filteredTypes"
+          class="cm-type-item"
+          [class.cm-type-item--active]="selectedType?.id === type.id"
+          [class.cm-type-item--inactive]="!type.active"
+          (click)="selectType(type)"
+        >
+          <div class="cm-type-info">
+            <span class="cm-type-name">{{ type.name }}</span>
+            <span class="cm-type-code">{{ type.type }}</span>
+          </div>
+          <div class="cm-type-actions">
+            <button
+              class="cm-icon-btn"
+              title="Sửa"
+              (click)="editType(type, $event)"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                />
+              </svg>
+            </button>
+            <button
+              class="cm-icon-btn cm-delete-btn"
+              title="Xóa"
+              (click)="deleteType(type, $event)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6h18" stroke="currentColor" stroke-width="2" />
+                <path d="M8 6V4h8v2" stroke="currentColor" stroke-width="2" />
+                <path
+                  d="M6 6l1 14h10l1-14"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <path
+                  d="M10 11v6M14 11v6"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cm-loading" *ngIf="typesLoading">
+        <div class="cm-spinner"></div>
+        <span>Đang tải...</span>
+      </div>
+    </aside>
+
+    <!-- Content: Catalog Items -->
+    <main class="cm-content">
+      <!-- Search bar -->
+      <div class="card cm-content-filters app-search-toolbar">
+        <div class="form-group">
+          <label tuiLabel class="app-form-label">Mã, tên</label>
+          <tui-input
+            [(ngModel)]="itemSearch"
+            [tuiTextfieldLabelOutside]="true"
+            tuiTextfieldSize="m"
+            (ngModelChange)="onSearchItem()"
+            class="search-input app-search-toolbar__field app-search-toolbar__field--grow"
+          >
+            Tìm theo mã hoặc tên...
+          </tui-input>
+        </div>
+        <!-- STATUS -->
+        <div class="form-group">
+          <label for="statusSelect" tuiLabel class="app-form-label">
+            Trạng thái
+          </label>
+
+          <tui-select
+            id="statusSelect"
+            [(ngModel)]="statusFilter"
+            (ngModelChange)="onStatusChange()"
+            [stringify]="stringifyStatus"
+            [tuiTextfieldLabelOutside]="true"
+            tuiTextfieldSize="m"
+            class="status-select app-search-toolbar__field search-input"
+          >
+            Trạng thái
+            <tui-data-list *tuiDataList>
+              <button *ngFor="let s of statusOptions" tuiOption [value]="s">
+                {{ stringifyStatus(s) }}
+              </button>
+            </tui-data-list>
+          </tui-select>
+        </div>
+      </div>
+
+      <!-- Grid card -->
+      <div class="card cm-grid-card" *ngIf="selectedType">
+        <div *ngIf="itemsLoading" class="grid-loading-overlay">
+          <span class="cm-spinner"></span> Đang tải dữ liệu...
+        </div>
+
+        <app-grid-header
+          [title]="selectedType.name"
+          [subtitle]="selectedType.type + ' · ' + items.length + ' mục'"
+          [showBtnCreateNew]="true"
+          [btnLabelCreateNew]="btnLabelCreateNew"
+          (buttonClickCreateNew)="addItem()"
+        />
+
+        <div class="cm-grid-wrap">
+          <app-ag-grid-wrapper [enableRangeSelection]="true"
+            [rowData]="items"
+            [columnDefs]="columnDefs"
+            [animateRows]="true"
+            [pagination]="false"
+            [suppressCellFocus]="true"
+            [height]="'100%'"
+            [width]="'100%'"
+            [theme]="'ag-theme-quartz'"
+            (gridReady)="onGridReady($event)"
+          ></app-ag-grid-wrapper>
+        </div>
+        <app-custom-pagination
+          [totalRows]="totalRows"
+          [currentPage]="pageNum + 1"
+          [pageSize]="pageSize"
+          (pageChanged)="onPageChanged($event)"
+          (pageSizeChanged)="onPageSizeChanged($event)"
+        />
+      </div>
+
+      <div class="cm-empty" *ngIf="!selectedType && !typesLoading">
+        <span class="cm-empty-icon">📂</span>
+        <p>Chọn một loại danh mục từ sidebar để xem các mục</p>
+      </div>
+    </main>
+  </div>
+</div>

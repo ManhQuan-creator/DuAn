@@ -1,0 +1,171 @@
+<div class="menu-manager-container">
+  <app-page-header
+    [title]="'Quản lý menu sidebar'"
+    [breadcrumbs]="breadcrumbs"
+
+  ></app-page-header>
+
+  <div class="card menu-tree-card">
+    <div class="tree-toolbar">
+      <div class="tree-toolbar-left">
+        <button
+          type="button"
+          tuiButton
+          appearance="secondary"
+          size="s"
+          class="buttons tree-toggle-all"
+          [class.tree-toggle-all--expanded]="isAllExpanded"
+          [icon]="isAllExpanded ? 'tuiIconChevronUp' : 'tuiIconChevronDown'"
+          (click)="toggleExpandAll()"
+        >
+          {{ isAllExpanded ? 'Thu gọn tất cả' : 'Mở tất cả' }}
+        </button>
+      </div>
+      <div class="tree-toolbar-right">
+          <button
+          tuiButton
+          appearance="primary"
+          size="s"
+          icon="tuiIconPlus"
+          (click)="openCreateRoot()"
+        >
+          Thêm menu cấp gốc
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="tree-loading">Đang tải...</div>
+
+    <div *ngIf="!loading && flatRows.length === 0" class="tree-empty">
+      Chưa có menu động nào. Nhấn "Thêm menu cấp gốc" để bắt đầu.
+    </div>
+
+    <div
+      *ngIf="!loading && flatRows.length > 0"
+      class="tree-list"
+      cdkDropList
+      [cdkDropListSortPredicate]="sortPredicate"
+      (cdkDropListDropped)="onDrop($event)"
+      [@treeList]="flatRows.length"
+    >
+      <div
+        *ngFor="let row of flatRows; trackBy: trackByRow"
+        class="tree-row"
+        cdkDrag
+        [cdkDragData]="row"
+        [class.tree-row--inactive]="!row.node.active"
+        [style.padding-left.px]="12 + row.depth * 24"
+      >
+        <div class="tree-drag-placeholder" *cdkDragPlaceholder></div>
+        <button
+          type="button"
+          class="tree-toggle"
+          [class.tree-toggle--invisible]="!row.hasChildren"
+          [class.tree-toggle--expanded]="row.isExpanded"
+          (click)="toggleExpand(row)"
+          [attr.aria-label]="row.isExpanded ? 'Thu gọn' : 'Mở rộng'"
+        >
+          <tui-svg
+            *ngIf="row.hasChildren"
+            src="tuiIconChevronRight"
+            class="tree-toggle__icon"
+          ></tui-svg>
+        </button>
+
+        <tui-svg
+          *ngIf="row.node.icon"
+          [src]="row.node.icon"
+          class="tree-row__icon"
+        ></tui-svg>
+
+        <div class="tree-row__main">
+          <div class="tree-row__label-line">
+            <span class="tree-row__label">{{ row.node.label }}</span>
+            <span class="tree-row__key">{{ row.node.menuKey }}</span>
+            <span
+              *ngIf="row.node.orgGroupCode"
+              class="tree-badge tree-badge--orggroup"
+              [title]="'Chỉ user nhóm ' + row.node.orgGroupCode + ' xem được'"
+              >{{ row.node.orgGroupCode }}</span
+            >
+            <span
+              *ngIf="topLevelPositionCount(row.node) > 0"
+              class="tree-badge tree-badge--top"
+              [title]="'Lãnh đạo cấp cao: ' + topLevelPositionCount(row.node) + ' chức danh'"
+              >{{ topLevelPositionCount(row.node) }} lãnh đạo</span
+            >
+            <span
+              *ngIf="deptRuleCount(row.node) > 0"
+              class="tree-badge tree-badge--rules"
+              [title]="permissionLabel(row.node)"
+              >{{ deptRuleCount(row.node) }} ban/phòng
+              <ng-container *ngIf="totalDeptPositionCount(row.node) > 0">
+                • {{ totalDeptPositionCount(row.node) }} chức danh
+              </ng-container>
+            </span>
+            <span
+              *ngIf="!hasRestrictions(row.node)"
+              class="tree-badge tree-badge--public"
+              title="Mọi user đều xem được"
+              >Mở</span
+            >
+            <span
+              *ngIf="!row.node.active"
+              class="tree-badge tree-badge--inactive"
+              >Vô hiệu</span
+            >
+          </div>
+          <div *ngIf="row.node.path" class="tree-row__path">
+            {{ row.node.path }}
+          </div>
+        </div>
+
+        <div class="tree-row__actions">
+          <button
+            type="button"
+            class="tree-drag-handle"
+            cdkDragHandle
+            title="Kéo để thay đổi thứ tự"
+            aria-label="Kéo để thay đổi thứ tự"
+          >
+            <tui-svg src="tuiIconMenu"></tui-svg>
+          </button>
+          <button
+            tuiIconButton
+            appearance="flat"
+            size="xs"
+            icon="tuiIconPlus"
+            title="Thêm menu con"
+            (click)="openCreateChild(row.node)"
+          ></button>
+          <button
+            tuiIconButton
+            appearance="flat"
+            size="xs"
+            icon="tuiIconEdit2"
+            title="Sửa"
+            (click)="openEditDialog(row.node)"
+          ></button>
+          <button
+            tuiIconButton
+            appearance="flat"
+            size="xs"
+            icon="tuiIconTrash2"
+            title="Xóa"
+            class="tree-action--danger"
+            (click)="confirmDelete(row.node)"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-sidebar-menu-form-dialog
+    [(isOpen)]="formDialogOpen"
+    [mode]="formMode"
+    [parentId]="formParentId"
+    [parentLabel]="formParentLabel"
+    [editingNode]="formEditingNode"
+    (saved)="onFormSaved($event)"
+  ></app-sidebar-menu-form-dialog>
+</div>

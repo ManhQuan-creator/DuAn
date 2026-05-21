@@ -1,0 +1,74 @@
+<div class="manager-container">
+  <app-page-header
+    title="Phân quyền nút trên báo cáo"
+    subtitle="Cấu hình ai được xem / nhập liệu / nộp / phê duyệt từng biểu mẫu"
+    [breadcrumbs]="breadcrumbs"
+  ></app-page-header>
+
+  <div class="card manager-filters app-search-toolbar">
+    <!-- BIỂU MẪU (searchable select) -->
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Biểu mẫu</label>
+      <tui-select
+        [(ngModel)]="selectedTemplate"
+        [stringify]="stringifyTemplate"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="template-select app-search-toolbar__field"
+        (ngModelChange)="onTemplateChange()"
+      >
+        Tất cả biểu mẫu
+        <tui-data-list-wrapper
+          *tuiDataList
+          [items]="templateList | tuiFilterByInput"
+          [itemContent]="templateItemTpl"
+        ></tui-data-list-wrapper>
+      </tui-select>
+    </div>
+
+    <!-- TÌM KIẾM RULE -->
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Tìm kiếm rule</label>
+      <tui-input
+        [(ngModel)]="searchText"
+        (ngModelChange)="onSearchChange()"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="search-input app-search-toolbar__field app-search-toolbar__field--grow"
+      >
+        Tìm kiếm rule...
+        <input tuiTextfield type="search" />
+      </tui-input>
+    </div>
+  </div>
+
+  <div class="card manager-grid-card">
+    <div class="manager-grid">
+      <app-grid-header
+        [showBtnCreateNew]="true"
+        (buttonClickCreateNew)="openCreateDialog()"
+      ></app-grid-header>
+      <app-ag-grid-wrapper [enableRangeSelection]="true"
+        [rowData]="rules"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowHeight]="40"
+        [height]="'100%'"
+        [width]="'100%'"
+        (gridReady)="onGridReady($event)"
+      />
+    </div>
+    <app-custom-pagination
+      [totalRows]="totalRows"
+      [currentPage]="pageNum + 1"
+      [pageSize]="pageSize"
+      (pageChanged)="onPageChanged($event)"
+      (pageSizeChanged)="onPageSizeChanged($event)"
+    />
+  </div>
+</div>
+
+<!-- Template item cho dropdown biểu mẫu -->
+<ng-template #templateItemTpl let-item>
+  [{{ item.id }}] {{ item.name }}
+</ng-template>

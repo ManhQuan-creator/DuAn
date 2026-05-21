@@ -1,0 +1,100 @@
+@startuml
+!theme vibrant
+skinparam componentStyle uml2
+skinparam linetype ortho
+
+title "Lending Hub Notification System Architecture\n(Active-Tab SSE + Redis Targeted Routing)"
+
+package "Client Side (Angular)" {
+    actor "User" as User
+    
+    component "HeaderComponent" as Header {
+        [Visibility Listener]
+        note right
+          Bắt sự kiện document.hidden
+          - Ẩn: Disconnect
+          - Hiện: Reconnect & Sync
+        end note
+    }
+    
+    component "NotificationService (TS)" as ClientService {
+        [EventSource Manager]
+        [Watchdog Timer]
+        note bottom
+           Tự động reconnect nếu
+           45s không thấy 'ping'
+        end note
+    }
+    
+    database "LocalStorage" as LocalStore {
+        [lastEventId]
+    }
+    
+    User --> Header : View/Click
+    Header --> ClientService : connect/disconnect
+    ClientService <--> LocalStore : Get/Set lastId
+}
+
+cloud "Gateway Layer" {
+    component "Nginx / Kong" as Gateway {
+        [Load Balancer]
+        note right
+          Routing Strategy: Round Robin
+          Header: X-Accel-Buffering: no
+        end note
+    }
+}
+
+package "Backend Cluster (Spring Boot)" {
+    
+    package "Node A (Instance)" as NodeA {
+        component "NotificationController" as Controller
+        component "NotificationService (Java)" as Service
+        component "RedisReceiver" as Receiver
+        component "SseEmitter Map" as EmitterMap
+        component "Async Executor" as ThreadPool
+    }
+
+    note right of Service
+        <b>Logic quan trọng:</b>
+        1. createEmitter: Lưu vị trí User vào Redis
+        2. sendNotification: Tìm User ở Node nào -> Bắn Redis
+        3. handleRedisEvent: Nhận tin -> Đẩy xuống Client
+        4. Heartbeat: Ping 30s/lần
+    end note
+}
+
+database "Data Infrastructure" {
+    component "Redis Cluster" as Redis {
+        [Pub/Sub Topics]
+        [Hash: user-locations]
+    }
+    
+    component "Oracle DB" as DB {
+        [Table: LH_NOTIFICATIONS]
+        note bottom
+          Partition theo tháng
+          Cleanup job 45 ngày
+        end note
+    }
+}
+
+' Relationships
+ClientService <..> Gateway : SSE Connection (Long-polling)
+Gateway ..> Controller : Proxy Request
+
+Controller --> Service : Gọi hàm
+Service --> EmitterMap : Quản lý Connection
+Service --> ThreadPool : Async Push
+ThreadPool ..> Gateway : Server-Sent Events
+
+' Redis Flow
+Service --> Redis : 1. Save User Location\n2. Publish Message
+Redis --> Receiver : 3. Subscribe & Receive
+Receiver --> Service : 4. Trigger Send
+
+' DB Flow
+Service --> DB : Persist Notification / Query Missed
+Service --> DB : Cleanup Job
+
+@enduml

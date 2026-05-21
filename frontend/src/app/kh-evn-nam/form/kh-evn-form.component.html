@@ -1,0 +1,126 @@
+<div class="form-root">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="title-block">
+      <h1>Nhập kế hoạch năm Tập đoàn EVN giao</h1>
+      <p class="subtitle">Ban Kế hoạch · 1 entry / năm cho toàn EVNNPC</p>
+    </div>
+    <div class="filter-block">
+      <label>Năm</label>
+      <app-single-select
+        [options]="yearOptions"
+        [ngModel]="selectedYear"
+        (ngModelChange)="onYearChange($event)"
+        placeholder="Chọn năm">
+      </app-single-select>
+      <button class="btn btn-primary" type="button"
+              [disabled]="saving"
+              (click)="saveCurrentTab()">
+        {{ saving ? 'Đang lưu...' : 'Lưu dữ liệu' }}
+      </button>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn" type="button"
+            [class.active]="activeTab === 'SXKD'"
+            (click)="switchTab('SXKD')">
+      Chỉ tiêu SXKD - ĐTXD - Tài chính
+    </button>
+    <button class="tab-btn" type="button"
+            [class.active]="activeTab === 'MUC_TIEU'"
+            (click)="switchTab('MUC_TIEU')">
+      Mục tiêu nâng cao hiệu quả
+    </button>
+  </div>
+
+  <!-- ═════ TAB: SXKD ═════ -->
+  @if (activeTab === 'SXKD') {
+    <div class="tab-content">
+      @for (section of sxkdSections(); track $index) {
+        <section class="form-section">
+          <h2 class="section-title">{{ section.header.stt }}. {{ section.header.tenChiTieu }}</h2>
+          <table class="form-table">
+            <thead>
+              <tr>
+                <th class="col-stt">STT</th>
+                <th>Tên chỉ tiêu</th>
+                <th class="col-donvi">Đơn vị</th>
+                <th class="col-giatri">Giá trị KH</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of section.items; track item.row.row_code) {
+                <tr>
+                  <td class="col-stt">{{ item.row.stt }}</td>
+                  <td>{{ item.row.tenChiTieu }}</td>
+                  <td class="col-donvi">{{ item.row.donVi }}</td>
+                  <td class="col-giatri">
+                    <input class="cell-input cell-input-number"
+                           type="number"
+                           step="any"
+                           [ngModel]="item.row.giaTri"
+                           (ngModelChange)="setSxkdValue(item.globalIdx, 'giaTri', $event)"
+                           placeholder="0" />
+                  </td>
+                  <td>
+                    <input class="cell-input"
+                           type="text"
+                           [ngModel]="item.row.ghiChu"
+                           (ngModelChange)="setSxkdValue(item.globalIdx, 'ghiChu', $event)" />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
+    </div>
+  }
+
+  <!-- ═════ TAB: MUC_TIEU ═════ -->
+  @if (activeTab === 'MUC_TIEU') {
+    <div class="tab-content">
+      @for (section of mucTieuSections(); track $index) {
+        <section class="form-section">
+          <h2 class="section-title">{{ section.header.stt }}. {{ section.header.mucTieu }}</h2>
+          <table class="form-table">
+            <thead>
+              <tr>
+                <th class="col-stt">STT</th>
+                <th>Mục tiêu</th>
+                <th class="col-chitieu">Chỉ tiêu định lượng</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of section.items; track item.row.row_code) {
+                <tr>
+                  <td class="col-stt">{{ item.row.stt }}</td>
+                  <td>{{ item.row.mucTieu }}</td>
+                  <td class="col-chitieu">
+                    <input class="cell-input"
+                           type="text"
+                           [ngModel]="item.row.chiTieuDinhLuong"
+                           (ngModelChange)="setMucTieuValue(item.globalIdx, 'chiTieuDinhLuong', $event)"
+                           placeholder="ví dụ: ≥ 99,7%" />
+                  </td>
+                  <td>
+                    <input class="cell-input"
+                           type="text"
+                           [ngModel]="item.row.ghiChu"
+                           (ngModelChange)="setMucTieuValue(item.globalIdx, 'ghiChu', $event)" />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
+    </div>
+  }
+
+</div>

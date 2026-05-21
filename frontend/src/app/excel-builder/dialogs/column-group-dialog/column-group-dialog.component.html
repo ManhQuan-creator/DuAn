@@ -1,0 +1,433 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{ size: 'auto', dismissible: true, closeable: true, label: 'Quản lý nhóm cột' }"
+>
+  <div class="cg-dialog">
+    <div class="cg-dialog__header">
+      <div class="cg-dialog__header-icon">⊞</div>
+      <div>
+        <div class="cg-dialog__title">Quản lý nhóm cột</div>
+        <div class="cg-dialog__subtitle">
+          Xem trước header bên trên · Click chọn nhóm + click chip để gán cột · ▲▼ sắp xếp · ↗ chuyển nhóm
+        </div>
+      </div>
+    </div>
+
+    <!-- ═════════════════════ TOP: LIVE PREVIEW CANVAS ═════════════════════ -->
+    <div class="cg-preview">
+      <div class="cg-preview__title">
+        <span>Xem trước header (như sẽ render trên lưới)</span>
+        <span class="cg-preview__hint">Cuộn ngang nếu nhiều cột →</span>
+      </div>
+      <div class="cg-preview__canvas">
+        <ng-container *ngFor="let block of previewBlocks; trackBy: trackPreview">
+          <div *ngIf="block.kind === 'leaf'" class="cg-preview-leaf cg-preview-leaf--standalone">
+            {{ block.headerName }}
+          </div>
+          <ng-container *ngIf="block.kind === 'group' && block.group">
+            <ng-container
+              *ngTemplateOutlet="previewGroup; context: { $implicit: block.group }"
+            ></ng-container>
+          </ng-container>
+        </ng-container>
+        <div *ngIf="previewBlocks.length === 0" class="cg-preview__empty">
+          Chưa có cột nào để hiển thị
+        </div>
+      </div>
+    </div>
+
+    <!-- ═════════════════════ BOTTOM: OUTLINE + CHIPS ═════════════════════ -->
+    <div class="cg-bottom">
+
+      <!-- LEFT: Outline tree -->
+      <div class="cg-outline">
+        <div class="cg-outline__header">
+          <span class="cg-outline__title">Cấu trúc nhóm</span>
+          <span class="cg-count-chip">{{ columnGroups.length }} gốc</span>
+        </div>
+
+        <div *ngIf="columnGroups.length === 0" class="cg-empty-state">
+          Chưa có nhóm nào. Tạo nhóm gốc ở dưới.
+        </div>
+
+        <div *ngIf="columnGroups.length > 0" class="cg-tree">
+          <ng-container *ngFor="let g of columnGroups; let idx = index; trackBy: trackGroup">
+            <ng-container
+              *ngTemplateOutlet="
+                treeNode;
+                context: {
+                  $implicit: g,
+                  path: [g.groupId],
+                  depth: 0,
+                  parentPath: [],
+                  itemIndex: idx,
+                  parentLength: columnGroups.length
+                }
+              "
+            ></ng-container>
+          </ng-container>
+        </div>
+
+        <div class="cg-add-root">
+          <tui-input
+            [formControl]="rootGroupNameCtrl"
+            tuiTextfieldSize="s"
+            (keydown.enter)="addRootGroup()"
+          >
+            Tên nhóm gốc...
+            <input tuiTextfield />
+          </tui-input>
+          <button
+            tuiButton
+            size="s"
+            icon="tuiIconPlus"
+            [disabled]="rootGroupNameCtrl.invalid"
+            (click)="addRootGroup()"
+          >
+            Thêm gốc
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Chip panel -->
+      <aside class="cg-chips">
+        <div class="cg-chips__header">
+          <span class="cg-chips__title">Cột chưa gán</span>
+          <span class="cg-count-chip">{{ availableColumns.length }}</span>
+        </div>
+
+        <tui-input
+          [formControl]="chipSearchCtrl"
+          tuiTextfieldSize="s"
+          (input)="onChipSearchChange()"
+        >
+          Tìm cột...
+          <input tuiTextfield />
+        </tui-input>
+
+        <div class="cg-chips__hint" [class.cg-chips__hint--active]="selectedPath">
+          <ng-container *ngIf="selectedPath; else noSelectionHint">
+            Đang chọn: <strong>{{ getBreadcrumb(selectedPath) }}</strong>
+            <br />
+            → Click chip để gán cột vào nhóm này
+          </ng-container>
+          <ng-template #noSelectionHint>
+            → Click chọn 1 nhóm bên trái rồi click chip để gán
+          </ng-template>
+        </div>
+
+        <div class="cg-chips__list">
+          <div *ngIf="availableColumnsFiltered.length === 0" class="cg-chips__empty">
+            {{ chipSearchCtrl.value ? 'Không có cột khớp' : 'Tất cả cột đã được gán' }}
+          </div>
+          <button
+            *ngFor="let col of availableColumnsFiltered; trackBy: trackCol"
+            type="button"
+            class="cg-chip"
+            [disabled]="!selectedPath"
+            (click)="onChipClick(col.field)"
+            [title]="selectedPath ? 'Click để gán vào ' + getBreadcrumb(selectedPath) : 'Hãy chọn 1 nhóm bên trái trước'"
+          >
+            <span class="cg-chip__icon">📄</span>
+            <span class="cg-chip__name">{{ col.headerName }}</span>
+            <span class="cg-chip__field">{{ col.field }}</span>
+          </button>
+        </div>
+      </aside>
+
+    </div>
+
+    <div class="cg-dialog__footer">
+      <button tuiButton appearance="flat" (click)="close()">Đóng</button>
+      <button tuiButton appearance="primary" (click)="onApply()">Áp dụng</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════ TREE NODE TEMPLATE (recursive) ════════════════════ -->
+  <ng-template
+    #treeNode
+    let-group
+    let-path="path"
+    let-depth="depth"
+    let-parentPath="parentPath"
+    let-itemIndex="itemIndex"
+    let-parentLength="parentLength"
+  >
+    <!-- HEADER ROW -->
+    <div
+      class="cg-node-row"
+      [class.cg-node-row--selected]="isSelected(path)"
+      [class.cg-node-row--empty]="isEmpty(group)"
+      [style.padding-left.px]="8 + depth * 18"
+      (click)="selectGroup(path)"
+    >
+      <button
+        type="button"
+        class="cg-toggle"
+        [class.cg-toggle--invisible]="(group.items?.length ?? 0) === 0"
+        (click)="toggleExpand(group.groupId); $event.stopPropagation()"
+        [title]="isExpanded(group.groupId) ? 'Thu gọn' : 'Mở rộng'"
+      >
+        {{ isExpanded(group.groupId) ? '▼' : '▶' }}
+      </button>
+
+      <span class="cg-node-icon">📁</span>
+
+      <ng-container *ngIf="isRenaming(path); else nameDisplay">
+        <span class="cg-node-rename" (click)="$event.stopPropagation()">
+          <tui-input
+            [formControl]="renameCtrl"
+            tuiTextfieldSize="s"
+            (keydown.enter)="commitRename()"
+            (keydown.escape)="cancelRename()"
+          >
+            <input tuiTextfield (blur)="commitRename()" />
+          </tui-input>
+        </span>
+      </ng-container>
+      <ng-template #nameDisplay>
+        <span
+          class="cg-node-name"
+          (dblclick)="startRename(path); $event.stopPropagation()"
+          [title]="'Click 2 lần để đổi tên'"
+        >
+          {{ group.headerName }}
+        </span>
+      </ng-template>
+
+      <span class="cg-node-meta">
+        <span *ngIf="(group.children?.length ?? 0) > 0" class="cg-badge cg-badge--blue">
+          {{ group.children!.length }} sub
+        </span>
+        <span *ngIf="(group.columnFields?.length ?? 0) > 0" class="cg-badge cg-badge--info">
+          {{ group.columnFields.length }} cột
+        </span>
+        <span *ngIf="isEmpty(group)" class="cg-badge cg-badge--warn">trống</span>
+        <span *ngIf="group.marryChildren" class="cg-badge cg-badge--gray" title="Khoá nhóm">🔒</span>
+      </span>
+
+      <span class="cg-node-actions" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="cg-icon-btn"
+          [disabled]="itemIndex === 0"
+          title="Lên trên"
+          (click)="moveUp(parentPath, itemIndex)"
+        >▲</button>
+        <button
+          type="button"
+          class="cg-icon-btn"
+          [disabled]="itemIndex >= parentLength - 1"
+          title="Xuống dưới"
+          (click)="moveDown(parentPath, itemIndex)"
+        >▼</button>
+        <button
+          type="button"
+          class="cg-icon-btn"
+          title="Chuyển sang nhóm khác"
+          (click)="startMoveGroup(path)"
+        >↗</button>
+        <button
+          type="button"
+          class="cg-icon-btn"
+          title="Thêm sub-nhóm"
+          (click)="startAddingSub(path)"
+        >+</button>
+        <button
+          type="button"
+          class="cg-icon-btn"
+          [class.cg-icon-btn--active]="isSettingsOpen(path)"
+          title="Tuỳ chọn"
+          (click)="toggleSettings(path)"
+        >⚙</button>
+        <button
+          type="button"
+          class="cg-icon-btn cg-icon-btn--danger"
+          title="Xoá nhóm"
+          (click)="removeGroupByPath(path)"
+        >✕</button>
+      </span>
+    </div>
+
+    <!-- SETTINGS POPOVER -->
+    <div
+      *ngIf="isSettingsOpen(path)"
+      class="cg-settings-popover"
+      [style.padding-left.px]="32 + depth * 18"
+      (click)="$event.stopPropagation()"
+    >
+      <tui-checkbox-labeled
+        [ngModel]="!!group.marryChildren"
+        (ngModelChange)="toggleMarryChildren(path, $event)"
+        size="m"
+      >
+        Khoá nhóm (marryChildren)
+      </tui-checkbox-labeled>
+      <div class="cg-settings-popover__field">
+        <label class="cg-field__label">Mã nhóm (groupId)</label>
+        <div class="cg-settings-popover__row">
+          <tui-input [formControl]="customGroupIdCtrl" tuiTextfieldSize="s">
+            vd: doanh_thu
+            <input tuiTextfield />
+          </tui-input>
+          <button tuiButton size="xs" (click)="commitCustomGroupId(path)">Lưu mã</button>
+        </div>
+        <span *ngIf="customGroupIdCtrl.invalid && customGroupIdCtrl.touched" class="cg-field__error">
+          Chỉ chấp nhận chữ, số, và dấu _
+        </span>
+      </div>
+    </div>
+
+    <!-- ADD-SUB INLINE FORM -->
+    <div
+      *ngIf="isAddingSubTo(path)"
+      class="cg-add-sub-inline"
+      [style.padding-left.px]="32 + depth * 18"
+      (click)="$event.stopPropagation()"
+    >
+      <tui-input
+        [formControl]="addSubNameCtrl"
+        tuiTextfieldSize="s"
+        (keydown.enter)="commitAddSub()"
+        (keydown.escape)="cancelAddSub()"
+      >
+        Tên sub-nhóm...
+        <input tuiTextfield />
+      </tui-input>
+      <button tuiButton size="xs" (click)="commitAddSub()" [disabled]="addSubNameCtrl.invalid">
+        Tạo
+      </button>
+      <button tuiButton appearance="flat" size="xs" (click)="cancelAddSub()">Huỷ</button>
+    </div>
+
+    <!-- CHILDREN LIST -->
+    <div *ngIf="isExpanded(group.groupId)" class="cg-children">
+      <ng-container *ngFor="let item of group.items; let i = index; trackBy: trackItem">
+        <!-- LEAF item -->
+        <div
+          *ngIf="item.type === 'field'"
+          class="cg-field-row"
+          [style.padding-left.px]="40 + depth * 18"
+        >
+          <span class="cg-field-row__icon">📄</span>
+          <span class="cg-field-row__name">
+            {{ getColumnHeaderName(item.field) }}
+            <span class="cg-field-row__field">{{ item.field }}</span>
+          </span>
+          <span class="cg-node-actions">
+            <button
+              type="button"
+              class="cg-icon-btn"
+              [disabled]="i === 0"
+              title="Lên trên"
+              (click)="moveUp(path, i)"
+            >▲</button>
+            <button
+              type="button"
+              class="cg-icon-btn"
+              [disabled]="i >= (group.items?.length ?? 0) - 1"
+              title="Xuống dưới"
+              (click)="moveDown(path, i)"
+            >▼</button>
+            <button
+              type="button"
+              class="cg-icon-btn"
+              title="Chuyển sang nhóm khác"
+              (click)="startMoveField(path, item.field)"
+            >↗</button>
+            <button
+              type="button"
+              class="cg-icon-btn cg-icon-btn--danger"
+              title="Bỏ cột khỏi nhóm"
+              (click)="removeFieldFromGroup(path, item.field)"
+            >✕</button>
+          </span>
+        </div>
+
+        <!-- SUB-GROUP item (recurse) -->
+        <ng-container *ngIf="item.type === 'group'">
+          <ng-container
+            *ngTemplateOutlet="
+              treeNode;
+              context: {
+                $implicit: findChildGroup(group, item.groupId)!,
+                path: pathOf(path, item.groupId),
+                depth: depth + 1,
+                parentPath: path,
+                itemIndex: i,
+                parentLength: group.items!.length
+              }
+            "
+          ></ng-container>
+        </ng-container>
+      </ng-container>
+
+      <div
+        *ngIf="(group.items?.length ?? 0) === 0"
+        class="cg-empty-hint"
+        [style.padding-left.px]="40 + depth * 18"
+      >
+        Chưa có gì. Click chip cột bên phải để gán, hoặc <strong>+</strong> ở trên để thêm sub.
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- ════════════════════ PREVIEW GROUP TEMPLATE (recursive) ════════════════════ -->
+  <ng-template #previewGroup let-group>
+    <div class="cg-preview-group" [class.cg-preview-group--marry]="group.marryChildren">
+      <div class="cg-preview-group__label">{{ group.headerName }}</div>
+      <div class="cg-preview-group__children">
+        <ng-container *ngIf="(group.items?.length ?? 0) > 0; else groupEmpty">
+          <ng-container *ngFor="let item of group.items; trackBy: trackItem">
+            <div *ngIf="item.type === 'field'" class="cg-preview-leaf">
+              {{ getColumnHeaderName(item.field) }}
+            </div>
+            <ng-container *ngIf="item.type === 'group'">
+              <ng-container
+                *ngTemplateOutlet="
+                  previewGroup;
+                  context: { $implicit: findChildGroup(group, item.groupId) }
+                "
+              ></ng-container>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+        <ng-template #groupEmpty>
+          <div class="cg-preview-leaf cg-preview-leaf--empty">(rỗng)</div>
+        </ng-template>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- ════════════════════ MOVE-TO PICKER (modal overlay) ════════════════════ -->
+  <div
+    *ngIf="movePicker"
+    class="cg-move-picker-overlay"
+    (click)="cancelMovePicker()"
+  >
+    <div class="cg-move-picker" (click)="$event.stopPropagation()">
+      <div class="cg-move-picker__header">{{ movePicker.title }}</div>
+      <div class="cg-move-picker__list">
+        <button
+          *ngFor="let target of movePicker.targets; trackBy: trackTarget"
+          type="button"
+          class="cg-move-picker__option"
+          [disabled]="target.disabled"
+          (click)="doMoveTo(target.path)"
+        >
+          <span class="cg-move-picker__option-label">{{ target.label }}</span>
+          <span *ngIf="target.reason" class="cg-move-picker__option-reason">
+            {{ target.reason }}
+          </span>
+        </button>
+        <div *ngIf="movePicker.targets.length === 0" class="cg-move-picker__empty">
+          Không có target hợp lệ
+        </div>
+      </div>
+      <div class="cg-move-picker__footer">
+        <button tuiButton appearance="flat" size="s" (click)="cancelMovePicker()">Huỷ</button>
+      </div>
+    </div>
+  </div>
+</ng-template>

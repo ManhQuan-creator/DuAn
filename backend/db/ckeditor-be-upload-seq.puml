@@ -1,0 +1,43 @@
+@startuml
+skinparam style strictuml
+
+partition "API: Save Post (Xử lý Input)" {
+  start
+  :Nhận HTML từ Request Body;
+  :Khởi tạo HTML Parser (ví dụ: Cheerio);
+  
+  while (Còn thẻ <img> trong HTML?) is (Có)
+    :Lấy giá trị 'src';
+    if (src chứa domain S3 của mình?) then (Yes)
+      :Parse URL string;
+      :Lấy pathname (bỏ dấu / đầu tiên);
+      note right: Ví dụ: /uploads/abc.jpg\n-> Key: uploads/abc.jpg
+      :Gán attribute 'data-s3-key' = Key;
+      
+      :Tùy chọn: Xóa 'src' hoặc để rỗng;
+      note right: Để không lưu link rác vào DB
+    else (No)
+      :Bỏ qua (Ảnh ngoài);
+    endif
+  endwhile
+  
+  :Lấy chuỗi HTML kết quả;
+  :Lưu xuống Database;
+  stop
+}
+
+partition "API: Get Post (Xử lý Output)" {
+  start
+  :Đọc HTML từ Database;
+  :Khởi tạo HTML Parser;
+  
+  while (Còn thẻ <img> có 'data-s3-key'?) is (Có)
+    :Lấy giá trị Key;
+    :Gọi AWS SDK: getSignedUrl(Key);
+    :Cập nhật 'src' = Signed URL mới;
+  endwhile
+  
+  :Trả HTML về cho Client;
+  stop
+}
+@enduml

@@ -1,0 +1,98 @@
+// Tuỳ chỉnh AG Grid (ag-theme-quartz) — dùng chung toàn app.
+// Import file này sau ag-grid.css + ag-theme-quartz.css trong styles.scss.
+.ag-icon-filter, .ag-icon-desc, .ag-icon-asc{
+  color: #ffffff !important;
+}
+.ag-header-group-cell,
+.ag-header-row:not(:first-child)
+  .ag-header-cell:not(.ag-header-span-height.ag-header-span-total, .ag-header-parent-hidden) {
+  border-right: var(--ag-borders-critical) var(--ag-border-color);
+}
+
+.ag-root-wrapper {
+  border-radius: 8px;
+}
+
+.ag-theme-quartz {
+  transition: height 0.2s ease;
+  --ag-row-height: 36px;
+  --ag-header-column-separator-display: block;
+  --ag-header-column-separator-color: #d1d5db;
+  --ag-header-column-separator-width: 1px;
+  --ag-header-column-separator-height: 100%;
+
+  /*
+   * Ranh cột ghim (STT | Mã): AG Grid dùng --ag-border-color cho .ag-pinned-left-header,
+   * trong khi giữa các cột ghim lại dùng --ag-header-column-separator-color → trên nền xanh #164397 ranh trông mờ hơn.
+   */
+  --ag-pinned-column-border: solid 1px var(--ag-header-column-separator-color);
+
+  .ag-pinned-left-header {
+    border-right: solid 1px var(--ag-header-column-separator-color);
+  }
+
+  .ag-pinned-right-header {
+    border-left: solid 1px var(--ag-header-column-separator-color);
+  }
+
+  .ag-ltr .ag-cell.ag-cell-last-left-pinned:not(.ag-cell-range-right):not(.ag-cell-range-single-cell) {
+    border-right-color: var(--ag-header-column-separator-color);
+  }
+
+  .ag-rtl .ag-cell.ag-cell-first-right-pinned:not(.ag-cell-range-left):not(.ag-cell-range-single-cell) {
+    border-left-color: var(--ag-header-column-separator-color);
+  }
+
+  /* Ẩn hoàn toàn input gốc — tránh hiện “ô Windows” chồng lên icon Quartz (kèm grid [theme]="'legacy'" nếu chỉ dùng file CSS) */
+  .ag-checkbox-input-wrapper {
+    position: relative;
+  }
+
+  .ag-checkbox-input-wrapper input[type='checkbox'] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    cursor: pointer;
+    z-index: 1;
+  }
+}
+
+.ag-header-group-cell {
+  border-bottom: 1px solid #d1d5db;
+}
+
+.ag-header-group-cell-label {
+  font-weight: 700;
+  justify-content: center;
+}
+
+// Ô ngày (Excel Builder / Render)
+.date-cell-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+}
+
+.date-cell-value {
+  flex: 1;
+}
+
+.date-cell-icon {
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  font-size: 14px;
+}
+
+.ag-row:hover .date-cell-icon {
+  opacity: 1;
+}

@@ -1,0 +1,78 @@
+<div class="manager-container">
+  <app-page-header
+    title="Quản lý người dùng"
+    subtitle="Cấu hình người dùng hệ thống EVNNPC"
+    [breadcrumbs]="breadcrumbs"
+  >
+  </app-page-header>
+
+  <div class="card manager-filters app-search-toolbar">
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Mã, tên</label>
+      <tui-input
+        [(ngModel)]="searchText"
+        (ngModelChange)="onSearch()"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="search-input app-search-toolbar__field app-search-toolbar__field--grow"
+      >
+        Tìm kiếm...
+      </tui-input>
+    </div>
+
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Trạng thái</label>
+      <tui-select
+        [(ngModel)]="activeFilter"
+        (ngModelChange)="onActiveChange()"
+        [stringify]="stringifyActive"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="status-select app-search-toolbar__field search-input"
+      >
+        Trạng thái
+        <tui-data-list *tuiDataList>
+          <button *ngFor="let opt of activeOptions" tuiOption [value]="opt">
+            {{ stringifyActive(opt) }}
+          </button>
+        </tui-data-list>
+      </tui-select>
+    </div>
+  </div>
+
+  <div class="card manager-grid-card">
+    <div class="manager-grid">
+      <app-grid-header
+        [showBtnCreateNew]="true"
+        [btnLabelCreateNew]="'Tạo mới'"
+        (buttonClickCreateNew)="openCreateDialog()"
+      ></app-grid-header>
+      <app-ag-grid-wrapper [enableRangeSelection]="true"
+        [rowData]="users"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [animateRows]="true"
+        [height]="'100%'"
+        [rowHeight]="40"
+        [width]="'100%'"
+        [theme]="'ag-theme-quartz'"
+        (gridReady)="onGridReady($event)"
+      ></app-ag-grid-wrapper>
+    </div>
+
+    <app-custom-pagination
+      [totalRows]="totalRows"
+      [currentPage]="pageNum + 1"
+      [pageSize]="pageSize"
+      (pageChanged)="onPageChanged($event)"
+      (pageSizeChanged)="onPageSizeChanged($event)"
+    />
+  </div>
+
+  <app-user-form-dialog
+    [(isOpen)]="formDialogOpen"
+    [mode]="formMode"
+    [editingUser]="formEditingUser"
+    (saved)="onFormSaved($event)"
+  ></app-user-form-dialog>
+</div>

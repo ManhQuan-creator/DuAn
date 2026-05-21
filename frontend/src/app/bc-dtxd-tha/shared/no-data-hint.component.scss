@@ -1,0 +1,55 @@
+:host { display: block; }
+
+.hint-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px;
+  padding: 14px 18px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.hint-icon {
+  flex-shrink: 0;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.hint-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  .hint-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #92400e;
+  }
+  .hint-message {
+    font-size: 0.85rem;
+    color: #78350f;
+    line-height: 1.45;
+  }
+}
+
+.hint-action {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  background: #f59e0b;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+
+  &:hover:not(:disabled) { background: #d97706; }
+  &:disabled { background: #cbd5e1; cursor: not-allowed; }
+}

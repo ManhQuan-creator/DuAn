@@ -1,0 +1,97 @@
+<tui-hosted-dropdown
+  tuiDropdownLimitWidth="fixed"
+  [content]="dropdownTpl"
+  [(open)]="open"
+  [canOpen]="!disabled"
+  class="ts__host"
+>
+  <button
+    type="button"
+    class="ts__trigger"
+    [class.ts__trigger--m]="size === 'm'"
+    [class.ts__trigger--s]="size === 's'"
+    [class.ts__trigger--l]="size === 'l'"
+    [class.ts__trigger--open]="open"
+    [class.ts__trigger--placeholder]="!selectedLabel"
+    [disabled]="disabled"
+    (click)="open = !open"
+  >
+    <span class="ts__trigger-text">{{ selectedLabel || placeholder }}</span>
+    <tui-svg
+      class="ts__trigger-caret"
+      [src]="open ? 'tuiIconChevronUp' : 'tuiIconChevronDown'"
+    ></tui-svg>
+  </button>
+</tui-hosted-dropdown>
+
+<ng-template #dropdownTpl>
+  <div class="ts__dropdown">
+    <div class="ts__search">
+      <input
+        type="text"
+        class="ts__search-input"
+        [placeholder]="searchPlaceholder"
+        [ngModel]="searchText"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </div>
+
+    <div class="ts__body">
+      <button
+        *ngIf="clearable"
+        type="button"
+        class="ts__node ts__node--clear"
+        [class.ts__node--selected]="value == null"
+        (click)="onClear()"
+      >
+        <span class="ts__node-caret ts__node-caret--placeholder"></span>
+        <span class="ts__node-label">{{ clearLabel }}</span>
+        <tui-svg *ngIf="value == null" src="tuiIconCheck" class="ts__node-check"></tui-svg>
+      </button>
+
+      <ng-container *ngFor="let root of visibleNodes; trackBy: trackByValue">
+        <ng-container *ngTemplateOutlet="nodeTpl; context: { $implicit: root, depth: 0 }"></ng-container>
+      </ng-container>
+
+      <div *ngIf="!visibleNodes.length" class="ts__empty">
+        Không tìm thấy kết quả phù hợp
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #nodeTpl let-node let-depth="depth">
+  <button
+    type="button"
+    class="ts__node"
+    [class.ts__node--branch]="hasChildren(node)"
+    [class.ts__node--leaf]="!hasChildren(node)"
+    [class.ts__node--selected]="isSelected(node)"
+    [class.ts__node--disabled]="!!node.disabled"
+    [disabled]="!!node.disabled"
+    [style.padding-left.px]="depth * 14 + 10"
+    (click)="onNodeClick(node)"
+  >
+    <tui-svg
+      *ngIf="hasChildren(node); else leafCaret"
+      class="ts__node-caret"
+      [src]="isExpanded(node) ? 'tuiIconChevronDown' : 'tuiIconChevronRight'"
+    ></tui-svg>
+    <ng-template #leafCaret>
+      <span class="ts__node-caret ts__node-caret--placeholder"></span>
+    </ng-template>
+    <!-- <tui-svg
+      class="ts__node-icon"
+      [class.ts__node-icon--branch]="hasChildren(node)"
+      [src]="hasChildren(node) ? 'tuiIconFolderOutline' : 'tuiIconBriefcase'"
+    ></tui-svg> -->
+    <span class="ts__node-label">{{ node.label }}</span>
+    <tui-svg *ngIf="isSelected(node)" src="tuiIconCheck" class="ts__node-check"></tui-svg>
+  </button>
+
+  <ng-container *ngIf="hasChildren(node) && isExpanded(node)">
+    <ng-container *ngFor="let child of node.children; trackBy: trackByValue">
+      <ng-container *ngTemplateOutlet="nodeTpl; context: { $implicit: child, depth: depth + 1 }"></ng-container>
+    </ng-container>
+  </ng-container>
+</ng-template>

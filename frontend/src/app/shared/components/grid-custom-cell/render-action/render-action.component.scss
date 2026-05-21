@@ -1,0 +1,70 @@
+.action-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+
+.action-icon-btn {
+  flex-shrink: 0;
+}
+
+/* Nhập liệu — tím */
+:host ::ng-deep .action-icon-btn--render:not([disabled]) {
+  color: #7c3aed !important;
+}
+
+:host ::ng-deep .action-icon-btn--render:not([disabled]) tui-svg svg {
+  color: #7c3aed;
+  stroke: #7c3aed;
+}
+
+/* Sửa — xanh dương */
+:host ::ng-deep .action-icon-btn--edit:not([disabled]) {
+  color: #2563eb !important;
+}
+
+:host ::ng-deep .action-icon-btn--edit:not([disabled]) tui-svg svg {
+  color: #2563eb;
+  stroke: #2563eb;
+}
+
+/* Xuất bản — xanh lá */
+:host ::ng-deep .action-icon-btn--publish:not([disabled]) {
+  color: #16a34a !important;
+}
+
+:host ::ng-deep .action-icon-btn--publish:not([disabled]) tui-svg svg {
+  color: #16a34a;
+  stroke: #16a34a;
+}
+
+/* Sao chép — cam */
+:host ::ng-deep .action-icon-btn--copy:not([disabled]) {
+  color: #ea580c !important;
+}
+
+:host ::ng-deep .action-icon-btn--copy:not([disabled]) tui-svg svg {
+  color: #ea580c;
+  stroke: #ea580c;
+}
+
+/* Xóa — đỏ */
+:host ::ng-deep .action-icon-btn--delete:not([disabled]) {
+  color: #dc2626 !important;
+}
+
+:host ::ng-deep .action-icon-btn--delete:not([disabled]) tui-svg svg {
+  color: #dc2626;
+  stroke: #dc2626;
+}
+
+.action-icon-btn[disabled] {
+  color: #9ca3af !important;
+  opacity: 0.85;
+}
+
+:host ::ng-deep .action-icon-btn[disabled] tui-svg svg {
+  color: #9ca3af;
+  stroke: #9ca3af;
+}

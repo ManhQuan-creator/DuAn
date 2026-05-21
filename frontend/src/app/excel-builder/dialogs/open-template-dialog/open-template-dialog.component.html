@@ -1,0 +1,109 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{ size: 'l', dismissible: true, closeable: true, label: 'Mở biểu mẫu' }"
+>
+  <div class="tpl-dialog">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="tpl-dialog__loading">
+      <tui-loader size="s"></tui-loader>
+      Đang tải danh sách...
+    </div>
+
+    <!-- Empty state -->
+    <div
+      *ngIf="!loading && templateList.length === 0"
+      class="tpl-dialog__empty"
+    >
+      <tui-svg
+        src="tuiIconFileTextLarge"
+        class="tpl-dialog__empty-icon"
+      ></tui-svg>
+      <p>Chưa có biểu mẫu nào được lưu.</p>
+    </div>
+
+    <!-- Template list -->
+    <div class="tpl-dialog__list">
+      <div
+        *ngFor="let tpl of templateList"
+        class="tpl-dialog__item"
+        [class.tpl-dialog__item--active]="currentTemplateId === tpl.id"
+        (click)="onLoadTemplate(tpl.id)"
+      >
+        <!-- Icon -->
+        <div class="tpl-dialog__icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="2" y="2" width="12" height="3" rx="1" fill="#378ADD" />
+            <rect
+              x="2"
+              y="7"
+              width="9"
+              height="2"
+              rx="1"
+              fill="#378ADD"
+              opacity="0.6"
+            />
+            <rect
+              x="2"
+              y="11"
+              width="6"
+              height="2"
+              rx="1"
+              fill="#378ADD"
+              opacity="0.4"
+            />
+          </svg>
+        </div>
+
+        <!-- Info -->
+        <div class="tpl-dialog__info">
+          <div class="tpl-dialog__meta">
+            <span class="tpl-dialog__name">{{ tpl.name }}</span>
+            <tui-badge
+              *ngIf="tpl.code"
+              [value]="tpl.code"
+              status="primary"
+              class="tpl-dialog__badge-code"
+            ></tui-badge>
+            <tui-badge
+              [value]="tpl.status"
+              [status]="tpl.status === 'PUBLISHED' ? 'success' : 'default'"
+              class="tpl-dialog__badge-status"
+            ></tui-badge>
+          </div>
+          <div class="tpl-dialog__version">
+            v{{ tpl.version }} &middot; Cập nhật
+            {{ tpl.updatedAt | date: "dd/MM/yyyy HH:mm" }}
+          </div>
+          <div *ngIf="tpl.description" class="tpl-dialog__description">
+            {{ tpl.description }}
+          </div>
+        </div>
+
+        <!-- Delete button -->
+        <button
+          tuiIconButton
+          type="button"
+          appearance="flat"
+          size="s"
+          icon="tuiIconTrash2"
+          class="tpl-dialog__delete"
+          (click)="onDeleteTemplate(tpl.id, $event)"
+        ></button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="tpl-dialog__footer">
+      <button
+        tuiButton
+        type="button"
+        appearance="outline"
+        size="m"
+        (click)="close()"
+      >
+        Đóng
+      </button>
+    </div>
+  </div>
+</ng-template>

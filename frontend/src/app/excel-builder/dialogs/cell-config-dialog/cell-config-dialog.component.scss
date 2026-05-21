@@ -1,0 +1,359 @@
+// ========================================
+// Cell Config Dialog — scoped styles cho dialog component.
+// Trước đây CSS này nằm trong excel-builder.component.scss với
+// `ViewEncapsulation.None` nên leak global → render đúng khi user vào Builder
+// nhưng XẤU khi Render mở dialog (Render không leak builder scss).
+// Move vào đây để dialog tự chứa style — Builder + Render đều render đẹp.
+// ========================================
+
+.cell-config-dialog {
+  min-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+// Tab bar
+.cc-tabs {
+  display: flex;
+  gap: 2px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 16px;
+}
+
+.cc-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(.cc-tab--active) {
+    background: #e2e8f0;
+    color: #334155;
+  }
+
+  &--active {
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+  }
+
+  &--formula.cc-tab--active {
+    color: #ea580c;
+  }
+
+  &--dropdown.cc-tab--active {
+    color: #6d28d9;
+  }
+
+  &--datepicker.cc-tab--active {
+    color: #1e40af;
+  }
+
+  &--validation.cc-tab--active {
+    color: #dc2626;
+  }
+}
+
+.cc-tab__icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+// Panel
+.cc-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #fafbfc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+// Hint text
+.cc-hint {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-left: 3px solid #cbd5e1;
+  border-radius: 0 6px 6px 0;
+}
+
+// Label
+.cc-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+// Help text
+.cc-help {
+  font-size: 12px;
+  color: #94a3b8;
+
+  code {
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: #475569;
+  }
+}
+
+// Formula validation result
+.cc-validation-result {
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 6px;
+
+  &--ok {
+    background: #f0fdf4;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &--err {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+}
+
+.cc-validation-refs {
+  font-size: 12px;
+  color: #64748b;
+}
+
+// Toggle switch
+.cc-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cc-toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cc-toggle__track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background: #cbd5e1;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.cc-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.cc-toggle__input:checked + .cc-toggle__track {
+  background: #3b82f6;
+
+  .cc-toggle__thumb {
+    transform: translateX(16px);
+  }
+}
+
+.cc-toggle__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+// Info card (datepicker details)
+.cc-info-card {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+
+  &--blue {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+  }
+}
+
+.cc-info-card__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+
+  code {
+    background: #dbeafe;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #1e40af;
+    font-weight: 600;
+  }
+}
+
+.cc-info-card__key {
+  font-weight: 500;
+  color: #475569;
+  min-width: 80px;
+}
+
+.cc-info-card__note {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+// Loading state
+.cc-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #64748b;
+  padding: 8px 0;
+}
+
+.cc-loading__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: cc-spin 0.6s linear infinite;
+}
+
+@keyframes cc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Dropdown preview
+.cc-preview {
+  margin-top: 4px;
+}
+
+.cc-preview__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cc-preview__list {
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  margin-top: 6px;
+  background: #fff;
+}
+
+.cc-preview__item {
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: #f8fafc;
+  }
+}
+
+// Field inputs
+.cc-field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.cc-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cc-field__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.cc-input {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #1e293b;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: #94a3b8;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+// Footer
+.cc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cc-footer__clear {
+  color: #94a3b8 !important;
+  font-size: 13px !important;
+
+  &:hover {
+    color: #dc2626 !important;
+  }
+}
+
+.cc-footer__actions {
+  display: flex;
+  gap: 8px;
+}

@@ -1,0 +1,126 @@
+<div class="action-cell">
+  <button
+    *ngIf="showDetailBtn"
+    type="button"
+    tuiIconButton
+    appearance="flat"
+    size="s"
+    class="action-icon-btn action-icon-btn--render"
+    title="Xem chi tiết"
+    [disabled]="isLoading"
+    (click)="onDetailClick()"
+  >
+    <tui-svg src="tuiIconEye"></tui-svg>
+  </button>
+
+  <button
+    *ngIf="showRenderBtn"
+    type="button"
+    tuiIconButton
+    appearance="flat"
+    size="s"
+    class="action-icon-btn action-icon-btn--render"
+    title="Nhập liệu"
+    [disabled]="isLoading"
+    (click)="onRenderClick()"
+  >
+    <tui-svg src="tuiIconEdit"></tui-svg>
+  </button>
+
+  <button
+    *ngIf="showDownloadBtn"
+    type="button"
+    tuiIconButton
+    appearance="flat"
+    size="s"
+    class="action-icon-btn action-icon-btn--edit"
+    title="Tải xuống"
+    [disabled]="isLoading"
+    (click)="onDownloadClick()"
+  >
+    <tui-svg src="tuiIconDownload"></tui-svg>
+  </button>
+
+  <button
+    *ngIf="showEditBtn"
+    type="button"
+    tuiIconButton
+    appearance="flat"
+    size="s"
+    class="action-icon-btn action-icon-btn--edit"
+    title="Sửa"
+    [disabled]="isLoading"
+    (click)="onEditClick()"
+  >
+    <tui-svg src="tuiIconEdit2"></tui-svg>
+  </button>
+
+  <button
+    *ngIf="showPublishBtn"
+    type="button"
+    tuiIconButton
+    appearance="flat"
+    size="s"
+    class="action-icon-btn action-icon-btn--publish"
+    title="Xuất bản"
+    [disabled]="isLoading"
+    (click)="onPublishClick()"
+  >
+    <tui-svg [src]="isLoading ? 'tuiIconLoader' : 'tuiIconUploadCloud'"></tui-svg>
+  </button>
+
+  <button
+    *ngIf="showCopyBtn"
+    type="button"
+    tuiIconButton
+    appearance="flat"
+    size="s"
+    class="action-icon-btn action-icon-btn--copy"
+    title="Sao chép biểu mẫu"
+    [disabled]="isLoading"
+    (click)="onCopyClick()"
+  >
+    <tui-svg [src]="isLoading ? 'tuiIconLoader' : 'tuiIconCopy'"></tui-svg>
+  </button>
+
+  <button
+    *ngIf="showDeleteBtn"
+    type="button"
+    tuiIconButton
+    appearance="flat"
+    size="s"
+    class="action-icon-btn action-icon-btn--delete"
+    title="Xóa"
+    [disabled]="isLoading"
+    (click)="onDeleteClick()"
+  >
+    <tui-svg [src]="isLoading ? 'tuiIconLoader' : 'tuiIconTrash'"></tui-svg>
+  </button>
+  <button
+    *ngIf="showAssessmentBtn"
+    type="button"
+    tuiIconButton
+    appearance="flat"
+    size="s"
+    class="action-icon-btn action-icon-btn--publish"
+    title="Chọn ban thẩm định"
+    [disabled]="isLoading"
+    (click)="onAssessmentClick()"
+  >
+    <tui-svg src="tuiIconSend"></tui-svg>
+  </button>
+
+  <button
+    *ngIf="showConfirmAssessmentBtn"
+    type="button"
+    tuiIconButton
+    appearance="flat"
+    size="s"
+    class="action-icon-btn action-icon-btn--render"
+    title="Xác nhận thẩm định"
+    [disabled]="isLoading"
+    (click)="onConfirmAssessmentClick()"
+  >
+    <tui-svg src="tuiIconCheck"></tui-svg>
+  </button>
+</div>

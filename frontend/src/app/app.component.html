@@ -1,0 +1,17 @@
+<tui-root>
+  <ng-container *ngIf="showAuthenticatedLayout; else loginOnly">
+    <app-header></app-header>
+    <div class="app-layout">
+      <app-sidebar></app-sidebar>
+      <main class="app-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </ng-container>
+
+  <ng-template #loginOnly>
+    <router-outlet></router-outlet>
+  </ng-template>
+
+  <app-loading></app-loading>
+</tui-root>

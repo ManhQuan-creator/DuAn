@@ -1,0 +1,88 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <h2 class="dialog-title">Tạo phiên nhập liệu mới</h2>
+  </div>
+
+  <div class="dialog-body">
+    <div class="form-card">
+      <div class="form-grid">
+
+        <!-- Mã phiên + Tên phiên ẩn khỏi UI theo yêu cầu NSD — vẫn auto-fill ngầm
+             qua `applyAutoFill()` rồi gửi lên BE. BE bắt buộc @NotBlank entryCode. -->
+
+        <div class="field" [class.field--span-2]="isYearMode">
+          <label class="field-label">Năm dữ liệu<span class="req">*</span></label>
+          <tui-input-year
+            [(ngModel)]="selectedYear"
+            (ngModelChange)="onDateChange()"
+            [tuiTextfieldLabelOutside]="true"
+            tuiTextfieldSize="m"
+          >
+            Chọn năm
+          </tui-input-year>
+        </div>
+
+        <!-- MONTH mode: dropdown 1-12 -->
+        <div *ngIf="isMonthMode" class="field">
+          <label class="field-label">Tháng <span class="req">*</span></label>
+          <app-single-select
+            [(ngModel)]="selectedMonth"
+            (ngModelChange)="onDateChange()"
+            [options]="monthSelectOptions"
+            [clearable]="false"
+            placeholder="Chọn tháng"
+          ></app-single-select>
+        </div>
+
+        <!-- QUARTER mode: dropdown Q1-Q4 -->
+        <div *ngIf="isQuarterMode" class="field">
+          <label class="field-label">Quý <span class="req">*</span></label>
+          <app-single-select
+            [(ngModel)]="selectedQuarter"
+            (ngModelChange)="onDateChange()"
+            [options]="quarterSelectOptions"
+            [clearable]="false"
+            placeholder="Chọn quý"
+          ></app-single-select>
+        </div>
+
+        <!-- HALF_YEAR mode: dropdown H1/H2 -->
+        <div *ngIf="isHalfYearMode" class="field">
+          <label class="field-label">Kỳ 6 tháng <span class="req">*</span></label>
+          <app-single-select
+            [(ngModel)]="selectedHalfYear"
+            (ngModelChange)="onDateChange()"
+            [options]="halfYearSelectOptions"
+            [clearable]="false"
+            placeholder="Chọn kỳ"
+          ></app-single-select>
+        </div>
+
+
+        <div class="field field--span-2">
+          <label class="field-label">
+            Mã điện lực <span class="req">*</span>
+            <span *ngIf="orgLocked" class="field-lock-hint">(theo đơn vị user hiện tại)</span>
+          </label>
+          <app-single-select
+            [(ngModel)]="form.orgCode"
+            (ngModelChange)="onOrgChange()"
+            [options]="orgSelectOptions"
+            [clearable]="false"
+            [disabled]="orgLocked"
+            placeholder="Chọn đơn vị"
+          ></app-single-select>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <button class="btn btn--cancel" (click)="cancel()">Hủy</button>
+    <button class="btn btn--confirm" [disabled]="!canSubmit" (click)="submit()">
+      Tạo mới
+    </button>
+  </div>
+</div>

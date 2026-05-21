@@ -1,0 +1,96 @@
+<div class="manager-container">
+  <app-page-header
+    [title]="headerTitle"
+    [subtitle]="subTitle"
+    [breadcrumbs]="breadcrumbs"
+  >
+  </app-page-header>
+
+  <div class="card manager-filters app-search-toolbar">
+    <!-- SEARCH -->
+    <div class="form-group">
+      <label for="searchInput" tuiLabel class="app-form-label"> Mã, tên </label>
+
+      <tui-input
+        id="searchInput"
+        [(ngModel)]="searchKeyword"
+        (ngModelChange)="onSearchInput()"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="search-input app-search-toolbar__field app-search-toolbar__field--grow"
+      >
+        Tìm kiếm theo mã, tên...
+      </tui-input>
+    </div>
+
+    <!-- STATUS -->
+    <div class="form-group">
+      <label for="statusSelect" tuiLabel class="app-form-label">
+        Trạng thái
+      </label>
+
+      <tui-select
+        id="statusSelect"
+        [(ngModel)]="statusFilter"
+        (ngModelChange)="onStatusChange()"
+        [stringify]="stringifyStatus"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="status-select app-search-toolbar__field search-input"
+      >
+        Trạng thái
+        <tui-data-list *tuiDataList>
+          <button *ngFor="let s of statusOptions" tuiOption [value]="s">
+            {{ stringifyStatus(s) }}
+          </button>
+        </tui-data-list>
+      </tui-select>
+    </div>
+  </div>
+
+  <div class="card manager-grid-card">
+    <div *ngIf="loading" class="grid-loading-overlay">
+      <span class="grid-loading-spinner"></span> Đang tải dữ liệu...
+    </div>
+    <app-grid-header
+      [title]="title"
+      [showBtnCreateNew]="true"
+      [btnLabelCreateNew]="btnLabelCreateNew"
+      (buttonClickCreateNew)="createNew()"
+    ></app-grid-header>
+    <div class="manager-grid">
+      <app-ag-grid-wrapper [enableRangeSelection]="true"
+        [rowData]="templateList"
+        [columnDefs]="columnDefs"
+        [animateRows]="true"
+        [pagination]="false"
+        [suppressCellFocus]="true"
+        [height]="'100%'"
+        [width]="'100%'"
+        [theme]="'ag-theme-quartz'"
+        (gridReady)="onGridReady($event)"
+      ></app-ag-grid-wrapper>
+    </div>      
+    <app-custom-pagination
+        [totalRows]="totalRows"
+        [currentPage]="pageNum + 1"
+        [pageSize]="pageSize"
+        (pageChanged)="onPageChanged($event)"
+        (pageSizeChanged)="onPageSizeChanged($event)"
+      />
+  </div>
+</div>
+
+<app-import-file-dialog [(open)]="isOpen" [title]="'Import Excel'" [fileType]="'excel'" (handleCancelEvent)="onCancel()"
+  (handlerFileSubmit)="onSubmit($event)" (handlerDowloadTemplate)="onDownloadTemplate()"></app-import-file-dialog>
+
+<app-advanced-settings-dialog
+  [(isOpen)]="isCreateDialogOpen"
+  title="Tạo mới báo cáo"
+  [data]="createDialogData"
+  [workflows]="deployedWorkflows"
+  [reportDepartmentOptions]="reportDepartmentOptions"
+  [sidebarMenuOptions]="sidebarMenuOptions"
+  (handleSaveEvent)="onCreateDialogSave($event)"
+  (handleCancelEvent)="onCreateDialogCancel()"
+></app-advanced-settings-dialog>

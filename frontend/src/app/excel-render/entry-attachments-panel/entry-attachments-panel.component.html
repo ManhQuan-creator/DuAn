@@ -1,0 +1,88 @@
+<!-- File input luôn có trong DOM (không bị bọc bởi *ngIf) để parent gọi
+     triggerPicker() được cả khi panel đang collapsed. -->
+<input
+  #fileInput
+  type="file"
+  multiple
+  style="display:none"
+  (change)="onFilesPicked($event)"
+/>
+
+<div class="attachments-panel" *ngIf="templateId && entryId && !collapsed">
+  <div class="attachments-header">
+    <div class="attachments-title-group">
+      <tui-svg src="tuiIconPaperclip" class="title-icon"></tui-svg>
+      <span class="attachments-title">Tài liệu đính kèm</span>
+      <span class="attachments-count" *ngIf="files.length > 0">{{ files.length }}</span>
+    </div>
+
+    <div class="attachments-actions">
+      <!-- Upload button ẩn (đã chuyển thành nút "Đính kèm file" ở action bar parent). -->
+      <button
+        *ngIf="false"
+        tuiButton
+        size="s"
+        appearance="secondary"
+        [disabled]="readonly || uploading"
+        (click)="triggerPicker()"
+      >
+        <tui-svg src="tuiIconUpload" class="btn-icon"></tui-svg>
+        {{ uploading ? 'Đang upload...' : 'Upload file' }}
+      </button>
+      <button
+        type="button"
+        class="attachments-close"
+        (click)="toggleCollapsed()"
+        title="Đóng"
+      >
+        <tui-svg src="tuiIconClose" class="close-icon"></tui-svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="attachments-body">
+    <div *ngIf="loading" class="attachments-empty">Đang tải danh sách...</div>
+
+    <div *ngIf="!loading && files.length === 0" class="attachments-empty">
+      Chưa có file đính kèm.
+    </div>
+
+    <table *ngIf="!loading && files.length > 0" class="attachments-table">
+      <thead>
+        <tr>
+          <th class="col-idx">#</th>
+          <th>Tên file</th>
+          <th class="col-size">Kích thước</th>
+          <th class="col-user">Người upload</th>
+          <th class="col-date">Ngày upload</th>
+          <th class="col-action"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let f of files; let i = index; trackBy: trackById">
+          <td class="col-idx">{{ i + 1 }}</td>
+          <td>
+            <a class="file-link" (click)="onDownload(f)" [title]="f.originalFileName">
+              <tui-svg src="tuiIconFile" class="file-icon"></tui-svg>
+              {{ f.originalFileName }}
+            </a>
+          </td>
+          <td class="col-size">{{ formatSize(f.fileSize) }}</td>
+          <td class="col-user">{{ f.createdBy || '—' }}</td>
+          <td class="col-date">{{ f.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="col-action">
+            <button
+              type="button"
+              class="icon-btn-delete"
+              (click)="onDelete(f)"
+              [disabled]="readonly"
+              title="Xóa file"
+            >
+              <tui-svg src="tuiIconTrash2"></tui-svg>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

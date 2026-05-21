@@ -1,0 +1,275 @@
+@use '../../styles.scss' as *;
+
+::ng-deep .search-input [tuiwrapper] {
+  box-shadow: none !important;
+  border: 1px solid #ccc !important;
+  border-radius: 8px !important;
+}
+
+::ng-deep .search-input [tuiwrapper][data-appearance='icon'] {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.catalog-manager-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px 24px;
+  gap: 16px;
+  background: #f9f9f9;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+}
+
+// Layout tổng: sidebar trái + content phải
+.catalog-layout {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// === Sidebar ===
+
+.cm-sidebar {
+  width: 280px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.cm-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cm-sidebar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.cm-sidebar-search {
+  padding: 8px 16px;
+}
+
+.cm-type-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 8px;
+}
+
+.cm-type-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+
+  &--active {
+    background: rgba(59, 130, 246, 0.08);
+    border-left: 3px solid #3b82f6;
+
+    .cm-type-name {
+      color: #2563eb;
+      font-weight: 600;
+    }
+  }
+
+  &--inactive {
+    opacity: 0.5;
+  }
+}
+
+.cm-type-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.cm-type-name {
+  font-size: 14px;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cm-type-code {
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.cm-type-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .cm-type-item:hover & {
+    opacity: 1;
+  }
+}
+
+.cm-icon-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #e2e8f0;
+    color: #2563eb;
+  }
+}
+
+.cm-delete-btn:hover {
+  color: rgb(220, 38, 38) !important;
+}
+
+// === Content ===
+
+.cm-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.cm-content-filters.app-search-toolbar {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr);
+  align-items: end;
+  column-gap: 24px;
+  row-gap: 16px;
+
+  .search-input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .app-search-toolbar__field,
+  .app-search-toolbar__field--grow {
+    flex: unset;
+    max-width: none;
+    min-width: 0;
+  }
+}
+
+.cm-grid-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cm-grid-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
+// === Shared ===
+
+.cm-loading,
+.grid-loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.cm-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: cm-spin 0.6s linear infinite;
+}
+
+@keyframes cm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cm-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: #94a3b8;
+  font-size: 15px;
+  gap: 12px;
+}
+
+.cm-empty-icon {
+  font-size: 48px;
+}
+
+.cm-content-filters.app-search-toolbar {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(220px, 300px); // thêm cột thứ 2
+  align-items: end;
+  column-gap: 24px;
+  row-gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+
+  .search-input,
+  .status-select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .app-search-toolbar__field,
+  .app-search-toolbar__field--grow {
+    flex: unset;
+    max-width: none;
+    min-width: 0;
+  }
+}

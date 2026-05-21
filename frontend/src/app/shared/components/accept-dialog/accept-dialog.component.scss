@@ -1,0 +1,107 @@
+.cd-content {
+  text-align: center;
+  padding: 8px 4px 4px;
+}
+
+/* Icon */
+.cd-icon-wrap {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* màu nhẹ như ảnh */
+.cd-icon--error {
+  background: #fdecec;
+  color: #e53935;
+}
+
+.cd-icon--warning {
+  background: #fff4e5;
+  color: #fb8c00;
+}
+
+.cd-icon--success {
+  background: #edf7ed;
+  color: #2e7d32;
+}
+
+.cd-icon--info {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.cd-icon {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* Title */
+.cd-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Message */
+.cd-message {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* Actions */
+.cd-actions {
+  display: flex;
+  justify-content: center; /* center như hình */
+  gap: 12px;
+}
+
+/* Buttons */
+.cd-btn {
+  min-width: 90px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Cancel */
+.cd-btn--cancel {
+  background: #f1f3f5;
+  color: #333;
+}
+
+.cd-btn--cancel:hover {
+  background: #e2e6ea;
+}
+
+/* Confirm */
+.cd-btn--error {
+  background: #e53935;
+  color: white;
+}
+
+.cd-btn--error:hover {
+  background: #c62828;
+}
+
+.cd-btn--success,
+.cd-btn--info,
+.cd-btn--warning {
+  background: #4574C0;
+  color: white;
+}
+
+.cd-btn--success:hover,
+.cd-btn--info:hover,
+.cd-btn--warning:hover {
+  background: #3068c2;
+}

@@ -1,0 +1,276 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{ size: 'm', dismissible: true, closeable: true, label: config?.field ? 'Cấu hình Cell [' + config!.field + ']' : 'Cấu hình Cell' }"
+>
+  <div class="cell-config-dialog">
+    <!-- Tab bar -->
+    <div class="cc-tabs">
+      <button
+        type="button"
+        class="cc-tab"
+        [class.cc-tab--active]="cellConfigTab === 'formula'"
+        [class.cc-tab--formula]="cellConfigTab === 'formula'"
+        (click)="cellConfigTab = 'formula'"
+      >
+        <span class="cc-tab__icon">fx</span> Công thức
+      </button>
+      <button
+        type="button"
+        class="cc-tab"
+        [class.cc-tab--active]="cellConfigTab === 'dropdown'"
+        [class.cc-tab--dropdown]="cellConfigTab === 'dropdown'"
+        (click)="cellConfigTab = 'dropdown'"
+      >
+        <span class="cc-tab__icon">▼</span> Dropdown
+      </button>
+      <button
+        type="button"
+        class="cc-tab"
+        [class.cc-tab--active]="cellConfigTab === 'datepicker'"
+        [class.cc-tab--datepicker]="cellConfigTab === 'datepicker'"
+        (click)="cellConfigTab = 'datepicker'"
+      >
+        <span class="cc-tab__icon">📅</span> Ngày tháng
+      </button>
+      <button
+        type="button"
+        class="cc-tab"
+        [class.cc-tab--active]="cellConfigTab === 'validation'"
+        [class.cc-tab--validation]="cellConfigTab === 'validation'"
+        (click)="cellConfigTab = 'validation'"
+      >
+        <span class="cc-tab__icon">✓</span> Validation
+      </button>
+    </div>
+
+    <!-- Formula panel -->
+    <div *ngIf="cellConfigTab === 'formula'" class="cc-panel">
+      <div class="cc-hint">
+        <ng-container *ngIf="editingCellIsFormulaCol"
+          >Nhập công thức riêng cho ô này. Để trống = dùng công thức mặc định
+          của cột.</ng-container
+        >
+        <ng-container *ngIf="!editingCellIsFormulaCol"
+          >Nhập công thức để tự động tính giá trị cho ô này. Để trống = nhập
+          liệu thủ công.</ng-container
+        >
+      </div>
+      <label class="cc-label">Công thức</label>
+      <tui-text-area [formControl]="cellFormulaCtrl" [expandable]="true">
+        Nhập công thức...
+      </tui-text-area>
+      <p class="cc-help">
+        Hỗ trợ: <code>+ - * / ()</code> &middot; VD:
+        <code>((PCHP_VAT2024 + 1) * VAT2024)</code>
+      </p>
+      <div *ngIf="formulaValidation" class="cc-validation-result">
+        <div *ngIf="formulaValidation.valid" class="cc-validation-result--ok">
+          <span>✓ Công thức hợp lệ</span>
+          <span
+            *ngIf="formulaValidation.references?.length"
+            class="cc-validation-refs"
+          >
+            Tham chiếu: {{ formulaValidation.references?.join(", ") }}
+          </span>
+        </div>
+        <div *ngIf="!formulaValidation.valid" class="cc-validation-result--err">
+          ✗ {{ formulaValidation.error }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Dropdown panel -->
+    <div *ngIf="cellConfigTab === 'dropdown'" class="cc-panel">
+      <div class="cc-hint">
+        Chọn loại danh mục để tạo dropdown cho ô này. Giá trị ô sẽ được chọn từ
+        danh sách.
+      </div>
+      <label class="cc-label">Loại danh mục</label>
+      <tui-select
+        [formControl]="cellDropdownCatalogType"
+        [stringify]="stringifyCatalogType"
+        [tuiTextfieldLabelOutside]="true"
+        class="w-full"
+        (ngModelChange)="onDropdownCatalogTypeChange()"
+      >
+        Chọn loại danh mục...
+        <tui-data-list *tuiDataList>
+          <button *ngFor="let ct of catalogTypes" tuiOption [value]="ct">
+            <tui-svg
+              [src]="ct.icon || 'tuiIconFolderLarge'"
+              class="icon"
+              style="color: #6366f1"
+            ></tui-svg>
+            <div class="content flex flex-col overflow-hidden">
+              <span class="name font-bold">{{ ct.name }}</span>
+              <span class="id text-xs text-gray-500">{{ ct.description }}</span>
+            </div>
+          </button>
+        </tui-data-list>
+      </tui-select>
+
+      <div *ngIf="cellDropdownLoading" class="cc-loading">
+        <span class="cc-loading__spinner"></span> Đang tải danh sách...
+      </div>
+      <div
+        *ngIf="!cellDropdownLoading && cellDropdownItems.length > 0"
+        class="cc-preview"
+      >
+        <label class="cc-preview__label"
+          >Xem trước ({{ cellDropdownItems.length }} mục)</label
+        >
+        <div class="cc-preview__list">
+          <div *ngFor="let item of cellDropdownItems" class="cc-preview__item">
+            {{ item.name }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date picker panel -->
+    <div *ngIf="cellConfigTab === 'datepicker'" class="cc-panel">
+      <div class="cc-hint">
+        Chuyển ô này thành date picker. Click ô sẽ mở lịch chọn ngày thay vì
+        nhập số.
+      </div>
+      <label class="cc-toggle">
+        <input
+          type="checkbox"
+          class="cc-toggle__input"
+          [(ngModel)]="cellDatePickerEnabled"
+          [ngModelOptions]="{ standalone: true }"
+        />
+        <span class="cc-toggle__track">
+          <span class="cc-toggle__thumb"></span>
+        </span>
+        <span class="cc-toggle__label">Bật date picker cho ô này</span>
+      </label>
+      <div
+        *ngIf="cellDatePickerEnabled"
+        class="cc-info-card cc-info-card--blue"
+      >
+        <div class="cc-info-card__row">
+          <span class="cc-info-card__key">Giá trị lưu</span>
+          <code>YYYY-MM-DD</code>
+        </div>
+        <div class="cc-info-card__row">
+          <span class="cc-info-card__key">Hiển thị</span>
+          <code>DD/MM/YYYY</code>
+        </div>
+        <div class="cc-info-card__note">
+          Ô sẽ hiển thị nền xanh nhạt với icon lịch 📅
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation panel -->
+    <div *ngIf="cellConfigTab === 'validation'" class="cc-panel">
+      <div class="cc-hint">
+        Đặt quy tắc validation cho ô này. Ô vi phạm sẽ hiển thị viền đỏ.
+      </div>
+      <label class="cc-toggle">
+        <input
+          type="checkbox"
+          class="cc-toggle__input"
+          [(ngModel)]="cellValidationRequired"
+          [ngModelOptions]="{ standalone: true }"
+        />
+        <span class="cc-toggle__track">
+          <span class="cc-toggle__thumb"></span>
+        </span>
+        <span class="cc-toggle__label">Bắt buộc nhập</span>
+      </label>
+      <div class="cc-field-row" *ngIf="!isEditingDateColumn">
+        <div class="cc-field">
+          <label class="cc-field__label">Giá trị tối thiểu</label>
+          <input
+            type="number"
+            [(ngModel)]="cellValidationMin"
+            [ngModelOptions]="{ standalone: true }"
+            class="cc-input"
+            placeholder="Không giới hạn"
+          />
+        </div>
+        <div class="cc-field">
+          <label class="cc-field__label">Giá trị tối đa</label>
+          <input
+            type="number"
+            [(ngModel)]="cellValidationMax"
+            [ngModelOptions]="{ standalone: true }"
+            class="cc-input"
+            placeholder="Không giới hạn"
+          />
+        </div>
+      </div>
+      <div class="cc-field-row" *ngIf="isEditingDateColumn">
+        <div class="cc-field">
+          <label class="cc-field__label">Ngày tối thiểu</label>
+          <input
+            type="date"
+            [(ngModel)]="cellValidationMinDate"
+            [ngModelOptions]="{ standalone: true }"
+            class="cc-input"
+          />
+        </div>
+        <div class="cc-field">
+          <label class="cc-field__label">Ngày tối đa</label>
+          <input
+            type="date"
+            [(ngModel)]="cellValidationMaxDate"
+            [ngModelOptions]="{ standalone: true }"
+            class="cc-input"
+          />
+        </div>
+      </div>
+      <div class="cc-field" *ngIf="!isEditingDateColumn">
+        <label class="cc-field__label">Pattern (regex)</label>
+        <input
+          type="text"
+          [(ngModel)]="cellValidationPattern"
+          [ngModelOptions]="{ standalone: true }"
+          class="cc-input"
+          placeholder="VD: ^[0-9]+$"
+        />
+      </div>
+      <div class="cc-field">
+        <label class="cc-field__label">Thông báo lỗi tùy chỉnh</label>
+        <input
+          type="text"
+          [(ngModel)]="cellValidationErrorMsg"
+          [ngModelOptions]="{ standalone: true }"
+          class="cc-input"
+          placeholder="Để trống = mặc định"
+        />
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="cc-footer">
+      <button
+        tuiButton
+        type="button"
+        appearance="flat"
+        size="s"
+        class="cc-footer__clear"
+        (click)="onClear()"
+      >
+        Xóa cấu hình
+      </button>
+      <div class="cc-footer__actions">
+        <button
+          tuiButton
+          type="button"
+          appearance="outline"
+          size="s"
+          (click)="close()"
+        >
+          Hủy
+        </button>
+        <button tuiButton type="button" appearance="primary" size="s" (click)="onSave()">
+          Lưu
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>

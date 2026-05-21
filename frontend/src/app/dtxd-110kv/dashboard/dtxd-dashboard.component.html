@@ -1,0 +1,147 @@
+<div class="dashboard-root">
+
+  <!-- Header: title + filter năm + button quản lý -->
+  <header class="page-header">
+    <div class="title-block">
+      <h1>Báo cáo tổng hợp dự án ĐTXD 110kV</h1>
+      <p class="subtitle">Tổng công ty Điện lực miền Bắc · Danh mục đầu tư xây dựng lưới điện 110kV</p>
+    </div>
+    <div class="filter-block">
+      <div class="field">
+        <label>Năm</label>
+        <app-single-select
+          [options]="yearOptions"
+          [ngModel]="selectedYear"
+          (ngModelChange)="onYearChange($event)"
+          placeholder="Chọn năm">
+        </app-single-select>
+      </div>
+      <div class="field">
+        <label>Đơn vị QLDA</label>
+        <app-single-select
+          class="unit-select"
+          [options]="unitOptions()"
+          [ngModel]="selectedUnit()"
+          (ngModelChange)="onUnitChange($event)"
+          placeholder="Tất cả đơn vị">
+        </app-single-select>
+      </div>
+    </div>
+  </header>
+
+  @if (loadError(); as err) {
+    <div class="error-banner">{{ err }}</div>
+  }
+
+  <!-- ═════ TẦNG 1 — KPI CARDS ═════ -->
+  <section class="tier tier-kpi">
+    <h2 class="tier-title">Tổng quan dự án</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng số dự án</div>
+          <div class="kpi-value">{{ fmtCount(kpi().tongSoDuAn) }}</div>
+          <div class="kpi-unit">dự án 110kV</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng giá trị TMĐT</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().tongTmdt) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-cyan">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng công suất</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().tongCongSuat) }}</div>
+          <div class="kpi-unit">MVA</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-emerald">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Đã quyết toán</div>
+          <div class="kpi-value">{{ fmtCount(kpi().soDaQuyetToan) }}</div>
+          <div class="kpi-unit">dự án hoàn thành</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-icon">🚧</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Đang thi công</div>
+          <div class="kpi-value">{{ fmtCount(kpi().soDangThiCong) }}</div>
+          <div class="kpi-unit">dự án triển khai</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-rose">
+        <div class="kpi-icon">⏳</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Chưa khởi công</div>
+          <div class="kpi-value">{{ fmtCount(kpi().soChuaKhoiCong) }}</div>
+          <div class="kpi-unit">dự án chuẩn bị</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-indigo">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Khởi công đúng KH</div>
+          <div class="kpi-value">{{ fmtCount(kpi().soKhoiCongDungKh) }}</div>
+          <div class="kpi-unit">dự án đúng tiến độ</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-violet">
+        <div class="kpi-icon">⚠️</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Khởi công trễ KH</div>
+          <div class="kpi-value">{{ fmtCount(kpi().soKhoiCongTreKh) }}</div>
+          <div class="kpi-unit">dự án chậm tiến độ</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ TẦNG 2 — PHÂN BỐ THEO TRẠNG THÁI & LOẠI HÌNH ═════ -->
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Phân bố dự án</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>Tình trạng dự án</h3>
+        <div class="chart-host">
+          <echarts [options]="statusChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Loại hình công trình</h3>
+        <div class="chart-host">
+          <echarts [options]="loaiHinhChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ TẦNG 3 — PHÂN BỔ THEO ĐƠN VỊ QLDA (ẩn khi filter đơn vị cụ thể) ═════ -->
+  @if (showUnitCharts()) {
+    <section class="tier tier-charts">
+      <h2 class="tier-title">Phân bổ theo Đơn vị QLDA (Top 10)</h2>
+      <div class="charts-grid charts-2col">
+        <div class="chart-card">
+          <h3>Số dự án theo đơn vị</h3>
+          <div class="chart-host">
+            <echarts [options]="unitCountChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Tổng TMĐT theo đơn vị (triệu đồng)</h3>
+          <div class="chart-host">
+            <echarts [options]="unitTmdtChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+</div>

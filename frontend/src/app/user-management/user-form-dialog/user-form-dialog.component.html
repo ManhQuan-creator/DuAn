@@ -1,0 +1,240 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{ size: 'l', dismissible: true, closeable: true }"
+>
+  <div class="dialog-wrapper">
+    <div class="dialog-header">
+      <h2 class="dialog-title">{{ dialogTitle }}</h2>
+      <span class="dialog-subtitle">Khai báo người dùng theo phân cấp tổ chức EVNNPC</span>
+    </div>
+
+    <div class="dialog-body">
+      <!-- ===== SECTION 1: Thông tin cơ bản ===== -->
+      <div class="section-title">Thông tin cơ bản</div>
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="field" *ngIf="mode === 'create'">
+            <label class="field-label">Tên đăng nhập <span class="req">*</span></label>
+            <input
+              class="field-input"
+              placeholder="VD: nguyenvana"
+              [(ngModel)]="form.username"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field" *ngIf="mode === 'create'">
+            <label class="field-label">Mật khẩu <span class="req">*</span></label>
+            <input
+              class="field-input"
+              type="password"
+              placeholder="Tối thiểu 6 ký tự"
+              [(ngModel)]="form.password"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="field field--span-2">
+            <label class="field-label">Họ và tên <span class="req">*</span></label>
+            <input
+              class="field-input"
+              placeholder="VD: Nguyễn Văn A"
+              [(ngModel)]="form.fullName"
+            />
+          </div>
+
+          <div class="field">
+            <label class="field-label">Email</label>
+            <input
+              class="field-input"
+              type="email"
+              placeholder="vd: a@evnnpc.vn"
+              [(ngModel)]="form.email"
+            />
+          </div>
+
+          <div class="field">
+            <label class="field-label">Số điện thoại</label>
+            <input
+              class="field-input"
+              placeholder="VD: 0912xxxxxx"
+              [(ngModel)]="form.phone"
+            />
+          </div>
+
+          <div *ngIf="mode === 'edit'" class="field field--span-2">
+            <label class="field-label">Đổi mật khẩu (để trống nếu không đổi)</label>
+            <input
+              class="field-input"
+              type="password"
+              placeholder="••••••"
+              [(ngModel)]="form.password"
+              autocomplete="new-password"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 2: Phân cấp tổ chức ===== -->
+      <div class="section-title">Phân cấp tổ chức</div>
+      <div class="form-card">
+        <!-- Step 1: Org Group -->
+        <div class="step">
+          <div class="step__title">
+            <span class="step__num">1</span>
+            Nhóm đơn vị <span class="req">*</span>
+          </div>
+          <div class="org-group-list">
+            <label
+              *ngFor="let opt of orgGroupOptions"
+              class="org-group-item"
+              [class.org-group-item--active]="form.orgGroupCode === opt.value"
+            >
+              <input
+                type="radio"
+                name="orgGroup"
+                [value]="opt.value"
+                [(ngModel)]="form.orgGroupCode"
+                (ngModelChange)="onOrgGroupChange()"
+              />
+              <div class="org-group-item__content">
+                <span class="org-group-item__label">{{ opt.label }}</span>
+                <span class="org-group-item__hint">{{ opt.hint }}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Step 1.5: Company (only PC_COMPANY) -->
+        <div *ngIf="needsCompany" class="step">
+          <div class="step__title">
+            <span class="step__num">2</span>
+            Công ty Điện lực <span class="req">*</span>
+          </div>
+          <select
+            class="field-input"
+            [(ngModel)]="form.companyCode"
+            (ngModelChange)="onCompanyChange()"
+          >
+            <option value="">-- Chọn công ty --</option>
+            <option
+              *ngFor="let c of pcCompanies; trackBy: trackByCompany"
+              [value]="c.companyCode"
+            >
+              {{ c.companyCode }} — {{ c.companyName }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Step 2: Employee kind (TOP vs DEPT) -->
+        <div *ngIf="showEmployeeKind" class="step">
+          <div class="step__title">
+            <span class="step__num">{{ needsCompany ? 3 : 2 }}</span>
+            Loại nhân sự <span class="req">*</span>
+          </div>
+          <div class="kind-list">
+            <label
+              class="kind-item"
+              [class.kind-item--active]="form.employeeKind === 'TOP'"
+            >
+              <input
+                type="radio"
+                name="employeeKind"
+                value="TOP"
+                [(ngModel)]="form.employeeKind"
+                (ngModelChange)="onEmployeeKindChange()"
+              />
+              <div class="kind-item__content">
+                <span class="kind-item__label">{{ topLevelLabel }}</span>
+                <span class="kind-item__hint">Không thuộc Ban/Phòng nào</span>
+              </div>
+            </label>
+
+            <label
+              class="kind-item"
+              [class.kind-item--active]="form.employeeKind === 'DEPT'"
+            >
+              <input
+                type="radio"
+                name="employeeKind"
+                value="DEPT"
+                [(ngModel)]="form.employeeKind"
+                (ngModelChange)="onEmployeeKindChange()"
+              />
+              <div class="kind-item__content">
+                <span class="kind-item__label">{{ deptLevelLabel }}</span>
+                <span class="kind-item__hint">Trực thuộc 1 Ban/Phòng cụ thể</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Step 3: Dept picker (only when DEPT kind) -->
+        <div *ngIf="showDeptPicker" class="step">
+          <div class="step__title">
+            <span class="step__num">{{ needsCompany ? 4 : 3 }}</span>
+            {{ deptPickerLabel }} <span class="req">*</span>
+          </div>
+          <select
+            class="field-input"
+            [(ngModel)]="form.deptCode"
+            (ngModelChange)="onDeptChange()"
+          >
+            <option value="">-- Chọn {{ deptPickerLabel }} --</option>
+            <option
+              *ngFor="let d of availableDepts; trackBy: trackByDept"
+              [value]="d.deptTypeCode"
+            >
+              {{ d.deptTypeName }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Step 4: Position picker (TOP: ngay; DEPT: sau khi chọn dept) -->
+        <div *ngIf="showPositionPicker" class="step">
+          <div class="step__title">
+            <span class="step__num">{{ needsCompany ? (isDeptLevel ? 5 : 4) : (isDeptLevel ? 4 : 3) }}</span>
+            Chức danh <span class="req">*</span>
+          </div>
+          <select class="field-input" [(ngModel)]="form.positionCode">
+            <option value="">-- Chọn chức danh --</option>
+            <option
+              *ngFor="let p of availablePositions; trackBy: trackByPosition"
+              [value]="p.positionCode"
+            >
+              {{ p.positionName }}
+            </option>
+          </select>
+          <div *ngIf="availablePositions.length === 0" class="step__empty">
+            Không có chức danh phù hợp.
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SECTION 3: Vai trò ===== -->
+      <div class="section-title">Vai trò hệ thống</div>
+      <div class="form-card">
+        <div class="field">
+          <label class="field-label">Vai trò <span class="req">*</span></label>
+          <select class="field-input" [(ngModel)]="form.roleCode">
+            <option *ngFor="let r of roleOptions" [value]="r.value">{{ r.label }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <button tuiButton appearance="outline" size="s" (click)="onClose()">Hủy</button>
+      <button
+        tuiButton
+        appearance="primary"
+        size="s"
+        [disabled]="!canSave()"
+        (click)="save()"
+      >
+        {{ mode === 'edit' ? 'Lưu thay đổi' : 'Tạo người dùng' }}
+      </button>
+    </div>
+  </div>
+</ng-template>

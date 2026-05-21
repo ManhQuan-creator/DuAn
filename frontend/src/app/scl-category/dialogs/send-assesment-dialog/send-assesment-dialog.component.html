@@ -1,0 +1,80 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{
+    size: 'auto',
+    dismissible: true,
+    closeable: true,
+  }"
+>
+  <div class="dialog-wrapper">
+
+    <!-- TITLE -->
+    <div class="dialog-title">
+      Gửi thẩm định
+    </div>
+
+    <!-- CONTENT -->
+    <div class="form-group">
+      <label tuiLabel class="app-form-label" for="unitSelect">Đơn vị</label>
+
+      <tui-multi-select
+        [(ngModel)]="unitFilter"
+        (ngModelChange)="onUnitChange()"
+        [stringify]="stringifyUnit"
+        [tuiTextfieldLabelOutside]="true"
+        [tuiTextfieldCleaner]="true"
+        tuiTextfieldSize="m"
+      >
+        Chọn đơn vị
+
+        <tui-data-list *tuiDataList>
+          <button
+            *ngFor="let item of filteredUnits"
+            tuiOption
+            [value]="item"
+            class="option-item"
+          >
+            <span class="label">
+              {{ stringifyUnit(item) }}
+            </span>
+
+            <tui-svg
+              *ngIf="unitFilter.includes(item)"
+              src="tuiIconCheck"
+              class="check-icon"
+            ></tui-svg>
+          </button>
+        </tui-data-list>
+
+      </tui-multi-select>
+    </div>
+
+    <!-- FOOTER BUTTONS -->
+    <div class="dialog-footer">
+        <button
+            class="cd-btn cd-btn--cancel"
+            type="button"
+            tuiButton
+            appearance="secondary"
+            size="s"
+            (click)="onCancel()"
+        >
+            Hủy
+        </button>
+
+        <button
+            class="cd-btn cd-btn--success"
+            type="button"
+            tuiButton
+            appearance="primary"
+            size="s"
+            [disabled]="disableAssessment"
+            (click)="onConfirm()"
+        >
+            Xác nhận
+        </button>
+    </div>
+
+  </div>
+</ng-template>

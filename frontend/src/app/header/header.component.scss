@@ -1,0 +1,340 @@
+:host {
+  display: block;
+}
+
+/* === Header bar === */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 66px;
+  padding: 0 24px;
+  background: white;
+  color: #001a4b;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Brand */
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 355px;
+}
+
+.brand-logo {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.brand-logo-img {
+  width: 183px;
+  height: auto;
+}
+
+.brand-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(22, 67, 151, 0.5);
+}
+
+.brand-tagline {
+  font-size: 24px;
+  font-weight: 700;
+  opacity: 0.9;
+  color: #4574C0;
+}
+
+/* Actions area */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.actions-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(22, 67, 151, 0.5);
+  margin: 0 4px;
+}
+
+/* === Bell wrapper === */
+.bell-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  & > button {
+    width: 45px;
+    height: 45px;
+  }
+}
+
+.task-badge-wrap > button.task-btn {
+  width: 45px;
+  height: 45px;
+}
+
+.bell-btn {
+  // color: #fff !important;
+  border-radius: 10px !important;
+  background: rgba(22, 67, 151, 0.08) !important;
+}
+
+:host ::ng-deep .bell-btn {
+  background: rgba(22, 67, 151, 0.08) !important;
+  transition: all 0.2s !important;
+}
+
+:host ::ng-deep .bell-btn:hover {
+  background: rgba(22, 67, 151, 0.4) !important;
+}
+
+/* Connection dot */
+.conn-dot {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #264d7a;
+  pointer-events: none;
+  transition: background 0.3s;
+}
+
+.conn-online {
+  background: #34d399;
+}
+
+.conn-connecting {
+  background: #fbbf24;
+  animation: pulse-dot 1.2s infinite;
+}
+
+.conn-offline {
+  background: #f87171;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Badge */
+.bell-badge {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  border: 1.5px solid #264d7a;
+  pointer-events: none;
+  animation: badge-pop 0.3s ease;
+}
+
+.bell-badge--wide {
+  right: -6px;
+  padding: 0 5px;
+}
+
+@keyframes badge-pop {
+  0% {
+    transform: scale(0);
+  }
+
+  60% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* === Task badge === */
+.task-badge-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.task-btn {
+  // color: #fff !important;
+  border-radius: 10px !important;
+  background: rgba(22, 67, 151, 0.08) !important;
+}
+
+:host ::ng-deep .task-btn {
+  transition: all 0.2s !important;
+}
+
+:host ::ng-deep .task-btn:hover {
+  background: rgba(22, 67, 151, 0.4) !important;
+}
+
+.task-badge {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #f59e0b;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  border: 1.5px solid #264d7a;
+  pointer-events: none;
+  animation: badge-pop 0.3s ease;
+}
+
+.task-badge--wide {
+  right: -6px;
+  padding: 0 5px;
+}
+
+/* === User chip === */
+.user-chip {
+  height: 45px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0px 6px 0px 6px;
+  border-radius: 10px;
+  background: rgba(22, 67, 151, 0.08);
+  cursor: default;
+  transition: all 0.2s;
+}
+
+.user-chip:hover {
+  background: rgba(22, 67, 151, 0.08);
+}
+
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(22, 67, 151, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  // color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  // color: #fff;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-org {
+  font-size: 10px;
+  font-weight: 600;
+  color: #e0f2fe;
+  background: #4574C0;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+/* Logout */
+.logout-btn {
+  width: 45px !important;
+  height: 45px !important;
+  border-radius: 10px !important;
+  background: rgba(22, 67, 151, 0.08) !important;
+  transition: all 0.2s !important;
+}
+
+:host ::ng-deep .logout-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* === Notification dropdown === */
+.noti-dropdown {
+  width: 400px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.noti-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+}
+
+.noti-dropdown-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #202124;
+}
+
+.noti-mark-all {
+  border: none;
+  background: none;
+  color: #1a73e8;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.noti-mark-all:hover {
+  background: #e8f0fe;
+}
+
+:host ::ng-deep app-notification-list {
+  display: block;
+  padding: 0 8px;
+}
+
+.noti-dropdown-footer {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a73e8;
+  text-decoration: none;
+  border-top: 1px solid #e8eaed;
+  transition: background 0.15s;
+}
+
+.noti-dropdown-footer:hover {
+  background: #f6f8fc;
+}

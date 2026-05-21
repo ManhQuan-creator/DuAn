@@ -1,0 +1,769 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="http://evnnpc.vn/scl"
+             exporter="Camunda Modeler"
+             exporterVersion="5.0.0">
+
+  <process id="scl-approval" name="SCL Approval Process" isExecutable="true" camunda:historyTimeToLive="365">
+
+    <!-- ========== START ========== -->
+    <startEvent id="start" name="Gửi phê duyệt">
+      <outgoing>flow_start_to_update_submitted</outgoing>
+    </startEvent>
+
+    <!-- Update status to SUBMITTED -->
+    <serviceTask id="update_status_submitted" name="Cập nhật trạng thái SUBMITTED"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="SUBMITTED" />
+      </extensionElements>
+      <incoming>flow_start_to_update_submitted</incoming>
+      <outgoing>flow_submitted_to_notify_bkh</outgoing>
+    </serviceTask>
+
+    <!-- Notify BKH -->
+    <serviceTask id="notify_bkh" name="Thông báo BKH"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="PLANNER" />
+        <camunda:field name="message" stringValue="Có phiên nhập liệu mới cần xét duyệt" />
+      </extensionElements>
+      <incoming>flow_submitted_to_notify_bkh</incoming>
+      <outgoing>flow_notify_bkh_to_bkh</outgoing>
+    </serviceTask>
+
+    <!-- ========== BKH REVIEW ========== -->
+    <userTask id="bkh_review" name="Ban Kế hoạch xét duyệt"
+              camunda:candidateGroups="PLANNER">
+      <incoming>flow_notify_bkh_to_bkh</incoming>
+      <incoming>flow_return_from_txd</incoming>
+      <outgoing>flow_bkh_to_update_bkh</outgoing>
+    </userTask>
+
+    <serviceTask id="update_status_bkh" name="Cập nhật trạng thái sau BKH"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="BKH_REVIEWED" />
+      </extensionElements>
+      <incoming>flow_bkh_to_update_bkh</incoming>
+      <outgoing>flow_update_bkh_to_gw_bkh</outgoing>
+    </serviceTask>
+
+    <exclusiveGateway id="gw_bkh" name="Kết quả BKH?">
+      <incoming>flow_update_bkh_to_gw_bkh</incoming>
+      <outgoing>flow_bkh_approve</outgoing>
+      <outgoing>flow_bkh_return</outgoing>
+      <outgoing>flow_bkh_reject</outgoing>
+    </exclusiveGateway>
+
+    <!-- ========== TXD AUDIT ========== -->
+    <serviceTask id="notify_txd" name="Thông báo TXD"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="REVIEWER" />
+        <camunda:field name="message" stringValue="Phiên nhập liệu đã qua BKH, cần kiểm tra" />
+      </extensionElements>
+      <incoming>flow_bkh_approve</incoming>
+      <outgoing>flow_notify_txd_to_txd</outgoing>
+    </serviceTask>
+
+    <userTask id="txd_audit" name="Tổ xét duyệt kiểm tra"
+              camunda:candidateGroups="REVIEWER">
+      <incoming>flow_notify_txd_to_txd</incoming>
+      <outgoing>flow_txd_to_update_txd</outgoing>
+    </userTask>
+
+    <serviceTask id="update_status_txd" name="Cập nhật trạng thái sau TXD"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="TXD_AUDITED" />
+      </extensionElements>
+      <incoming>flow_txd_to_update_txd</incoming>
+      <outgoing>flow_update_txd_to_gw_txd</outgoing>
+    </serviceTask>
+
+    <exclusiveGateway id="gw_txd" name="Kết quả TXD?">
+      <incoming>flow_update_txd_to_gw_txd</incoming>
+      <outgoing>flow_txd_approve</outgoing>
+      <outgoing>flow_txd_return</outgoing>
+      <outgoing>flow_txd_reject</outgoing>
+    </exclusiveGateway>
+
+    <!-- ========== TGD APPROVE ========== -->
+    <serviceTask id="notify_tgd" name="Thông báo TGĐ"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="DIRECTOR" />
+        <camunda:field name="message" stringValue="Phiên nhập liệu cần TGĐ phê duyệt" />
+      </extensionElements>
+      <incoming>flow_txd_approve</incoming>
+      <outgoing>flow_notify_tgd_to_tgd</outgoing>
+    </serviceTask>
+
+    <userTask id="tgd_approve" name="TGĐ/P.TGĐ phê duyệt"
+              camunda:candidateGroups="DIRECTOR">
+      <incoming>flow_notify_tgd_to_tgd</incoming>
+      <incoming>flow_return_from_hdtv</incoming>
+      <outgoing>flow_tgd_to_update_tgd</outgoing>
+    </userTask>
+
+    <serviceTask id="update_status_tgd" name="Cập nhật trạng thái sau TGĐ"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="TGD_APPROVED" />
+      </extensionElements>
+      <incoming>flow_tgd_to_update_tgd</incoming>
+      <outgoing>flow_update_tgd_to_gw_tgd</outgoing>
+    </serviceTask>
+
+    <exclusiveGateway id="gw_tgd" name="Kết quả TGĐ?">
+      <incoming>flow_update_tgd_to_gw_tgd</incoming>
+      <outgoing>flow_tgd_approved</outgoing>
+      <outgoing>flow_tgd_return</outgoing>
+      <outgoing>flow_tgd_reject</outgoing>
+    </exclusiveGateway>
+
+    <!-- ========== HDTV APPROVE ========== -->
+    <serviceTask id="notify_hdtv" name="Thông báo HĐTV"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="BOARD_MEMBER" />
+        <camunda:field name="message" stringValue="Phiên nhập liệu cần HĐTV phê duyệt" />
+      </extensionElements>
+      <incoming>flow_tgd_approved</incoming>
+      <outgoing>flow_notify_hdtv_to_hdtv</outgoing>
+    </serviceTask>
+
+    <userTask id="hdtv_approve" name="HĐTV phê duyệt"
+              camunda:candidateGroups="BOARD_MEMBER">
+      <incoming>flow_notify_hdtv_to_hdtv</incoming>
+      <outgoing>flow_hdtv_to_update_hdtv</outgoing>
+    </userTask>
+
+    <serviceTask id="update_status_hdtv" name="Cập nhật trạng thái sau HĐTV"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="HDTV_APPROVED" />
+      </extensionElements>
+      <incoming>flow_hdtv_to_update_hdtv</incoming>
+      <outgoing>flow_update_hdtv_to_gw_hdtv</outgoing>
+    </serviceTask>
+
+    <exclusiveGateway id="gw_hdtv" name="Kết quả HĐTV?">
+      <incoming>flow_update_hdtv_to_gw_hdtv</incoming>
+      <outgoing>flow_hdtv_approved</outgoing>
+      <outgoing>flow_hdtv_return</outgoing>
+      <outgoing>flow_hdtv_reject</outgoing>
+    </exclusiveGateway>
+
+    <!-- ========== FINAL APPROVED ========== -->
+    <serviceTask id="update_status_approved" name="Cập nhật APPROVED"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="APPROVED" />
+      </extensionElements>
+      <incoming>flow_hdtv_approved</incoming>
+      <outgoing>flow_approved_to_notify_done</outgoing>
+    </serviceTask>
+
+    <serviceTask id="notify_approved" name="Thông báo hoàn thành"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="SUBMITTER" />
+        <camunda:field name="message" stringValue="Phiên nhập liệu đã được phê duyệt hoàn thành" />
+      </extensionElements>
+      <incoming>flow_approved_to_notify_done</incoming>
+      <outgoing>flow_notify_done_to_end</outgoing>
+    </serviceTask>
+
+    <endEvent id="end_approved" name="Đã phê duyệt">
+      <incoming>flow_notify_done_to_end</incoming>
+    </endEvent>
+
+    <!-- ========== RETURN FLOWS ========== -->
+
+    <!-- BKH return → notify submitter → revision task -->
+    <serviceTask id="update_status_returned_bkh" name="Cập nhật RETURNED (BKH)"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="RETURNED" />
+      </extensionElements>
+      <incoming>flow_bkh_return</incoming>
+      <outgoing>flow_return_bkh_to_notify</outgoing>
+    </serviceTask>
+
+    <serviceTask id="notify_return_bkh" name="Thông báo trả lại (BKH)"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="SUBMITTER" />
+        <camunda:field name="message" stringValue="Phiên nhập liệu bị trả lại bởi Ban Kế hoạch" />
+      </extensionElements>
+      <incoming>flow_return_bkh_to_notify</incoming>
+      <outgoing>flow_notify_return_bkh_to_revision</outgoing>
+    </serviceTask>
+
+    <userTask id="revision_from_bkh" name="Chỉnh sửa lại (từ BKH)"
+              camunda:assignee="${submittedBy}">
+      <incoming>flow_notify_return_bkh_to_revision</incoming>
+      <outgoing>flow_revision_bkh_to_gw</outgoing>
+    </userTask>
+
+    <exclusiveGateway id="gw_revision_bkh" name="Gửi lại hay hủy?">
+      <incoming>flow_revision_bkh_to_gw</incoming>
+      <outgoing>flow_revision_bkh_resubmit</outgoing>
+      <outgoing>flow_revision_bkh_cancel</outgoing>
+    </exclusiveGateway>
+
+    <!-- TXD return → back to BKH -->
+    <serviceTask id="update_status_returned_txd" name="Cập nhật RETURNED (TXD)"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="RETURNED" />
+      </extensionElements>
+      <incoming>flow_txd_return</incoming>
+      <outgoing>flow_return_txd_to_notify</outgoing>
+    </serviceTask>
+
+    <serviceTask id="notify_return_txd" name="Thông báo trả lại (TXD)"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="PLANNER" />
+        <camunda:field name="message" stringValue="Phiên nhập liệu bị trả lại bởi Tổ xét duyệt" />
+      </extensionElements>
+      <incoming>flow_return_txd_to_notify</incoming>
+      <outgoing>flow_return_from_txd</outgoing>
+    </serviceTask>
+
+    <!-- TGĐ return → back to BKH -->
+    <serviceTask id="update_status_returned_tgd" name="Cập nhật RETURNED (TGĐ)"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="RETURNED" />
+      </extensionElements>
+      <incoming>flow_tgd_return</incoming>
+      <outgoing>flow_return_tgd_to_notify</outgoing>
+    </serviceTask>
+
+    <serviceTask id="notify_return_tgd" name="Thông báo trả lại (TGĐ)"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="SUBMITTER" />
+        <camunda:field name="message" stringValue="Phiên nhập liệu bị trả lại bởi TGĐ" />
+      </extensionElements>
+      <incoming>flow_return_tgd_to_notify</incoming>
+      <outgoing>flow_return_tgd_to_revision</outgoing>
+    </serviceTask>
+
+    <userTask id="revision_from_tgd" name="Chỉnh sửa lại (từ TGĐ)"
+              camunda:assignee="${submittedBy}">
+      <incoming>flow_return_tgd_to_revision</incoming>
+      <outgoing>flow_revision_tgd_to_gw</outgoing>
+    </userTask>
+
+    <exclusiveGateway id="gw_revision_tgd" name="Gửi lại hay hủy? (TGĐ)">
+      <incoming>flow_revision_tgd_to_gw</incoming>
+      <outgoing>flow_revision_tgd_resubmit</outgoing>
+      <outgoing>flow_revision_tgd_cancel</outgoing>
+    </exclusiveGateway>
+
+    <!-- HĐTV return → back to TGĐ -->
+    <serviceTask id="update_status_returned_hdtv" name="Cập nhật RETURNED (HĐTV)"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="RETURNED" />
+      </extensionElements>
+      <incoming>flow_hdtv_return</incoming>
+      <outgoing>flow_return_hdtv_to_notify</outgoing>
+    </serviceTask>
+
+    <serviceTask id="notify_return_hdtv" name="Thông báo trả lại (HĐTV)"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="DIRECTOR" />
+        <camunda:field name="message" stringValue="Phiên nhập liệu bị trả lại bởi HĐTV" />
+      </extensionElements>
+      <incoming>flow_return_hdtv_to_notify</incoming>
+      <outgoing>flow_return_from_hdtv</outgoing>
+    </serviceTask>
+
+    <!-- ========== REJECT FLOWS ========== -->
+    <serviceTask id="update_status_rejected" name="Cập nhật REJECTED"
+                 camunda:delegateExpression="${updateEntryStatusDelegate}">
+      <extensionElements>
+        <camunda:field name="targetStatus" stringValue="REJECTED" />
+      </extensionElements>
+      <incoming>flow_bkh_reject</incoming>
+      <incoming>flow_txd_reject</incoming>
+      <incoming>flow_tgd_reject</incoming>
+      <incoming>flow_hdtv_reject</incoming>
+      <incoming>flow_revision_bkh_cancel</incoming>
+      <incoming>flow_revision_tgd_cancel</incoming>
+      <outgoing>flow_rejected_to_notify</outgoing>
+    </serviceTask>
+
+    <serviceTask id="notify_rejected" name="Thông báo từ chối"
+                 camunda:delegateExpression="${taskNotificationDelegate}">
+      <extensionElements>
+        <camunda:field name="targetGroup" stringValue="SUBMITTER" />
+        <camunda:field name="message" stringValue="Phiên nhập liệu đã bị từ chối" />
+      </extensionElements>
+      <incoming>flow_rejected_to_notify</incoming>
+      <outgoing>flow_notify_reject_to_end</outgoing>
+    </serviceTask>
+
+    <endEvent id="end_rejected" name="Đã từ chối">
+      <incoming>flow_notify_reject_to_end</incoming>
+    </endEvent>
+
+    <!-- ========== SEQUENCE FLOWS ========== -->
+    <sequenceFlow id="flow_start_to_update_submitted" sourceRef="start" targetRef="update_status_submitted" />
+    <sequenceFlow id="flow_submitted_to_notify_bkh" sourceRef="update_status_submitted" targetRef="notify_bkh" />
+    <sequenceFlow id="flow_notify_bkh_to_bkh" sourceRef="notify_bkh" targetRef="bkh_review" />
+
+    <!-- BKH gateway -->
+    <sequenceFlow id="flow_bkh_to_update_bkh" sourceRef="bkh_review" targetRef="update_status_bkh" />
+    <sequenceFlow id="flow_update_bkh_to_gw_bkh" sourceRef="update_status_bkh" targetRef="gw_bkh" />
+    <sequenceFlow id="flow_bkh_approve" sourceRef="gw_bkh" targetRef="notify_txd">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'APPROVE'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_bkh_return" sourceRef="gw_bkh" targetRef="update_status_returned_bkh">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'RETURN'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_bkh_reject" sourceRef="gw_bkh" targetRef="update_status_rejected">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'REJECT'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- TXD -->
+    <sequenceFlow id="flow_notify_txd_to_txd" sourceRef="notify_txd" targetRef="txd_audit" />
+    <sequenceFlow id="flow_txd_to_update_txd" sourceRef="txd_audit" targetRef="update_status_txd" />
+    <sequenceFlow id="flow_update_txd_to_gw_txd" sourceRef="update_status_txd" targetRef="gw_txd" />
+    <sequenceFlow id="flow_txd_approve" sourceRef="gw_txd" targetRef="notify_tgd">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'APPROVE'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_txd_return" sourceRef="gw_txd" targetRef="update_status_returned_txd">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'RETURN'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_txd_reject" sourceRef="gw_txd" targetRef="update_status_rejected">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'REJECT'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- TGĐ -->
+    <sequenceFlow id="flow_notify_tgd_to_tgd" sourceRef="notify_tgd" targetRef="tgd_approve" />
+    <sequenceFlow id="flow_tgd_to_update_tgd" sourceRef="tgd_approve" targetRef="update_status_tgd" />
+    <sequenceFlow id="flow_update_tgd_to_gw_tgd" sourceRef="update_status_tgd" targetRef="gw_tgd" />
+    <sequenceFlow id="flow_tgd_approved" sourceRef="gw_tgd" targetRef="notify_hdtv">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'APPROVE'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_tgd_return" sourceRef="gw_tgd" targetRef="update_status_returned_tgd">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'RETURN'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_tgd_reject" sourceRef="gw_tgd" targetRef="update_status_rejected">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'REJECT'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- HĐTV -->
+    <sequenceFlow id="flow_notify_hdtv_to_hdtv" sourceRef="notify_hdtv" targetRef="hdtv_approve" />
+    <sequenceFlow id="flow_hdtv_to_update_hdtv" sourceRef="hdtv_approve" targetRef="update_status_hdtv" />
+    <sequenceFlow id="flow_update_hdtv_to_gw_hdtv" sourceRef="update_status_hdtv" targetRef="gw_hdtv" />
+    <sequenceFlow id="flow_hdtv_approved" sourceRef="gw_hdtv" targetRef="update_status_approved">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'APPROVE'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_hdtv_return" sourceRef="gw_hdtv" targetRef="update_status_returned_hdtv">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'RETURN'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_hdtv_reject" sourceRef="gw_hdtv" targetRef="update_status_rejected">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'REJECT'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- Final approved -->
+    <sequenceFlow id="flow_approved_to_notify_done" sourceRef="update_status_approved" targetRef="notify_approved" />
+    <sequenceFlow id="flow_notify_done_to_end" sourceRef="notify_approved" targetRef="end_approved" />
+
+    <!-- Return from BKH -->
+    <sequenceFlow id="flow_return_bkh_to_notify" sourceRef="update_status_returned_bkh" targetRef="notify_return_bkh" />
+    <sequenceFlow id="flow_notify_return_bkh_to_revision" sourceRef="notify_return_bkh" targetRef="revision_from_bkh" />
+    <sequenceFlow id="flow_revision_bkh_to_gw" sourceRef="revision_from_bkh" targetRef="gw_revision_bkh" />
+    <sequenceFlow id="flow_revision_bkh_resubmit" sourceRef="gw_revision_bkh" targetRef="notify_bkh">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'RESUBMIT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_revision_bkh_cancel" sourceRef="gw_revision_bkh" targetRef="update_status_rejected">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'CANCEL'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- Return from TXD → BKH -->
+    <sequenceFlow id="flow_return_txd_to_notify" sourceRef="update_status_returned_txd" targetRef="notify_return_txd" />
+    <sequenceFlow id="flow_return_from_txd" sourceRef="notify_return_txd" targetRef="bkh_review" />
+
+    <!-- Return from TGĐ → submitter revision -->
+    <sequenceFlow id="flow_return_tgd_to_notify" sourceRef="update_status_returned_tgd" targetRef="notify_return_tgd" />
+    <sequenceFlow id="flow_return_tgd_to_revision" sourceRef="notify_return_tgd" targetRef="revision_from_tgd" />
+    <sequenceFlow id="flow_revision_tgd_to_gw" sourceRef="revision_from_tgd" targetRef="gw_revision_tgd" />
+    <sequenceFlow id="flow_revision_tgd_resubmit" sourceRef="gw_revision_tgd" targetRef="notify_bkh">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'RESUBMIT'}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow_revision_tgd_cancel" sourceRef="gw_revision_tgd" targetRef="update_status_rejected">
+      <conditionExpression xsi:type="tFormalExpression">${action == 'CANCEL'}</conditionExpression>
+    </sequenceFlow>
+
+    <!-- Return from HĐTV → TGĐ -->
+    <sequenceFlow id="flow_return_hdtv_to_notify" sourceRef="update_status_returned_hdtv" targetRef="notify_return_hdtv" />
+    <sequenceFlow id="flow_return_from_hdtv" sourceRef="notify_return_hdtv" targetRef="tgd_approve" />
+
+    <!-- Reject -->
+    <sequenceFlow id="flow_rejected_to_notify" sourceRef="update_status_rejected" targetRef="notify_rejected" />
+    <sequenceFlow id="flow_notify_reject_to_end" sourceRef="notify_rejected" targetRef="end_rejected" />
+
+  </process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="scl-approval">
+
+      <!-- START + SUBMITTED -->
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <omgdc:Bounds x="160" y="280" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="update_status_submitted_di" bpmnElement="update_status_submitted">
+        <omgdc:Bounds x="250" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_bkh_di" bpmnElement="notify_bkh">
+        <omgdc:Bounds x="400" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- BKH -->
+      <bpmndi:BPMNShape id="bkh_review_di" bpmnElement="bkh_review">
+        <omgdc:Bounds x="550" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="update_status_bkh_di" bpmnElement="update_status_bkh">
+        <omgdc:Bounds x="700" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_bkh_di" bpmnElement="gw_bkh" isMarkerVisible="true">
+        <omgdc:Bounds x="845" y="273" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- TXD -->
+      <bpmndi:BPMNShape id="notify_txd_di" bpmnElement="notify_txd">
+        <omgdc:Bounds x="950" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="txd_audit_di" bpmnElement="txd_audit">
+        <omgdc:Bounds x="1100" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="update_status_txd_di" bpmnElement="update_status_txd">
+        <omgdc:Bounds x="1250" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_txd_di" bpmnElement="gw_txd" isMarkerVisible="true">
+        <omgdc:Bounds x="1395" y="273" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- TGD -->
+      <bpmndi:BPMNShape id="notify_tgd_di" bpmnElement="notify_tgd">
+        <omgdc:Bounds x="1500" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="tgd_approve_di" bpmnElement="tgd_approve">
+        <omgdc:Bounds x="1650" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="update_status_tgd_di" bpmnElement="update_status_tgd">
+        <omgdc:Bounds x="1800" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_tgd_di" bpmnElement="gw_tgd" isMarkerVisible="true">
+        <omgdc:Bounds x="1945" y="273" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- HDTV -->
+      <bpmndi:BPMNShape id="notify_hdtv_di" bpmnElement="notify_hdtv">
+        <omgdc:Bounds x="2050" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="hdtv_approve_di" bpmnElement="hdtv_approve">
+        <omgdc:Bounds x="2200" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="update_status_hdtv_di" bpmnElement="update_status_hdtv">
+        <omgdc:Bounds x="2350" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_hdtv_di" bpmnElement="gw_hdtv" isMarkerVisible="true">
+        <omgdc:Bounds x="2495" y="273" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- FINAL APPROVED -->
+      <bpmndi:BPMNShape id="update_status_approved_di" bpmnElement="update_status_approved">
+        <omgdc:Bounds x="2600" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_approved_di" bpmnElement="notify_approved">
+        <omgdc:Bounds x="2750" y="258" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_approved_di" bpmnElement="end_approved">
+        <omgdc:Bounds x="2900" y="280" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <!-- RETURN BKH (submitter) — row below -->
+      <bpmndi:BPMNShape id="update_status_returned_bkh_di" bpmnElement="update_status_returned_bkh">
+        <omgdc:Bounds x="820" y="440" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_return_bkh_di" bpmnElement="notify_return_bkh">
+        <omgdc:Bounds x="820" y="560" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="revision_from_bkh_di" bpmnElement="revision_from_bkh">
+        <omgdc:Bounds x="820" y="680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_revision_bkh_di" bpmnElement="gw_revision_bkh" isMarkerVisible="true">
+        <omgdc:Bounds x="845" y="800" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- RETURN TXD (previous=BKH) -->
+      <bpmndi:BPMNShape id="update_status_returned_txd_di" bpmnElement="update_status_returned_txd">
+        <omgdc:Bounds x="1370" y="440" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_return_txd_di" bpmnElement="notify_return_txd">
+        <omgdc:Bounds x="1370" y="560" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- RETURN TGD (submitter) -->
+      <bpmndi:BPMNShape id="update_status_returned_tgd_di" bpmnElement="update_status_returned_tgd">
+        <omgdc:Bounds x="1920" y="440" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_return_tgd_di" bpmnElement="notify_return_tgd">
+        <omgdc:Bounds x="1920" y="560" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="revision_from_tgd_di" bpmnElement="revision_from_tgd">
+        <omgdc:Bounds x="1920" y="680" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="gw_revision_tgd_di" bpmnElement="gw_revision_tgd" isMarkerVisible="true">
+        <omgdc:Bounds x="1945" y="800" width="50" height="50" />
+      </bpmndi:BPMNShape>
+
+      <!-- RETURN HDTV (previous=TGD) -->
+      <bpmndi:BPMNShape id="update_status_returned_hdtv_di" bpmnElement="update_status_returned_hdtv">
+        <omgdc:Bounds x="2470" y="440" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_return_hdtv_di" bpmnElement="notify_return_hdtv">
+        <omgdc:Bounds x="2470" y="560" width="100" height="80" />
+      </bpmndi:BPMNShape>
+
+      <!-- REJECTED -->
+      <bpmndi:BPMNShape id="update_status_rejected_di" bpmnElement="update_status_rejected">
+        <omgdc:Bounds x="1550" y="900" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_rejected_di" bpmnElement="notify_rejected">
+        <omgdc:Bounds x="1700" y="900" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_rejected_di" bpmnElement="end_rejected">
+        <omgdc:Bounds x="1850" y="922" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <!-- ========== EDGES: Main flow ========== -->
+      <bpmndi:BPMNEdge id="flow_start_to_update_submitted_di" bpmnElement="flow_start_to_update_submitted">
+        <omgdi:waypoint x="196" y="298" />
+        <omgdi:waypoint x="250" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_submitted_to_notify_bkh_di" bpmnElement="flow_submitted_to_notify_bkh">
+        <omgdi:waypoint x="350" y="298" />
+        <omgdi:waypoint x="400" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_notify_bkh_to_bkh_di" bpmnElement="flow_notify_bkh_to_bkh">
+        <omgdi:waypoint x="500" y="298" />
+        <omgdi:waypoint x="550" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_bkh_to_update_bkh_di" bpmnElement="flow_bkh_to_update_bkh">
+        <omgdi:waypoint x="650" y="298" />
+        <omgdi:waypoint x="700" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_update_bkh_to_gw_bkh_di" bpmnElement="flow_update_bkh_to_gw_bkh">
+        <omgdi:waypoint x="800" y="298" />
+        <omgdi:waypoint x="845" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_bkh_approve_di" bpmnElement="flow_bkh_approve">
+        <omgdi:waypoint x="895" y="298" />
+        <omgdi:waypoint x="950" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_bkh_return_di" bpmnElement="flow_bkh_return">
+        <omgdi:waypoint x="870" y="323" />
+        <omgdi:waypoint x="870" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_bkh_reject_di" bpmnElement="flow_bkh_reject">
+        <omgdi:waypoint x="870" y="323" />
+        <omgdi:waypoint x="870" y="380" />
+        <omgdi:waypoint x="1600" y="380" />
+        <omgdi:waypoint x="1600" y="900" />
+      </bpmndi:BPMNEdge>
+
+      <!-- TXD edges -->
+      <bpmndi:BPMNEdge id="flow_notify_txd_to_txd_di" bpmnElement="flow_notify_txd_to_txd">
+        <omgdi:waypoint x="1050" y="298" />
+        <omgdi:waypoint x="1100" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_txd_to_update_txd_di" bpmnElement="flow_txd_to_update_txd">
+        <omgdi:waypoint x="1200" y="298" />
+        <omgdi:waypoint x="1250" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_update_txd_to_gw_txd_di" bpmnElement="flow_update_txd_to_gw_txd">
+        <omgdi:waypoint x="1350" y="298" />
+        <omgdi:waypoint x="1395" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_txd_approve_di" bpmnElement="flow_txd_approve">
+        <omgdi:waypoint x="1445" y="298" />
+        <omgdi:waypoint x="1500" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_txd_return_di" bpmnElement="flow_txd_return">
+        <omgdi:waypoint x="1420" y="323" />
+        <omgdi:waypoint x="1420" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_txd_reject_di" bpmnElement="flow_txd_reject">
+        <omgdi:waypoint x="1420" y="323" />
+        <omgdi:waypoint x="1420" y="380" />
+        <omgdi:waypoint x="1590" y="380" />
+        <omgdi:waypoint x="1590" y="900" />
+      </bpmndi:BPMNEdge>
+
+      <!-- TGD edges -->
+      <bpmndi:BPMNEdge id="flow_notify_tgd_to_tgd_di" bpmnElement="flow_notify_tgd_to_tgd">
+        <omgdi:waypoint x="1600" y="298" />
+        <omgdi:waypoint x="1650" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_tgd_to_update_tgd_di" bpmnElement="flow_tgd_to_update_tgd">
+        <omgdi:waypoint x="1750" y="298" />
+        <omgdi:waypoint x="1800" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_update_tgd_to_gw_tgd_di" bpmnElement="flow_update_tgd_to_gw_tgd">
+        <omgdi:waypoint x="1900" y="298" />
+        <omgdi:waypoint x="1945" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_tgd_approved_di" bpmnElement="flow_tgd_approved">
+        <omgdi:waypoint x="1995" y="298" />
+        <omgdi:waypoint x="2050" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_tgd_return_di" bpmnElement="flow_tgd_return">
+        <omgdi:waypoint x="1970" y="323" />
+        <omgdi:waypoint x="1970" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_tgd_reject_di" bpmnElement="flow_tgd_reject">
+        <omgdi:waypoint x="1970" y="323" />
+        <omgdi:waypoint x="1970" y="380" />
+        <omgdi:waypoint x="1610" y="380" />
+        <omgdi:waypoint x="1610" y="900" />
+      </bpmndi:BPMNEdge>
+
+      <!-- HDTV edges -->
+      <bpmndi:BPMNEdge id="flow_notify_hdtv_to_hdtv_di" bpmnElement="flow_notify_hdtv_to_hdtv">
+        <omgdi:waypoint x="2150" y="298" />
+        <omgdi:waypoint x="2200" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_hdtv_to_update_hdtv_di" bpmnElement="flow_hdtv_to_update_hdtv">
+        <omgdi:waypoint x="2300" y="298" />
+        <omgdi:waypoint x="2350" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_update_hdtv_to_gw_hdtv_di" bpmnElement="flow_update_hdtv_to_gw_hdtv">
+        <omgdi:waypoint x="2450" y="298" />
+        <omgdi:waypoint x="2495" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_hdtv_approved_di" bpmnElement="flow_hdtv_approved">
+        <omgdi:waypoint x="2545" y="298" />
+        <omgdi:waypoint x="2600" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_hdtv_return_di" bpmnElement="flow_hdtv_return">
+        <omgdi:waypoint x="2520" y="323" />
+        <omgdi:waypoint x="2520" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_hdtv_reject_di" bpmnElement="flow_hdtv_reject">
+        <omgdi:waypoint x="2520" y="323" />
+        <omgdi:waypoint x="2520" y="380" />
+        <omgdi:waypoint x="1620" y="380" />
+        <omgdi:waypoint x="1620" y="900" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Final approved edges -->
+      <bpmndi:BPMNEdge id="flow_approved_to_notify_done_di" bpmnElement="flow_approved_to_notify_done">
+        <omgdi:waypoint x="2700" y="298" />
+        <omgdi:waypoint x="2750" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_notify_done_to_end_di" bpmnElement="flow_notify_done_to_end">
+        <omgdi:waypoint x="2850" y="298" />
+        <omgdi:waypoint x="2900" y="298" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Return BKH edges -->
+      <bpmndi:BPMNEdge id="flow_return_bkh_to_notify_di" bpmnElement="flow_return_bkh_to_notify">
+        <omgdi:waypoint x="870" y="520" />
+        <omgdi:waypoint x="870" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_notify_return_bkh_to_revision_di" bpmnElement="flow_notify_return_bkh_to_revision">
+        <omgdi:waypoint x="870" y="640" />
+        <omgdi:waypoint x="870" y="680" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_revision_bkh_to_gw_di" bpmnElement="flow_revision_bkh_to_gw">
+        <omgdi:waypoint x="870" y="760" />
+        <omgdi:waypoint x="870" y="800" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_revision_bkh_resubmit_di" bpmnElement="flow_revision_bkh_resubmit">
+        <omgdi:waypoint x="845" y="825" />
+        <omgdi:waypoint x="450" y="825" />
+        <omgdi:waypoint x="450" y="338" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_revision_bkh_cancel_di" bpmnElement="flow_revision_bkh_cancel">
+        <omgdi:waypoint x="870" y="850" />
+        <omgdi:waypoint x="870" y="940" />
+        <omgdi:waypoint x="1550" y="940" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Return TXD edges -->
+      <bpmndi:BPMNEdge id="flow_return_txd_to_notify_di" bpmnElement="flow_return_txd_to_notify">
+        <omgdi:waypoint x="1420" y="520" />
+        <omgdi:waypoint x="1420" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_return_from_txd_di" bpmnElement="flow_return_from_txd">
+        <omgdi:waypoint x="1370" y="600" />
+        <omgdi:waypoint x="600" y="600" />
+        <omgdi:waypoint x="600" y="338" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Return TGD edges -->
+      <bpmndi:BPMNEdge id="flow_return_tgd_to_notify_di" bpmnElement="flow_return_tgd_to_notify">
+        <omgdi:waypoint x="1970" y="520" />
+        <omgdi:waypoint x="1970" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_return_tgd_to_revision_di" bpmnElement="flow_return_tgd_to_revision">
+        <omgdi:waypoint x="1970" y="640" />
+        <omgdi:waypoint x="1970" y="680" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_revision_tgd_to_gw_di" bpmnElement="flow_revision_tgd_to_gw">
+        <omgdi:waypoint x="1970" y="760" />
+        <omgdi:waypoint x="1970" y="800" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_revision_tgd_resubmit_di" bpmnElement="flow_revision_tgd_resubmit">
+        <omgdi:waypoint x="1945" y="825" />
+        <omgdi:waypoint x="450" y="825" />
+        <omgdi:waypoint x="450" y="338" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_revision_tgd_cancel_di" bpmnElement="flow_revision_tgd_cancel">
+        <omgdi:waypoint x="1970" y="850" />
+        <omgdi:waypoint x="1970" y="940" />
+        <omgdi:waypoint x="1650" y="940" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Return HDTV edges -->
+      <bpmndi:BPMNEdge id="flow_return_hdtv_to_notify_di" bpmnElement="flow_return_hdtv_to_notify">
+        <omgdi:waypoint x="2520" y="520" />
+        <omgdi:waypoint x="2520" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_return_from_hdtv_di" bpmnElement="flow_return_from_hdtv">
+        <omgdi:waypoint x="2470" y="600" />
+        <omgdi:waypoint x="1700" y="600" />
+        <omgdi:waypoint x="1700" y="338" />
+      </bpmndi:BPMNEdge>
+
+      <!-- Reject edges -->
+      <bpmndi:BPMNEdge id="flow_rejected_to_notify_di" bpmnElement="flow_rejected_to_notify">
+        <omgdi:waypoint x="1650" y="940" />
+        <omgdi:waypoint x="1700" y="940" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="flow_notify_reject_to_end_di" bpmnElement="flow_notify_reject_to_end">
+        <omgdi:waypoint x="1800" y="940" />
+        <omgdi:waypoint x="1850" y="940" />
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</definitions>

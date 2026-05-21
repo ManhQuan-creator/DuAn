@@ -1,0 +1,103 @@
+:host {
+    display: block;
+    width: 100%;
+
+    // Ép tui-hosted-dropdown chiếm full width
+    tui-hosted-dropdown {
+        display: block;
+        width: 100%;
+    }
+}
+
+// ===== TRIGGER =====
+.select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    // Chiếm đúng 100% ô chứa, không co giãn theo nội dung
+    width: 100%;
+    min-width: 0;
+    height: 2.5rem;
+    padding: 0 0.75rem;
+    background: var(--tui-base-01);
+    border: 1px solid var(--tui-base-04);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+    box-sizing: border-box;
+
+    &:hover {
+        border-color: var(--tui-base-05);
+    }
+
+    &_active {
+        border-color: var(--tui-primary);
+        box-shadow: 0 0 0 2px var(--tui-primary-hover);
+    }
+
+    &__label {
+        flex: 1;
+        min-width: 0; // cho phép text-overflow hoạt động đúng
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font: var(--tui-font-text-m);
+        color: var(--tui-text-01);
+        text-align: left;
+
+        &_placeholder {
+            color: var(--tui-text-03);
+        }
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        margin-left: 0.5rem;
+        color: var(--tui-text-03);
+        transition: transform 0.2s ease;
+    }
+}
+
+// ===== DROPDOWN PANEL =====
+// tuiDropdownLimitWidth="fixed" đã ép panel bằng width trigger
+// min-width: 0 tránh panel bị nhỏ hơn nội dung
+.dropdown-panel {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    background: var(--tui-base-01);
+    border-radius: 8px;
+    overflow: hidden;
+
+    &__search {
+        padding: 0.5rem;
+
+        tui-input {
+            display: block;
+            width: 100%;
+        }
+
+        ::ng-deep {
+            [tuiWrapper] {
+                border-radius: 8px !important;
+                box-shadow: none !important;
+
+                &:hover,
+                &:focus-within,
+                &._focused,
+                &[data-state] {
+                    box-shadow: none !important;
+                }
+            }
+        }
+    }
+}
+
+// ===== EMPTY =====
+.empty-text {
+    display: block;
+    padding: 0;
+    color: var(--tui-text-03);
+    font: var(--tui-font-text-s);
+    text-align: center;
+}

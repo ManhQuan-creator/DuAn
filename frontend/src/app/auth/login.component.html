@@ -1,0 +1,53 @@
+<div class="login-evn">
+  <div class="main-container">
+    <div class="login-box">
+      <div class="login-header">
+        <img
+          class="logo"
+          src="assets/images/login/logo.png"
+          alt="Logo đăng nhập"
+        />
+        <h2 class="form-title">ĐĂNG NHẬP</h2>
+        <p class="subtitle">Nâng cao năng lực quản trị công tác kế hoạch</p>
+      </div>
+
+      <form class="login-form" (ngSubmit)="onLogin()" novalidate>
+        <div class="form-group">
+          <label for="username">Tài khoản</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            [(ngModel)]="username"
+            required
+            autocomplete="username"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            [(ngModel)]="password"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+
+        <div class="form-utils">
+          <div class="remember-me">
+            <input type="checkbox" id="remember" name="remember" [(ngModel)]="rememberMe" />
+            <label for="remember">Ghi nhớ</label>
+          </div>
+          <button type="button" class="forgot-password" (click)="onForgotPassword()">Quên mật khẩu?</button>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="loading">
+          {{ loading ? 'Đang xử lý…' : 'ĐĂNG NHẬP' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,59 @@
+<div class="manager-container">
+  <app-page-header
+    [title]="headerTitle"
+    [subtitle]="subTitle"
+    [breadcrumbs]="breadcrumbs"
+  ></app-page-header>
+
+  <div class="card manager-filters app-search-toolbar">
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Tên hoặc mã quy trình</label>
+      <tui-input
+        [(ngModel)]="search"
+        (ngModelChange)="onSearchInput()"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="search-input app-search-toolbar__field app-search-toolbar__field--grow"
+      >
+        Nhập tên hoặc mã quy trình...
+      </tui-input>
+    </div>
+
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Trạng thái</label>
+      <select class="app-select" [(ngModel)]="status" (ngModelChange)="onStatusChange()">
+        <option value="">Tất cả</option>
+        <option value="DRAFT">Draft</option>
+        <option value="DEPLOYED">Deployed</option>
+      </select>
+    </div>
+
+
+  </div>
+
+  <div class="card manager-grid-card">
+    <div class="manager-grid">
+      <app-grid-header
+        [showBtnCreateNew]="true"
+        [btnLabelCreateNew]="btnLabelCreateNew"
+        (buttonClickCreateNew)="createNew()"
+      ></app-grid-header>
+      <app-ag-grid-wrapper
+        [rowData]="filteredList"
+        [columnDefs]="columnDefs"
+        [rowHeight]="40"
+        [height]="'100%'"
+        [width]="'100%'"
+        [theme]="'ag-theme-quartz'"
+        (gridReady)="onGridReady($event)"
+      />
+    </div>
+    <app-custom-pagination
+      [totalRows]="totalRows"
+      [currentPage]="pageNum + 1"
+      [pageSize]="pageSize"
+      (pageChanged)="onPageChanged($event)"
+      (pageSizeChanged)="onPageSizeChanged($event)"
+    />
+  </div>
+</div>

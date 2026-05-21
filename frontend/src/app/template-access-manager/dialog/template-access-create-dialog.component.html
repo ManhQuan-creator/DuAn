@@ -1,0 +1,197 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <h2 class="dialog-title">Thêm rule phân quyền</h2>
+    <span class="dialog-subtitle">Chọn biểu mẫu, action, rồi chỉ định phạm vi được phép</span>
+  </div>
+
+  <div class="dialog-body">
+    <!-- ===== SECTION 1: Biểu mẫu & Action ===== -->
+    <div class="section-title">Biểu mẫu & Action</div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="field field--span-2">
+          <label class="field-label">Biểu mẫu <span class="req">*</span></label>
+          <select class="field-input"
+                  [(ngModel)]="form.templateId"
+                  (ngModelChange)="onTemplateChange($event)">
+            <option value="">— Chọn biểu mẫu —</option>
+            <option *ngFor="let t of templateOptions" [value]="t.value">{{ t.label }}</option>
+          </select>
+        </div>
+
+        <div class="field field--span-2">
+          <label class="field-label">Action Key <span class="req">*</span></label>
+          <select class="field-input"
+                  [(ngModel)]="form.actionKey"
+                  [disabled]="!form.templateId || buttonOptions.length === 0">
+            <option value="">— Chọn action —</option>
+            <option *ngFor="let b of buttonOptions" [value]="b.value">{{ b.label }}</option>
+          </select>
+          <span *ngIf="form.templateId && buttonOptions.length === 0" class="field-hint">
+            Biểu mẫu này chưa có button nào được khai báo.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SECTION 2: Phạm vi phân quyền ===== -->
+    <ng-container *ngIf="showPermissionSection">
+      <div class="section-title step">
+        Phạm vi phân quyền
+        <span *ngIf="ruleCount > 0" class="permission-summary">{{ ruleCount }} rule</span>
+      </div>
+
+      <div class="form-card step">
+        <!-- 2.1 Nhóm tổ chức -->
+        <div class="perm-block">
+          <div class="perm-block__title">Nhóm tổ chức</div>
+          <div class="perm-block__hint">
+            Chọn nhóm đơn vị được phép thực hiện action này. "Tất cả" = không giới hạn.
+          </div>
+          <div class="org-group-list">
+            <label
+              *ngFor="let opt of orgGroupOptions"
+              class="org-group-item"
+              [class.org-group-item--active]="form.orgGroupCode === opt.value"
+            >
+              <input
+                type="radio"
+                name="orgGroup"
+                [value]="opt.value"
+                [(ngModel)]="form.orgGroupCode"
+                (ngModelChange)="onOrgGroupChange()"
+              />
+              <div class="org-group-item__content">
+                <span class="org-group-item__label">{{ opt.label }}</span>
+                <span class="org-group-item__hint">{{ opt.hint }}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2.2 Lãnh đạo cấp cao -->
+        <div *ngIf="isPermissionEnabled && topLevelPositionOptions.length > 0" class="perm-block">
+          <div class="perm-block__title">
+            {{ topLevelSectionTitle }}
+            <span *ngIf="topLevelPositions.size > 0" class="perm-block__counter">
+              {{ topLevelPositions.size }} chức danh
+            </span>
+          </div>
+          <div class="perm-block__hint">
+            Các chức danh lãnh đạo cấp cao — không thuộc Ban/Phòng cụ thể.
+          </div>
+
+          <div class="perm-actions">
+            <button type="button" class="perm-chip perm-chip--action" (click)="selectAllTopLevel()">
+              + Chọn tất cả
+            </button>
+            <button *ngIf="topLevelPositions.size > 0"
+                    type="button"
+                    class="perm-chip perm-chip--clear"
+                    (click)="clearTopLevel()">
+              × Bỏ chọn
+            </button>
+          </div>
+
+          <div class="position-chip-list">
+            <label
+              *ngFor="let p of topLevelPositionOptions; trackBy: trackByPosition"
+              class="position-chip"
+              [class.position-chip--active]="isTopLevelSelected(p.positionCode)"
+            >
+              <input
+                type="checkbox"
+                [checked]="isTopLevelSelected(p.positionCode)"
+                (change)="toggleTopLevelPosition(p.positionCode)"
+              />
+              <span class="position-chip__label">{{ p.positionName }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2.3 Quy tắc theo Ban/Phòng + Chức danh -->
+        <div *ngIf="isPermissionEnabled" class="perm-block">
+          <div class="perm-block__title">
+            Quy tắc theo {{ deptSectionLabel }} + Chức danh
+            <span class="perm-block__counter">{{ rules.size }} quy tắc</span>
+          </div>
+          <div class="perm-block__hint">
+            Tick chọn {{ deptSectionLabel }}, sau đó chọn chức danh áp dụng.
+            Để trống chức danh = mọi chức danh trong đơn vị đó.
+          </div>
+
+          <div class="perm-actions">
+            <button type="button" class="perm-chip perm-chip--action"
+                    (click)="selectAllVisibleDepts()">
+              + Chọn tất cả {{ deptSectionLabel }}
+            </button>
+            <button *ngIf="rules.size > 0"
+                    type="button"
+                    class="perm-chip perm-chip--clear"
+                    (click)="clearAllRules()">
+              × Xóa toàn bộ
+            </button>
+          </div>
+
+          <div *ngIf="loadingLookups && visibleDepts.length === 0" class="perm-loading">
+            Đang tải danh sách...
+          </div>
+
+          <div *ngIf="visibleDepts.length === 0 && !loadingLookups" class="perm-empty">
+            Chưa có dữ liệu loại đơn vị cho nhóm đã chọn.
+          </div>
+
+          <div class="dept-rule-list">
+            <div
+              *ngFor="let dept of visibleDepts; trackBy: trackByDept"
+              class="dept-rule"
+              [class.dept-rule--active]="isDeptSelected(dept.deptTypeCode)"
+            >
+              <label class="dept-rule__head">
+                <input
+                  type="checkbox"
+                  [checked]="isDeptSelected(dept.deptTypeCode)"
+                  (change)="toggleDept(dept.deptTypeCode)"
+                />
+                <span class="dept-rule__name">{{ dept.deptTypeName }}</span>
+                <span class="dept-rule__code">{{ dept.deptTypeCode }}</span>
+                <span *ngIf="isDeptSelected(dept.deptTypeCode)" class="dept-rule__pos-count">
+                  {{ positionsCountForDept(dept.deptTypeCode) === 0
+                       ? 'Mọi chức danh'
+                       : positionsCountForDept(dept.deptTypeCode) + ' chức danh' }}
+                </span>
+              </label>
+
+              <div *ngIf="isDeptSelected(dept.deptTypeCode)" class="dept-rule__positions">
+                <div class="dept-rule__positions-label">Chức danh áp dụng:</div>
+                <div class="position-chip-list">
+                  <label
+                    *ngFor="let p of positionsForDept(dept.deptTypeCode); trackBy: trackByPosition"
+                    class="position-chip"
+                    [class.position-chip--active]="isPositionSelected(dept.deptTypeCode, p.positionCode)"
+                  >
+                    <input
+                      type="checkbox"
+                      [checked]="isPositionSelected(dept.deptTypeCode, p.positionCode)"
+                      (change)="togglePosition(dept.deptTypeCode, p.positionCode)"
+                    />
+                    <span class="position-chip__label">{{ p.positionName }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="dialog-footer">
+    <button class="tacd-btn tacd-btn--cancel" (click)="cancel()">Hủy</button>
+    <button class="tacd-btn tacd-btn--confirm"
+            [disabled]="!canSubmit()"
+            (click)="submit()">
+      Tạo{{ ruleCount > 0 ? ' (' + ruleCount + ' rule)' : '' }}
+    </button>
+  </div>
+</div>

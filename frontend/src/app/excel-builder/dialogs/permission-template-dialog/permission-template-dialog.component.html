@@ -1,0 +1,191 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{ size: 'l', dismissible: true, closeable: true }"
+>
+  <div class="dialog-wrapper">
+    <div class="dialog-header">
+      <h2 class="dialog-title">{{ title }}</h2>
+    </div>
+
+    <div class="dialog-body" style="min-width: 700px">
+      <h3 class="font-bold tui-space_bottom-2">Thêm quyền</h3>
+
+      <!-- Cấp độ -->
+      <div class="field">
+        <tui-select [formControl]="permLevel" [stringify]="stringifyLevel">
+          Cấp độ
+          <tui-data-list-wrapper
+            *tuiDataList
+            [items]="levelItems"
+            [itemContent]="levelTpl"
+          ></tui-data-list-wrapper>
+        </tui-select>
+        <ng-template #levelTpl let-item>
+          {{ stringifyLevel(item) }}
+        </ng-template>
+      </div>
+
+      <!-- Field (COLUMN | CELL) -->
+      <div
+        *ngIf="permLevel.value === 'COLUMN' || permLevel.value === 'CELL'"
+        class="field"
+      >
+        <tui-select [formControl]="permField" [stringify]="stringifyField">
+          Field
+          <tui-data-list-wrapper
+            *tuiDataList
+            [items]="columnItems"
+            [itemContent]="fieldTpl"
+          ></tui-data-list-wrapper>
+        </tui-select>
+        <ng-template #fieldTpl let-item>
+          {{ stringifyField(item) }}
+        </ng-template>
+      </div>
+
+      <!-- Row Code (ROW | CELL) -->
+      <div
+        *ngIf="permLevel.value === 'ROW' || permLevel.value === 'CELL'"
+        class="field"
+      >
+        <tui-input [formControl]="permRowCode">Row Code</tui-input>
+      </div>
+
+      <!-- Loại quyền -->
+      <div class="field">
+        <tui-select [formControl]="permType" [stringify]="stringifyType">
+          Loại quyền
+          <tui-data-list-wrapper
+            *tuiDataList
+            [items]="typeItems"
+            [itemContent]="typeTpl"
+          ></tui-data-list-wrapper>
+        </tui-select>
+        <ng-template #typeTpl let-item>
+          {{ stringifyType(item) }}
+        </ng-template>
+      </div>
+
+      <!-- User ID (DENY | ALLOW) -->
+      <div *ngIf="permType.value !== 'LOCK'" class="field">
+        <tui-input [formControl]="permUserId">User ID</tui-input>
+      </div>
+
+      <button
+        tuiButton
+        appearance="primary"
+        class="btn btn-add"
+        (click)="addPermission()"
+      >
+        Thêm
+      </button>
+
+      <!-- Danh sách quyền -->
+      <h3 class="font-bold tui-space_bottom-2 tui-space_top-4">
+        Danh sách quyền ({{ displayList.length }})
+      </h3>
+
+      <!-- Empty state -->
+      <div *ngIf="displayList.length === 0" class="perm-list__empty">
+        <tui-svg src="tuiIconLockLarge" class="perm-list__empty-icon"></tui-svg>
+        <p>Chưa có quyền nào. Tất cả ô đều có thể chỉnh sửa.</p>
+      </div>
+
+      <!-- Permission list — dùng displayList, trackBy để tránh re-render thừa -->
+      <div class="perm-list__list">
+        <div
+          *ngFor="let perm of displayList; trackBy: trackByPermission"
+          class="perm-list__item"
+          [class.perm-list__item--new]="perm._isNew"
+        >
+          <!-- Icon -->
+          <div class="perm-list__icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="6" y="7" width="4" height="6" rx="1" fill="#378ADD" />
+              <path
+                d="M5 7V5a3 3 0 016 0v2"
+                stroke="#378ADD"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+
+          <!-- Info -->
+          <div class="perm-list__info">
+            <div class="perm-list__meta">
+              <span class="perm-list__name">
+                {{ stringifyLevel(perm.level) }}
+              </span>
+
+              <!-- Badge "Mới" cho permission chưa lưu -->
+              <tui-badge
+                *ngIf="perm._isNew"
+                value="Mới"
+                status="info"
+                class="perm-list__badge"
+              ></tui-badge>
+
+              <tui-badge
+                [value]="stringifyType(perm.permissionType)"
+                [status]="
+                  perm.permissionType === 'LOCK'
+                    ? 'error'
+                    : perm.permissionType === 'DENY'
+                      ? 'warning'
+                      : 'success'
+                "
+                class="perm-list__badge"
+              ></tui-badge>
+            </div>
+
+            <div class="perm-list__detail">
+              <ng-container *ngIf="perm.targetField">
+                Field: <strong>{{ stringifyField(perm.targetField) }}</strong>
+              </ng-container>
+              <ng-container *ngIf="perm.targetRowCode">
+                &middot; Row: <strong>{{ perm.targetRowCode }}</strong>
+              </ng-container>
+              <ng-container *ngIf="perm.userId">
+                &middot; User: <strong>{{ perm.userId }}</strong>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- Delete — truyền toàn bộ entry, không chỉ id -->
+          <button
+            tuiIconButton
+            type="button"
+            appearance="flat"
+            size="s"
+            icon="tuiIconTrash2"
+            class="perm-list__delete"
+            (click)="removePermission(perm)"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <button
+        tuiButton
+        appearance="outline"
+        class="btn btn-cancel"
+        (click)="onClose()"
+      >
+        Đóng
+      </button>
+
+      <button
+        tuiButton
+        appearance="primary"
+        class="btn btn-save"
+        (click)="savePermission()"
+        [disabled]="false"
+      >
+        Lưu
+      </button>
+    </div>
+  </div>
+</ng-template>

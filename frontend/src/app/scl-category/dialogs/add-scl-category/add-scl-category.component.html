@@ -1,0 +1,236 @@
+<ng-template [(appDialog)]="isOpen" (appDialogChange)="isOpenChange.emit($event)" [appDialogOptions]="{
+    size: 'm',
+    dismissible: true,
+    closeable: true,
+  }">
+  <div class="pd-dialog">
+    <div class="pd-icon-wrap pd-icon--info">
+      <span class="pd-icon">+</span>
+    </div>
+    <div class="pd-title">Thêm mới</div>
+
+    <form [formGroup]="formSCLadd">
+      <!-- Row 1 -->
+      <div class="add-scl-group">
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>PC</label>
+            <span class="pd-required">*</span>
+          </div>
+          <tui-select
+              formControlName="pc"
+              [stringify]="stringifyPc"
+              [tuiTextfieldLabelOutside]="true"
+              [tuiTextfieldCleaner]="true"
+              tuiTextfieldSize="m"
+              class="scl-input"
+              [class.input-error]="isInvalid(pc)"
+
+              >
+            --Chọn PC--
+            <tui-data-list *tuiDataList>
+              <button *ngFor="let u of pcOptions" tuiOption [value]="u">
+                {{ stringifyPc(u) }}
+              </button>
+            </tui-data-list>
+          </tui-select>
+          <span class="error-msg" *ngIf="isInvalid(pc)">Vui lòng chọn PC</span>
+        </div>
+
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>Đơn vị</label>
+            <span class="pd-required">*</span>
+          </div>
+          <tui-select
+              formControlName="unit"
+              [stringify]="stringifyUnit"
+              [tuiTextfieldLabelOutside]="true"
+              [tuiTextfieldCleaner]="true"
+              tuiTextfieldSize="m"
+              class="scl-input"
+              [class.input-error]="isInvalid(unit)"
+
+              >
+            --Chọn đơn vị--
+            <tui-data-list *tuiDataList>
+              <button *ngFor="let u of unitOptions" tuiOption [value]="u">
+                {{ stringifyUnit(u) }}
+              </button>
+            </tui-data-list>
+          </tui-select>
+          <span class="error-msg" *ngIf="isInvalid(unit)">Vui lòng chọn đơn vị</span>
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+       <div class="add-scl-group">
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>Tiến độ</label>
+            <span class="pd-required">*</span>
+          </div>
+          <tui-select
+            formControlName="progress"
+            [stringify]="stringifyProgress"
+            [tuiTextfieldLabelOutside]="true"
+            [tuiTextfieldCleaner]="true"
+            tuiTextfieldSize="m"
+            [class.input-error]="isInvalid(progress)"
+            class="scl-input">
+            Chọn tiến độ
+            <tui-data-list *tuiDataList>
+              <button *ngFor="let item of progressOptions" tuiOption [value]="item">
+                {{ stringifyProgress(item) }}
+              </button>
+            </tui-data-list>
+          </tui-select>
+          <span class="error-msg" *ngIf="isInvalid(progress)">Vui lòng chọn tiến độ</span>
+        </div>
+
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>Trạng thái</label>
+            <span class="pd-required">*</span>
+          </div>
+          <tui-select
+            formControlName="status"
+            [stringify]="stringifyStatus"
+            [tuiTextfieldLabelOutside]="true"
+            [tuiTextfieldCleaner]="true"
+            tuiTextfieldSize="m"
+            [class.input-error]="isInvalid(status)"
+            class="scl-input">
+            Chọn trạng thái
+            <tui-data-list *tuiDataList>
+              <button *ngFor="let item of statusOptions" tuiOption [value]="item">
+                {{ stringifyStatus(item) }}
+              </button>
+            </tui-data-list>
+          </tui-select>
+          <span class="error-msg" *ngIf="isInvalid(status)">Vui lòng chọn trạng thái</span>
+        </div>
+      </div>
+
+      <!-- Row 3 -->
+       <div class="add-scl-group">
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>Tên hạng mục</label>
+            <span class="pd-required">*</span>
+          </div>
+          <tui-input
+              formControlName="categoryName"
+              [tuiTextfieldLabelOutside]="true"
+              [tuiTextfieldCleaner]="true"
+              tuiTextfieldSize="m" class="scl-input"
+
+              [class.input-error]="isInvalid(categoryName)">
+            Nhập tên hạng mục...
+          </tui-input>
+          <span class="error-msg" *ngIf="isInvalid(categoryName)">Vui lòng nhập tên hạng mục</span>
+        </div>
+
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>Mã tài sản</label>
+            <span class="pd-required">*</span>
+          </div>
+          <tui-input
+              formControlName="assetCode"
+              [tuiTextfieldLabelOutside]="true"
+              [tuiTextfieldCleaner]="true"
+              tuiTextfieldSize="m" class="scl-input"
+
+              [class.input-error]="isInvalid(assetCode)">
+            Nhập mã tài sản...
+          </tui-input>
+          <span class="error-msg" *ngIf="isInvalid(assetCode)">Vui lòng nhập mã tài sản</span>
+        </div>
+      </div>
+      
+      <!-- Row 4 -->
+       <div class="add-scl-group">
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>Mã hạng mục</label>
+            <span class="pd-required">*</span>
+          </div>
+          <tui-input
+            formControlName="categoryCode"
+            [tuiTextfieldLabelOutside]="true"
+            [tuiTextfieldCleaner]="true"
+            tuiTextfieldSize="m"
+            class="scl-input"
+            [class.input-error]="isInvalid(categoryCode)"
+
+          >
+            Nhập mã hạng mục...
+          </tui-input>
+          <span class="error-msg" *ngIf="isInvalid(categoryCode)">Vui lòng nhập mã hạng mục</span>
+        </div>
+
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>Khối lượng thực hiện</label>
+          </div>
+          <tui-input
+              formControlName="actualVolume"
+              [tuiTextfieldLabelOutside]="true"
+              [tuiTextfieldCleaner]="true"
+              tuiTextfieldSize="m" class="scl-input">
+            Nhập khối lượng thực hiện...
+          </tui-input>
+        </div>
+      </div>
+      
+      <!-- Row 5 -->
+      <div class="add-scl-group">
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>Năm SCL gần nhất</label>
+          </div>
+          <tui-select formControlName="lastSclYear" 
+            [stringify]="stringifyLastSclYear"
+            [tuiTextfieldLabelOutside]="true"
+            [tuiTextfieldCleaner]="true" 
+            tuiTextfieldSize="m" 
+            class="scl-input">
+            Chọn năm SCL gần nhất
+            <tui-data-list *tuiDataList>
+              <button *ngFor="let y of yearOptions" tuiOption [value]="y">
+                {{ stringifyLastSclYear(y) }}
+              </button>
+            </tui-data-list>
+          </tui-select>
+        </div>
+        
+        <div class="form-group scl-b">
+          <div class="app-form-label-category">
+            <label tuiLabel>Năm kế hoạch</label>
+          </div>
+          <tui-select formControlName="yearPlan" 
+            [stringify]="stringifyYear"
+            [tuiTextfieldLabelOutside]="true"
+            [tuiTextfieldCleaner]="true" 
+            tuiTextfieldSize="m" 
+            class="scl-input">
+            Chọn năm
+            <tui-data-list *tuiDataList>
+              <button *ngFor="let y of yearOptions" tuiOption [value]="y">
+                {{ stringifyYear(y) }}
+              </button>
+            </tui-data-list>
+          </tui-select>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="pd-actions">
+        <button class="pd-btn pd-btn--cancel" type="button" (click)="cancel()">Huỷ</button>
+        <button class="pd-btn pd-btn--confirm" type="button" [disabled]="formSCLadd.invalid"
+          (click)="handleSubmit()">Lưu</button>
+      </div>
+    </form>
+  </div>
+</ng-template>

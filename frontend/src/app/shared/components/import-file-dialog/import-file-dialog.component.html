@@ -1,0 +1,145 @@
+<ng-template
+  [(appDialog)]="open"
+  (appDialogChange)="openChange.emit($event)"
+  [appDialogOptions]="{ size: 'm', dismissible: true, closeable: true }"
+>
+  <div class="dialog-wrapper">
+    <!-- Header -->
+    <div class="dialog-header">
+      <h2 class="dialog-title">{{ title }}</h2>
+    </div>
+
+    <!-- Subtitle -->
+    <div class="dialog-subtitle">
+      <span>Chưa có file? Tải template mẫu để nhập dữ liệu:</span>
+      <button
+        tuiButton
+        type="button"
+        appearance="secondary"
+        size="s"
+        class="btn-download-template"
+        [disabled]="isDownloadingTemplate"
+        (click)="onDownloadTemplate()"
+      >
+        <tui-svg src="tuiIconDownload"></tui-svg>
+        {{ isDownloadingTemplate ? "Đang tải..." : "Tải template import" }}
+      </button>
+    </div>
+
+    <!-- DROPZONE ĐÚNG v3 -->
+    <tui-input-files
+      class="dropzone-wrapper"
+      [formControl]="control"
+      [accept]="
+        fileType === 'excel'
+          ? '.xls,.xlsx'
+          : fileType === 'csv'
+            ? '.csv'
+            : '.xml'
+      "
+    >
+      <ng-template let-dragged>
+        <div class="dropzone-content">
+          <tui-marker-icon
+            mode="link"
+            src="tuiIconDownloadCloudLarge"
+          ></tui-marker-icon>
+
+          <div class="dropzone-text">
+            <strong>
+              {{
+                dragged ? "Thả file vào đây!" : "Chọn hoặc kéo thả file ở đây"
+              }}
+            </strong>
+
+            <p class="dropzone-hint">
+              Định dạng:
+              <ng-container [ngSwitch]="fileType">
+                <span *ngSwitchCase="'excel'">xls, xlsx</span>
+                <span *ngSwitchCase="'csv'">csv</span>
+                <span *ngSwitchCase="'xml'">xml</span>
+              </ng-container>
+              <br />
+
+              Dung lượng tối đa 20MB
+            </p>
+
+            <a tuiLink class="choose-link"> Chọn tệp </a>
+          </div>
+        </div>
+      </ng-template>
+    </tui-input-files>
+
+    <!-- File preview -->
+    <div *ngIf="selectedFile" class="file-list">
+      <div class="file-item">
+        <div class="file-icon">
+          <tui-svg src="tuiIconFile" class="excel-icon"></tui-svg>
+        </div>
+
+        <div class="file-info">
+          <span class="file-name" [title]="selectedFile.name">
+            {{ selectedFile.name }}
+          </span>
+          <span class="file-meta">
+            {{ formatFileSize(selectedFile.size) }}
+          </span>
+        </div>
+
+        <div class="file-actions">
+          <span class="file-status-badge">
+            <span class="dot"></span>
+            File đã chọn
+          </span>
+
+          <button
+            tuiIconButton
+            appearance="flat"
+            size="s"
+            title="Tải file về"
+            (click)="onDownloadFile()"
+          >
+            <tui-svg src="tuiIconDownload"></tui-svg>
+          </button>
+
+          <button
+            tuiIconButton
+            appearance="flat"
+            size="s"
+            class="btn-delete"
+            title="Xóa file"
+            (click)="onRemoveFile()"
+          >
+            <tui-svg src="tuiIconTrash"></tui-svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #icon>
+      <tui-svg src="tuiIconFile"></tui-svg>
+    </ng-template>
+
+    <!-- Footer -->
+    <div class="dialog-footer">
+      <button
+        tuiButton
+        appearance="outline"
+        (click)="onClose()"
+        class="btn btn-cancel"
+      >
+        Thoát
+      </button>
+
+      <button
+        tuiButton
+        appearance="primary"
+        [disabled]="!selectedFile"
+        (click)="onImport()"
+        class="btn btn-submit"
+      >
+        Nhập file
+      </button>
+    </div>
+  </div>
+</ng-template>

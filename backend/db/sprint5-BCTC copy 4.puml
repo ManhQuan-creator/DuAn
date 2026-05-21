@@ -1,0 +1,194 @@
+@startuml BCTC_Sprint5_ERD
+skinparam linetype ortho
+skinparam roundcorner 10
+skinparam shadowing false
+
+title ERD - Sprint 5 - Tab Thông tin tài chính
+
+package "customer-information-service" #E3F2FD {
+  entity "CUSTOMER_FINANCIAL_REPORT" as master_report #90CAF9 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CIF : VARCHAR2(20)
+    * REPORT_TEMPLATE_CODE : VARCHAR2(50)
+    * REPORT_TYPE : VARCHAR2(20)
+    * REPORT_STATUS : VARCHAR2(20)
+    * PERIOD_TYPE : VARCHAR2(10)
+    * PERIOD_YEAR : NUMBER(4)
+    PERIOD_QUARTER : NUMBER(1)
+    * FISCAL_END_DATE : DATE
+    * CURRENCY : VARCHAR2(10)
+    * DISPLAY_UNIT : VARCHAR2(20)
+    SOURCE_SYSTEM : VARCHAR2(50)
+    SOURCE_ID : VARCHAR2(100)
+    IS_DELETED : NUMBER(1)
+    * VERSION : NUMBER(10)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+
+  entity "CUSTOMER_FINANCIAL_REPORT_ITEM" as master_item #BBDEFB {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * REPORT_ID : VARCHAR2(36) <<FK>>
+    * INDICATOR_CODE : VARCHAR2(50)
+    * INDICATOR_NAME : VARCHAR2(500)
+    * INDICATOR_ORDER : NUMBER(5)
+    VALUE : NUMBER(20,4)
+    FORMULA : VARCHAR2(500)
+    IS_FORMULA_FIELD : NUMBER(1)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+
+  entity "CUSTOMER_FINANCIAL_INDICATOR" as master_indicator #FFF59D {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CIF : VARCHAR2(20)
+    * INDICATOR_CODE : VARCHAR2(50)
+    * INDICATOR_NAME : VARCHAR2(500)
+    * PERIOD_TYPE : VARCHAR2(10)
+    * PERIOD_YEAR : NUMBER(4)
+    PERIOD_QUARTER : NUMBER(1)
+    * REPORT_STATUS : VARCHAR2(20)
+    VALUE : NUMBER(20,4)
+    UNIT : VARCHAR2(20)
+    * IS_RATIO : NUMBER(1)
+    * CALCULATED_AT : TIMESTAMP
+    SOURCE_REPORT_ID : VARCHAR2(36)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+}
+
+package "credit-proposal-service" #FFF3E0 {
+  entity "CAS_PROPOSAL" as proposal #FFE0B2 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CUSTOMER_CIF : VARCHAR2(20)
+    * PROPOSAL_TYPE : VARCHAR2(20)
+    * STATUS : VARCHAR2(20)
+    * CREATED_BY : VARCHAR2(50)
+    * CREATED_AT : TIMESTAMP
+  }
+
+  entity "CAS_FINANCIAL_REPORT_SELECTION" as selection #A5D6A7 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CAS_ID : VARCHAR2(36) <<FK>>
+    * CUSTOMER_FINANCIAL_REPORT_ID : VARCHAR2(36) <<FK>>
+    DISPLAY_ORDER : NUMBER(3)
+    IS_DELETED : NUMBER(1)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+
+  entity "CAS_FINANCIAL_ASSESSMENT" as assessment #F48FB1 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * CAS_ID : VARCHAR2(36) <<FK>> <<UNIQUE>>
+    OVERALL_ASSESSMENT : CLOB
+    * VERSION : NUMBER(10)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+
+  entity "CAS_FINANCIAL_ASSESSMENT_BLOCK" as block #F8BBD9 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * ASSESSMENT_ID : VARCHAR2(36) <<FK>>
+    * BLOCK_NAME : VARCHAR2(200)
+    * BLOCK_ORDER : NUMBER(3)
+    BLOCK_ASSESSMENT : CLOB
+    * VERSION : NUMBER(10)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+    UPDATED_AT : TIMESTAMP
+    UPDATED_BY : VARCHAR2(50)
+  }
+
+  entity "CAS_FINANCIAL_ASSESSMENT_INDICATOR" as indicator #FCE4EC {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * BLOCK_ID : VARCHAR2(36) <<FK>>
+    * INDICATOR_CODE : VARCHAR2(50)
+    * INDICATOR_NAME : VARCHAR2(500)
+    * INDICATOR_ORDER : NUMBER(3)
+    CHART_TYPE : VARCHAR2(20)
+    * CREATED_AT : TIMESTAMP
+    * CREATED_BY : VARCHAR2(50)
+  }
+
+}
+
+package "customer-information-service" #E3F2FD {
+  entity "CUSTOMER_FINANCIAL_REPORT_HISTORY" as history #FFCDD2 {
+    * ID : VARCHAR2(36) <<PK>>
+    --
+    * REPORT_ID : VARCHAR2(36) <<FK>>
+    * VERSION : NUMBER(10)
+    * ACTION : VARCHAR2(20)
+    OLD_DATA : CLOB
+    NEW_DATA : CLOB
+    CHANGE_REASON : VARCHAR2(500)
+    * CHANGED_AT : TIMESTAMP
+    * CHANGED_BY : VARCHAR2(50)
+    CHANGED_BY_NAME : VARCHAR2(200)
+  }
+}
+
+' ========================================
+' QUAN HỆ TRONG customer-information-service
+' ========================================
+
+' CUSTOMER_FINANCIAL_REPORT 1 - N CUSTOMER_FINANCIAL_REPORT_ITEM
+' Một BCTC có nhiều chỉ tiêu
+master_report ||--|{ master_item : "1 - N"
+
+' CUSTOMER_FINANCIAL_REPORT 1 - N CUSTOMER_FINANCIAL_REPORT_HISTORY
+' Một BCTC có nhiều lịch sử chỉnh sửa
+master_report ||--|{ history : "1 - N"
+
+' ========================================
+' QUAN HỆ TRONG credit-proposal-service
+' ========================================
+
+' CAS_PROPOSAL 1 - N CAS_FINANCIAL_REPORT_SELECTION
+' Một CAS có thể chọn nhiều BCTC
+proposal ||--|{ selection : "1 - N"
+
+' CAS_PROPOSAL 1 - 1 CAS_FINANCIAL_ASSESSMENT
+' Một CAS chỉ có 1 đánh giá tài chính
+proposal ||--|| assessment : "1 - 1"
+
+' CAS_FINANCIAL_ASSESSMENT 1 - N CAS_FINANCIAL_ASSESSMENT_BLOCK
+' Một đánh giá có nhiều khối (biểu đồ)
+assessment ||--|{ block : "1 - N"
+
+' CAS_FINANCIAL_ASSESSMENT_BLOCK 1 - N CAS_FINANCIAL_ASSESSMENT_INDICATOR
+' Một khối có nhiều chỉ tiêu
+block ||--|{ indicator : "1 - N"
+
+' ========================================
+' QUAN HỆ CROSS-SERVICE
+' ========================================
+
+' CUSTOMER_FINANCIAL_REPORT 1 - N CAS_FINANCIAL_REPORT_SELECTION
+' Một BCTC Master có thể được chọn vào nhiều CAS
+master_report ||--o{ selection : "1 - N"
+
+' CUSTOMER_FINANCIAL_INDICATOR ..> CAS_FINANCIAL_ASSESSMENT_INDICATOR
+' Chỉ tiêu trong CAS lấy giá trị từ Master
+master_indicator ..> indicator : "get value (by INDICATOR_CODE)"
+
+@enduml

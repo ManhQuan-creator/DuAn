@@ -1,0 +1,37 @@
+@startuml BE001_Get_BCTC_List
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title BE001 - Lấy danh sách BCTC đã chọn trong CAS
+
+actor "User" as user
+participant "FE\n(Lending Hub)" as fe
+participant "credit-proposal\nservice" as cas
+database "CAS_DB" as cas_db
+participant "customer-info\nservice" as master
+
+user -> fe : Mở tab BCTC
+activate fe
+
+fe -> cas : GET /cas/financial-reports?casId={casId}
+activate cas
+
+cas -> cas_db : SELECT s., r.\nFROM CAS_FINANCIAL_REPORT_SELECTION s\nJOIN CUSTOMER_FINANCIAL_REPORT r ON s.CUSTOMER_FINANCIAL_REPORT_ID = r.ID\nWHERE s.CAS_ID = ? AND s.IS_DELETED = 0
+activate cas_db
+cas_db --> cas : List<Report>
+deactivate cas_db
+
+loop for each report with SOURCE_REPORT_ID
+    cas -> master : GET /customers/financial-reports/detail\n?reportId={sourceReportId}
+    activate master
+    master --> cas : Master Report Details
+    deactivate master
+end
+
+cas --> fe : Response:\n- casId\n- createdBy\n- reports[]\n- summary
+deactivate cas
+
+fe --> user : Hiển thị bảng BCTC
+deactivate fe
+
+@enduml

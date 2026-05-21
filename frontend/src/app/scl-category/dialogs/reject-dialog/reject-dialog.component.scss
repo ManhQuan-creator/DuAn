@@ -1,0 +1,306 @@
+// ── Wrapper ────────────────────────────────────
+.dialog-wrapper {
+  width: 700px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--tui-base-01);
+  border-radius: var(--tui-radius-l);
+  overflow: hidden;
+}
+
+.dialog-divider {
+  height: 1px;
+  background: var(--tui-base-03);
+}
+
+// ── Header ─────────────────────────────────────
+.dialog-header {
+  padding: 10px;
+
+  &__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--tui-text-01);
+  }
+}
+
+// ── Body ───────────────────────────────────────
+.dialog-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// ── Field group ────────────────────────────────
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tui-text-01);
+
+  tui-svg {
+    font-size: 1rem;
+    color: var(--tui-text-03);
+  }
+}
+
+// Label row: label bên trái, btn-attach bên phải
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.field-required {
+  color: var(--tui-error-fill, #e53935);
+  margin-left: 2px;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--tui-text-03);
+  margin: 0;
+}
+
+.btn-attach {
+  transform: translateY(-10px);
+}
+
+// ── Reason textarea ────────────────────────────
+.reason-textarea {
+  width: 100%;
+
+  ::ng-deep .t-content {
+    min-height: 88px;
+  }
+
+  ::ng-deep tui-scrollbar,
+  ::ng-deep .t-scrollbar {
+    padding: 0 !important;
+    border-top: none !important; // hoặc 0
+  }
+}
+
+// ── Drop zone ──────────────────────────────────
+.drop-zone {
+  position: relative;
+  border: 1.5px dashed var(--tui-base-05);
+  border-radius: var(--tui-radius-m);
+  background: var(--tui-base-02);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+  overflow: hidden;
+
+  // Empty state: clickable
+  &:not(.drop-zone--has-files) {
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--tui-primary);
+      background: var(--tui-primary-bg, #f0f5ff);
+    }
+  }
+
+  // Drag-over state
+  &--active {
+    border-color: var(--tui-primary) !important;
+    background: var(--tui-primary-bg, #f0f5ff) !important;
+  }
+}
+
+// Empty state content
+.drop-zone__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  pointer-events: none; // clicks bubble up to .drop-zone
+}
+
+.drop-zone__icon {
+  font-size: 2rem;
+  color: var(--tui-text-03);
+  margin-bottom: 0.25rem;
+}
+
+.drop-zone__primary {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tui-text-01);
+}
+
+.drop-zone__secondary {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--tui-text-03);
+}
+
+.drop-zone__link {
+  color: var(--tui-primary);
+  font-weight: 500;
+  cursor: pointer;
+  pointer-events: all;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.drop-zone__hint {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: var(--tui-text-03);
+}
+
+// File list inside drop zone
+.file-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 180px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: var(--tui-base-02);
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--tui-base-05);
+    border-radius: 2px;
+  }
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--tui-base-03);
+  transition: background 0.12s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+  &:hover {
+    background: var(--tui-base-03);
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    color: var(--tui-text-03);
+    display: flex;
+    align-items: center;
+    tui-svg {
+      font-size: 1rem;
+    }
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  &__name {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--tui-text-01);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__size {
+    font-size: 0.6875rem;
+    color: var(--tui-text-03);
+  }
+
+  &__remove {
+    flex-shrink: 0;
+    opacity: 0.45;
+    transition: opacity 0.15s;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// Hint bar at bottom of drop zone when files exist
+.drop-zone__hint-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem;
+  border-top: 1px dashed var(--tui-base-04);
+  background: var(--tui-base-02);
+  font-size: 0.75rem;
+  color: var(--tui-text-03);
+
+  tui-svg {
+    font-size: 0.875rem;
+  }
+}
+
+// Drag-over overlay (kéo đè lên danh sách)
+.drop-zone__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: color-mix(in srgb, var(--tui-primary) 10%, transparent);
+  border: 2px dashed var(--tui-primary);
+  border-radius: var(--tui-radius-m);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tui-primary);
+  pointer-events: none;
+
+  tui-svg {
+    font-size: 1.75rem;
+  }
+}
+
+// ── Footer ─────────────────────────────────────
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+}
+
+.btn-confirm {
+  &__icon {
+    font-size: 0.875rem;
+  }
+  &[disabled] {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}

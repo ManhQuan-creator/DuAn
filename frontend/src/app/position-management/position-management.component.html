@@ -1,0 +1,69 @@
+<div class="manager-container">
+  <app-page-header
+    title="Quản lý chức danh"
+    subtitle="Cấu hình chức danh theo cấp bậc tổ chức EVNNPC"
+    [breadcrumbs]="breadcrumbs"
+  ></app-page-header>
+
+  <div class="card manager-filters app-search-toolbar">
+    <!-- TÌM KIẾM -->
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Mã, tên chức danh</label>
+      <tui-input
+        [(ngModel)]="searchText"
+        (ngModelChange)="onSearchChange()"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="search-input app-search-toolbar__field app-search-toolbar__field--grow"
+      >
+        Tìm kiếm theo mã, tên...
+      </tui-input>
+    </div>
+
+    <!-- TRẠNG THÁI -->
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Trạng thái</label>
+      <tui-select
+        [(ngModel)]="statusFilter"
+        [stringify]="stringifyStatus"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="status-select app-search-toolbar__field"
+        (ngModelChange)="onStatusChange()"
+      >
+        Trạng thái
+        <tui-data-list *tuiDataList>
+          <button *ngFor="let s of statusOptions" tuiOption [value]="s">
+            {{ stringifyStatus(s) }}
+          </button>
+        </tui-data-list>
+      </tui-select>
+    </div>
+  </div>
+
+  <div class="card manager-grid-card">
+    <div class="manager-grid">
+      <app-grid-header
+        [showBtnCreateNew]="true"
+        (buttonClickCreate)="openCreateDialog()"
+      ></app-grid-header>
+      <app-ag-grid-wrapper [enableRangeSelection]="true"
+        [rowData]="positions"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [rowHeight]="40"
+        [height]="'100%'"
+        [width]="'100%'"
+        [theme]="'ag-theme-quartz'"
+        (gridReady)="onGridReady($event)"
+      />
+    </div>
+    <app-custom-pagination
+      [totalRows]="totalRows"
+      [currentPage]="pageNum + 1"
+      [pageSize]="pageSize"
+      (pageChanged)="onPageChanged($event)"
+      (pageSizeChanged)="onPageSizeChanged($event)"
+    />
+  </div>
+</div>

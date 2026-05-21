@@ -1,0 +1,124 @@
+.page-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  background: transparent;
+}
+
+.page-header__breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.page-header__breadcrumb-link {
+  color: inherit;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.page-header__breadcrumb-link--clickable {
+  cursor: pointer;
+
+  &:hover {
+    color: #1a4f9a;
+    /* Viettel blue or similar */
+    text-decoration: underline;
+  }
+}
+
+.page-header__breadcrumb-link--last {
+  font-weight: 500;
+  color: #333;
+}
+
+.page-header__breadcrumb-sep {
+  color: #9ca3af;
+  cursor: default;
+}
+
+.page-header__title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-header__title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-header__title-text {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+  text-transform: uppercase;
+}
+
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition:
+      background-color 0.2s ease,
+      filter 0.2s ease;
+
+    // ── primary (xanh đậm mặc định) ──────────────────────
+    &[data-appearance="primary"],
+    &:not([data-appearance]) {
+      &:hover {
+        background-color: #143e7a;
+      }
+    }
+
+    // ── secondary (xám nhạt) ─────────────────────────────
+    &[data-appearance="secondary"] {
+      &:hover {
+        background-color: #d0d5dd;
+      }
+    }
+
+    // ── flat (không nền) ─────────────────────────────────
+    &[data-appearance="flat"] {
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+      }
+    }
+
+    // ── outline (chỉ viền) ───────────────────────────────
+    &[data-appearance="outline"] {
+      &:hover {
+        background-color: rgba(26, 79, 154, 0.08);
+      }
+    }
+
+    // ── whiteblock (nền trắng) ───────────────────────────
+    &[data-appearance="whiteblock"] {
+      &:hover {
+        background-color: #f0f4fa;
+      }
+    }
+
+    // ── accent (đỏ/nguy hiểm) ───────────────────────────
+    &[data-appearance="accent"] {
+      &:hover {
+        background-color: #b91c1c;
+      }
+    }
+  }
+}

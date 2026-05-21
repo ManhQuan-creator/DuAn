@@ -1,0 +1,42 @@
+{
+  "code": "TCT",
+  "name": "Tổng Công ty",
+  "level": 1,
+  "children": [
+    {
+      "code": "PC",
+      "name": "Công ty điện lực",
+      "level": 2,
+      "children": [
+        { "code": "PC_HAIPHONG",   "name": "Công ty Điện lực Hải Phòng",   "level": 3 },
+        { "code": "PC_NINHBINH",   "name": "Công ty Điện lực Ninh Bình",   "level": 3 },
+        { "code": "PC_PHUTHO",     "name": "Công ty Điện lực Phú Thọ",     "level": 3 },
+        { "code": "PC_QUANGNINH",  "name": "Công ty Điện lực Quảng Ninh",  "level": 3 },
+        { "code": "PC_THAINGUYEN", "name": "Công ty Điện lực Thái Nguyên", "level": 3 },
+        { "code": "PC_BACNINH",    "name": "Công ty Điện lực Bắc Ninh",    "level": 3 },
+        { "code": "PC_THANHHOA",   "name": "Công ty Điện lực Thanh Hóa",   "level": 3 },
+        { "code": "PC_HUNGYEN",    "name": "Công ty Điện lực Hưng Yên",    "level": 3 },
+        { "code": "PC_LAOCAI",     "name": "Công ty Điện lực Lào Cai",     "level": 3 },
+        { "code": "PC_LANGSON",    "name": "Công ty Điện lực Lạng Sơn",    "level": 3 },
+        { "code": "PC_TUYENQUANG", "name": "Công ty Điện lực Tuyên Quang", "level": 3 },
+        { "code": "PC_NGHEAN",     "name": "Công ty Điện lực Nghệ An",     "level": 3 },
+        { "code": "PC_CAOBANG",    "name": "Công ty Điện lực Cao Bằng",    "level": 3 },
+        { "code": "PC_SONLA",      "name": "Công ty Điện lực Sơn La",      "level": 3 },
+        { "code": "PC_HATINH",     "name": "Công ty Điện lực Hà Tĩnh",     "level": 3 },
+        { "code": "PC_DIENBIEN",   "name": "Công ty Điện lực Điện Biên",   "level": 3 },
+        { "code": "PC_LAICHAU",    "name": "Công ty Điện lực Lai Châu",    "level": 3 }
+      ]
+    },
+    {
+      "code": "PHUTRO",
+      "name": "Các đơn vị phụ trợ",
+      "level": 2,
+      "children": [
+        { "code": "VPCQ",     "name": "Văn phòng cơ quan",              "level": 3 },
+        { "code": "CTY_CNTT", "name": "Công ty CNTT Điện lực miền Bắc", "level": 3 },
+        { "code": "TTCSKH",   "name": "Trung tâm CSKH",                 "level": 3 },
+        { "code": "NPSC",     "name": "NPSC",                           "level": 3 }
+      ]
+    }
+  ]
+}

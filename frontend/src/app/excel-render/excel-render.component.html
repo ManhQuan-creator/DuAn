@@ -1,0 +1,472 @@
+<div class="render-container">
+  <!-- ============ LIST VIEW ============ -->
+  <ng-container *ngIf="viewMode === 'list'">
+    <div class="render-header">
+      <app-page-header
+        [title]="displayHeaderTitle"
+        [breadcrumbs]="displayBreadcrumbs"
+      >
+      </app-page-header>
+      <!-- [showCustomBtn]="!!templateId" -->
+    </div>
+
+    <div *ngIf="isReportMode" class="card report-search-card">
+      <div
+        class="report-search-grid"
+        [class.report-search-grid--no-period]="!showReportPeriodInput"
+      >
+        <div class="report-search-field">
+          <label tuiLabel class="app-form-label">Mã/Tên biểu mẫu</label>
+          <app-single-select
+            [(ngModel)]="selectedReportTemplate"
+            (ngModelChange)="onReportTemplateChange($event)"
+            [options]="templateSelectOptions"
+            [clearable]="false"
+            placeholder="Chọn biểu mẫu"
+            class="report-filter-field"
+          ></app-single-select>
+        </div>
+
+        <div class="report-search-field">
+          <label tuiLabel class="app-form-label">Năm kế hoạch</label>
+          <tui-input-year
+            [(ngModel)]="selectedReportYear"
+            (ngModelChange)="onReportEntryFiltersChange()"
+            [tuiTextfieldLabelOutside]="true"
+            tuiTextfieldSize="m"
+            class="report-filter-field"
+          >
+            Chọn năm kế hoạch
+          </tui-input-year>
+        </div>
+
+        @if (showReportPeriodInput) {
+          <div class="report-search-field">
+            <label tuiLabel class="app-form-label">{{ reportPeriodLabel }}</label>
+            <app-single-select
+              [(ngModel)]="selectedReportPeriod"
+              (ngModelChange)="onReportEntryFiltersChange()"
+              [options]="periodSelectOptions"
+              [placeholder]="reportPeriodPlaceholder"
+              [clearLabel]="reportPeriodClearLabel"
+              class="report-filter-field"
+            ></app-single-select>
+          </div>
+        }
+
+        <div class="report-search-field">
+          <label tuiLabel class="app-form-label">Lĩnh vực</label>
+          <app-single-select
+            [(ngModel)]="selectedReportDepartment"
+            (ngModelChange)="onReportDepartmentChange()"
+            [options]="departmentSelectOptions"
+            placeholder="Chọn lĩnh vực"
+            clearLabel="Tất cả lĩnh vực"
+            class="report-filter-field"
+          ></app-single-select>
+        </div>
+
+        <div class="report-search-field">
+          <label tuiLabel class="app-form-label">Trạng thái</label>
+          <app-single-select
+            [(ngModel)]="selectedReportStatus"
+            (ngModelChange)="onReportEntryFiltersChange()"
+            [options]="statusSelectOptions"
+            [clearable]="false"
+            placeholder="Chọn trạng thái"
+            class="report-filter-field"
+          ></app-single-select>
+        </div>
+      </div>
+
+      <div class="report-search-actions">
+        <button
+          tuiButton
+          type="button"
+          appearance="primary"
+          size="m"
+          (click)="clearReportFilters()"
+          class="report-clear-btn"
+          title="Đưa form về mặc định và tìm kiếm lại"
+        >
+          <tui-svg src="tuiIconRefreshCw" class="btn-icon"></tui-svg>
+          Đặt lại
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loadingEntries" class="render-loading">
+      Đang tải danh sách phiên...
+    </div>
+
+    <div
+      *ngIf="!loadingEntries && (!isReportMode || filteredReportTemplates.length > 0)"
+      class="card entry-list-card"
+    >
+      <app-grid-header
+        [title]="'Danh sách phiên nhập liệu'"
+        [showBtnCreateNew]="showBtnCreateNew"
+        [btnLabelCreateNew]="btnLabelCreateNew"
+        (buttonClickCreateNew)="onButtonClickCreateNew()"
+      ></app-grid-header>
+      <div class="entry-list-grid-wrapper">
+        <app-ag-grid-wrapper
+          [rowData]="entryList"
+          [columnDefs]="entryColumnDefs"
+          [animateRows]="true"
+          [suppressCellFocus]="true"
+          [height]="'calc(100vh - 400px)'"
+          [width]="'100%'"
+          [theme]="'ag-theme-quartz'"
+        ></app-ag-grid-wrapper>
+      </div>
+    </div>
+
+    <div
+      *ngIf="!loadingEntries && isReportMode && filteredReportTemplates.length === 0"
+      class="empty-state"
+    >
+      Không có báo cáo nào thuộc nhóm chức năng {{ reportType }}.
+    </div>
+
+    <div
+      *ngIf="!loadingEntries && entryList.length === 0 && (!isReportMode || filteredReportTemplates.length > 0)"
+      class="empty-state"
+    >
+      Chưa có phiên nhập liệu nào. Nhấn "Tạo phiên mới" để bắt đầu.
+    </div>
+  </ng-container>
+
+  <!-- ============ ENTRY VIEW ============ -->
+  <ng-container *ngIf="viewMode === 'entry'">
+    <app-page-header
+      [breadcrumbs]="entryBreadcrumbs"
+    ></app-page-header>
+    <h2 class="render-title">{{ resolvedTemplateName || "Nhập liệu" }}</h2>
+    <div class="render-header entry-header">
+      <div class="render-header-left">
+        <div class="render-title-group">
+          <div class="entry-meta">
+            <!-- <span class="meta-badge meta-year">{{ entryYear }}</span>
+            <span class="meta-badge meta-month" *ngIf="entryMonth != null"
+              >T{{ entryMonth }}</span> -->
+            <!-- <span class="meta-badge meta-month" *ngIf="entryMonth == null"
+              >Cả năm</span>
+            <span class="meta-badge meta-org" *ngIf="entryOrgCode">{{
+              entryOrgCode
+            }}</span>
+            <span class="meta-badge meta-org-tct" *ngIf="!entryOrgCode"
+              >Tổng công ty</span> -->
+            <!-- Status badge -->
+            <!-- <span
+              class="meta-badge"
+              [style.background]="getStatusColor(entryStatus)"
+              [style.color]="getStatusTextColor(entryStatus)"
+            >
+              {{ getStatusLabel(entryStatus) }}
+            </span> -->
+            <!-- Nút toggle hiển thị panel tài liệu đính kèm — nằm bên trái -->
+            <button
+            *ngIf="templateId && entryId"
+            tuiButton
+            size="s"
+            appearance="flat"
+            (click)="toggleAttachments()"
+            class="template-action-btn attachments-toggle-btn"
+            [class.attachments-toggle-btn--empty]="attachmentsFilesCount === 0"
+            [title]="attachmentsCollapsed ? 'Mở tài liệu đính kèm' : 'Đóng tài liệu đính kèm'"
+        >
+            <tui-svg src="tuiIconPaperclip" class="btn-icon"></tui-svg>
+            @if (attachmentsFilesCount > 0) {
+            Tài liệu đính kèm ({{ attachmentsFilesCount }})
+            } @else {
+            Không có tài liệu đính kèm
+            }
+            </button>
+            <!-- Hạn xử lý phiên. Cho phép edit khi entry còn DRAFT/RETURNED (canEditDueDate)
+                 — TCT set hạn ngay trên entry 304 trước khi bấm "Giao chi phí cho đơn vị".
+                 Sau DISTRIBUTED → readOnly, mọi role chỉ xem.
+                 Hiển thị khi template bật `useDueDate` VÀ (đã có hạn HOẶC user còn quyền edit). -->
+            @if (templateUseDueDate && (entryDueDate || canEditDueDate)) {
+              <span
+                class="due-date-control"
+                [ngClass]="dueDateHighlightClass"
+                [title]="canEditDueDate ? 'Hạn xử lý của phiên — bấm để chỉnh sửa' : 'Hạn xử lý của phiên'"
+              >
+                <tui-svg src="tuiIconClock" class="due-date-control__icon"></tui-svg>
+                <span class="due-date-control__label">Hạn xử lý:</span>
+                <app-date-picker
+                  [ngModel]="dueDateInputValue"
+                  (ngModelChange)="onDueDateChange($event)"
+                  [readOnly]="!canEditDueDate"
+                  [withTime]="true"
+                  size="s"
+                  width="180px"
+                  height="35px"
+                ></app-date-picker>
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="render-actions">
+        <span *ngIf="validationErrorCount > 0" class="validation-badge">
+          {{ validationErrorCount }} lỗi
+        </span>
+
+        <!-- Chế độ chỉnh sửa dòng động — switch pill rõ ràng là toggle mode.
+             Cùng trạng thái với nút SAVE (DRAFT hoặc RETURNED) — vì thêm/xóa dòng
+             phải save được mới có ý nghĩa. -->
+        @if (canEditRows) {
+          <label
+            class="edit-mode-switch"
+            [class.edit-mode-switch--on]="isEditMode"
+            [title]="isEditMode ? 'Tắt chế độ chỉnh sửa bảng' : 'Bật chế độ chỉnh sửa bảng'"
+          >
+            <input
+              type="checkbox"
+              class="edit-mode-switch__input"
+              [checked]="isEditMode"
+              (change)="toggleEditMode()"
+            />
+            <tui-svg src="tuiIconSliders" class="edit-mode-switch__icon"></tui-svg>
+            <span class="edit-mode-switch__label">Chỉnh sửa bảng</span>
+            <span class="edit-mode-switch__track" aria-hidden="true">
+              <span class="edit-mode-switch__thumb"></span>
+            </span>
+          </label>
+        }
+
+        <!-- Toggle thanh Định dạng (B/I/Fill/Text/Merge). Ẩn mặc định để bớt rối UI. -->
+        <!-- <button
+          tuiButton
+          size="s"
+          [appearance]="'primary'"
+          (click)="formatBarCollapsed = !formatBarCollapsed"
+          class="template-action-btn"
+        >
+          <tui-svg *ngIf="formatBarCollapsed" src="tuiIconChevronDown" class="btn-icon"></tui-svg>
+          <tui-svg *ngIf="!formatBarCollapsed" src="tuiIconChevronUp" class="btn-icon"></tui-svg>
+          {{ formatBarCollapsed ? 'Mở định dạng' : 'Ẩn định dạng' }}
+        </button> -->
+
+        <!-- Nút Lịch sử phê duyệt (luôn hiện nếu có history) -->
+        <button
+          tuiButton
+          size="s"
+          appearance="secondary"
+          (click)="toggleHistory()"
+          *ngIf="hasWorkflow && approvalHistory.length > 0"
+          class="template-action-btn"
+        >
+          <tui-svg src="tuiIconClock" class="btn-icon"></tui-svg>
+          {{ showHistory ? "Ẩn lịch sử" : "Lịch sử phê duyệt" }}
+        </button>
+
+        <!-- Nút Đính kèm file — mở trực tiếp file picker -->
+        <button
+          *ngIf="templateId && entryId && isEntryEditable"
+          tuiButton
+          size="s"
+          appearance="primary"
+          (click)="openUploadAttachment()"
+          class="template-action-btn"
+          title="Đính kèm file"
+        >
+          <tui-svg src="tuiIconUpload" class="btn-icon"></tui-svg>
+          Đính kèm file
+        </button>
+
+        <!-- Nút động từ TEMPLATE_BUTTON (SAVE, EXPORT...) — SUBMIT và APPROVE ẩn ở đây -->
+        <ng-container *ngFor="let btn of templateButtons">
+          <button
+            *ngIf="isButtonVisible(btn)"
+            tuiButton
+            [appearance]="'primary'"
+            size="s"
+            [disabled]="isButtonDisabled(btn)"
+            (click)="onTemplateButtonClick(btn)"
+            class="template-action-btn"
+            [title]="btn.buttonLabel"
+          >
+            <tui-svg *ngIf="btn.buttonIcon" [src]="btn.buttonIcon" class="btn-icon"></tui-svg>
+            {{ btn.buttonLabel }}
+          </button>
+        </ng-container>
+
+        <!-- Nút gửi duyệt — chỉ hiện khi DRAFT (chưa từng gửi) -->
+        <button
+          *ngIf="hasWorkflow && canSubmitEntry && entryStatus === 'DRAFT'"
+          tuiButton
+          appearance="secondary"
+          size="s"
+          [disabled]="submitting"
+          (click)="submitForApproval()"
+          class="template-action-btn"
+        >
+          <tui-svg src="tuiIconSend" class="btn-icon"></tui-svg>
+          {{ submitting ? 'Đang gửi...' : 'Gửi duyệt' }}
+        </button>
+
+        <!-- Nút duyệt / gửi lại — hiện khi Camunda có task cho user này -->
+        <ng-container *ngIf="pendingTask">
+          <!-- Revision task (bị trả lại) → nút Gửi lại -->
+          <button
+            *ngIf="isRevisionTask"
+            tuiButton
+            appearance="secondary"
+            size="s"
+            (click)="resubmitEntry()"
+            class="template-action-btn"
+          >
+            <tui-svg src="tuiIconSend" class="btn-icon"></tui-svg>
+            Gửi lại
+          </button>
+
+          <!-- Approval task → nút Duyệt -->
+          <button
+            *ngIf="!isRevisionTask"
+            tuiButton
+            appearance="accent"
+            size="s"
+            (click)="openApprovalAction()"
+            class="template-action-btn"
+          >
+            <tui-svg src="tuiIconCheckCircle" class="btn-icon"></tui-svg>
+            {{ pendingTask.taskName || 'Duyệt / Xử lý' }}
+          </button>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Attachments panel — chỉ hiện khi đã có entryId, mặc định collapsed.
+         Toggle qua nút "Tài liệu đính kèm" ở render-actions (state ở parent). -->
+    <app-entry-attachments-panel
+      *ngIf="templateId && entryId"
+      [templateId]="templateId"
+      [entryId]="entryId"
+      [readonly]="entryStatus !== 'DRAFT' && entryStatus !== 'RETURNED' && entryStatus !== 'DISTRIBUTED'"
+      [collapsed]="attachmentsCollapsed"
+      (collapsedChange)="attachmentsCollapsed = $event"
+      (filesCountChange)="attachmentsFilesCount = $event"
+    ></app-entry-attachments-panel>
+
+    <!-- Approval History Panel -->
+    <div *ngIf="showHistory" class="history-panel">
+      <div class="history-panel-header">
+        <h3>Lịch sử duyệt</h3>
+        <button class="history-close" (click)="showHistory = false">
+          &times;
+        </button>
+      </div>
+      <app-history-timeline [history]="approvalHistory"></app-history-timeline>
+    </div>
+
+    @if (loading) {
+      <div class="render-loading">Đang tải biểu mẫu...</div>
+    }
+
+    <!-- Banner hint khi editmode ON. Gate bằng `canEditRows` để nếu status entry
+         đổi giữa chừng (approve/submit) thì banner tự ẩn. -->
+    @if (isEditMode && canEditRows && !loading) {
+      <div class="edit-mode-banner">
+        <tui-svg src="tuiIconInfo" class="edit-mode-banner__icon"></tui-svg>
+        <span>
+          Đang ở chế độ chỉnh sửa bảng. <strong>Chuột phải</strong> vào dòng để thêm/xóa,
+          <strong>kéo thả</strong> ở cột Mã dòng để sắp xếp lại,
+          <strong>click biểu tượng bánh răng</strong> trong cell để sửa công thức/định dạng.
+        </span>
+      </div>
+    }
+
+    <!-- Cảnh báo entry có formula chưa đồng bộ với DB. Chỉ hiện cho user không
+         có quyền edit (user editable đã có auto-sync xử lý). Báo cáo phụ thuộc
+         (LOOKUP cross-entry) đọc DB nên cần entry này được save sau khi formula
+         eval. Khuyến nghị NSD: nhờ chủ entry mở lại và bấm Lưu. -->
+    @if (!loading && !canEditRows && unsyncedFormulasDetected) {
+      <div class="unsynced-banner">
+        <tui-svg src="tuiIconAlertTriangle" class="unsynced-banner__icon"></tui-svg>
+        <span>
+          Entry này có giá trị công thức <strong>chưa đồng bộ với cơ sở dữ liệu</strong>.
+          Báo cáo phụ thuộc (LOOKUP) có thể chưa chính xác. Vui lòng nhờ
+          người có quyền chỉnh sửa mở lại entry để hệ thống tự đồng bộ.
+        </span>
+      </div>
+    }
+
+    @if (!loading) {
+      <div class="render-format-bar">
+        <span class="render-format-bar__label">Định dạng:</span>
+        <app-format-toolbar
+          #formatToolbar
+          [gridApi]="gridApi"
+          [getRangeBounds]="rangeBoundsFn"
+          [canApplyToCell]="canApplyFmtFn"
+          [disabled]="!canEditRows"
+          (formatChanged)="onFormatChanged($event)"
+        ></app-format-toolbar>
+        @if (!canEditRows) {
+          <span class="render-format-bar__hint">Chỉ áp được khi entry ở trạng thái Nháp/Trả về.</span>
+        }
+      </div>
+    }
+    @if (!loading) {
+      <div
+        class="data-entry-grid-wrapper"
+        (contextmenu)="onGridContextMenu($event)"
+        (copy)="handleGridCopy($event)"
+        (paste)="handleGridPaste($event)"
+      >
+        <app-ag-grid-wrapper
+          [rowData]="rowData"
+          [columnDefs]="gridColDefs"
+          [defaultColDef]="gridDefaultColDef"
+          [suppressCellFocus]="false"
+          [getRowStyle]="getRowStyle"
+          [animateRows]="true"
+          [rowDragManaged]="true"
+          [height]="'calc(100vh - 300px)'"
+          [width]="'100%'"
+          (gridReady)="onGridReady($event)"
+          (cellValueChanged)="onCellValueChanged($event)"
+          (rowDragEnd)="onRowDragEnd()"
+        ></app-ag-grid-wrapper>
+        <app-validation-error-panel
+          [errors]="validationErrors"
+          [expanded]="validationPanelExpanded"
+          (toggle)="onValidationPanelToggle()"
+          (entryClick)="onValidationEntryClick($event)"
+        ></app-validation-error-panel>
+      </div>
+    }
+
+    <app-render-context-menu
+      [menu]="contextMenu"
+      (addBelow)="onContextMenuAddBelow($event)"
+      (delete)="onContextMenuDelete()"
+      (resetCellConfig)="onContextMenuResetCellConfig()"
+    />
+
+    <app-cell-config-dialog
+      [(isOpen)]="isCellConfigDialogOpen"
+      [config]="cellConfigInput"
+      [catalogTypes]="catalogTypes"
+      [cellDropdownItems]="cellDropdownItems"
+      [cellDropdownLoading]="cellDropdownLoading"
+      [formulaValidation]="formulaValidation"
+      (saveCellConfig)="onCellConfigSave($event)"
+      (clearCellConfig)="onCellConfigClear()"
+      (dropdownCatalogTypeChange)="onCellDropdownCatalogTypeChange($event)"
+    ></app-cell-config-dialog>
+
+    <app-import-file-dialog
+      [(open)]="isImportDialogOpen"
+      [title]="'Nhập Excel — ' + (resolvedTemplateName || 'Phiên dữ liệu')"
+      [fileType]="'excel'"
+      [isDownloadingTemplate]="isDownloadingImportTemplate"
+      (handlerFileSubmit)="onImportFileSubmit($event)"
+      (handlerDowloadTemplate)="onDownloadImportTemplate()"
+    ></app-import-file-dialog>
+
+  </ng-container>
+</div>

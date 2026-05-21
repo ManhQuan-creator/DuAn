@@ -1,0 +1,39 @@
+<div class="task-list-container">
+  <app-page-header
+    title="Công việc của tôi"
+    subtitle="Danh sách công việc đang chờ xử lý"
+    [breadcrumbs]="breadcrumbs"
+  ></app-page-header>
+
+  <div class="card task-filter-card">
+    <div class="task-filter">
+      <input
+        class="task-search-input"
+        type="text"
+        placeholder="Tìm kiếm theo tên công việc, người gửi, đơn vị..."
+        [(ngModel)]="searchText"
+        (ngModelChange)="onSearchChange()"
+      />
+      <button tuiButton appearance="flat" size="s" (click)="loadTasks()">
+        Làm mới
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="task-loading">Đang tải danh sách công việc...</div>
+
+  <div *ngIf="!loading" class="card task-grid-card">
+    <app-ag-grid-wrapper [enableRangeSelection]="true"
+      [rowData]="filteredTasks"
+      [columnDefs]="columnDefs"
+      [animateRows]="true"
+      [width]="'100%'"
+      [theme]="'ag-theme-quartz'"
+      [domLayout]="'autoHeight'"
+    ></app-ag-grid-wrapper>
+  </div>
+
+  <div *ngIf="!loading && filteredTasks.length === 0" class="empty-state">
+    Không có công việc nào đang chờ xử lý.
+  </div>
+</div>

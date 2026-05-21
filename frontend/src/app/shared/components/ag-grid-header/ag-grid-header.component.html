@@ -1,0 +1,22 @@
+<div class="grid-header">
+  <div class="header-text">
+    <span class="title">{{ title }}</span>
+    <span class="subtitle" *ngIf="subtitle">{{ subtitle }}</span>
+  </div>
+
+  <div class="button-group">
+    <button
+      *ngFor="let action of visibleActions"
+      type="button"
+      tuiButton
+      [appearance]="action.appearance || 'primary'"
+      size="s"
+      [ngClass]="['buttons', action.className || '']"
+      [icon]="action.icon || ''"
+      [disabled]="!!action.disabled"
+      (click)="onActionClick(action)"
+    >
+      {{ action.label }}
+    </button>
+  </div>
+</div>

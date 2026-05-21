@@ -1,0 +1,60 @@
+::ng-deep .template-select [tuiwrapper],
+::ng-deep .search-input [tuiwrapper] {
+  box-shadow: none !important;
+  border: 1px solid #ccc !important;
+  border-radius: 8px !important;
+}
+
+.manager-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px 24px;
+  gap: 16px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+}
+
+.manager-filters.app-search-toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 400px) minmax(240px, 1fr);
+  align-items: end;
+  column-gap: 24px;
+  row-gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+
+  .template-select,
+  .search-input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .app-search-toolbar__field,
+  .app-search-toolbar__field--grow {
+    flex: unset;
+    max-width: none;
+    min-width: 0;
+  }
+}
+
+.manager-grid-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.manager-grid {
+  flex: 1;
+  min-height: 0;
+}

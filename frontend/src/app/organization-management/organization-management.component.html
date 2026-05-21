@@ -1,0 +1,73 @@
+<div class="manager-container">
+  <app-page-header
+    [title]="headerTitle"
+    [subtitle]="subTitle"
+    [breadcrumbs]="breadcrumbs"
+  ></app-page-header>
+
+  <div class="card manager-filters app-search-toolbar">
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Mã, tên</label>
+      <tui-input
+        [(ngModel)]="searchKeyword"
+        (ngModelChange)="onSearchInput()"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="search-input app-search-toolbar__field app-search-toolbar__field--grow"
+      >
+        Tìm kiếm theo mã, tên đơn vị...
+      </tui-input>
+    </div>
+
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Trạng thái</label>
+      <tui-select
+        [(ngModel)]="activeFilter"
+        (ngModelChange)="onActiveChange()"
+        [stringify]="stringifyActive"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="status-select app-search-toolbar__field search-input"
+      >
+        Trạng thái
+        <tui-data-list *tuiDataList>
+          <button *ngFor="let opt of activeOptions" tuiOption [value]="opt">
+            {{ stringifyActive(opt) }}
+          </button>
+        </tui-data-list>
+      </tui-select>
+    </div>
+  </div>
+
+  <div class="card manager-grid-card">
+    <div *ngIf="loading" class="grid-loading-overlay">
+      <span class="grid-loading-spinner"></span> Đang tải dữ liệu...
+    </div>
+    <div class="manager-grid">
+      <app-grid-header
+        [showBtnCreateNew]="true"
+        (buttonClickCreate)="openCreateDialog()"
+      ></app-grid-header>
+      <app-ag-grid-wrapper
+        [rowData]="organizations"
+        [columnDefs]="columnDefs"
+        [defaultColDef]="defaultColDef"
+        [animateRows]="true"
+        [pagination]="false"
+        [suppressCellFocus]="true"
+        [enableRangeSelection]="true"
+        [height]="'100%'"
+        [width]="'100%'"
+        [theme]="'ag-theme-quartz'"
+        (gridReady)="onGridReady($event)"
+      ></app-ag-grid-wrapper>
+    </div>
+    <app-custom-pagination
+      [totalRows]="totalRows"
+      [currentPage]="pageNum + 1"
+      [pageSize]="pageSize"
+      (pageChanged)="onPageChanged($event)"
+      (pageSizeChanged)="onPageSizeChanged($event)"
+    />
+  </div>
+</div>

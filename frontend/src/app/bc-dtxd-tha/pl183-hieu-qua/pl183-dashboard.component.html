@@ -1,0 +1,117 @@
+<div class="dashboard-root">
+
+  @if (loadError(); as err) {
+    <div class="error-banner">{{ err }}</div>
+  }
+
+  @if (!entryExists()) {
+    <app-no-data-hint
+      [templateId]="templateId()"
+      message="Kỳ này chưa có dự án nào được đánh giá hiệu quả. Vui lòng thêm từng dự án qua màn hình nhập liệu (mỗi dự án = 1 dòng custom).">
+    </app-no-data-hint>
+  }
+
+  <section class="tier tier-kpi">
+    <h2 class="tier-title">
+      Tổng quan hiệu quả ĐT
+      @if (currentUnit()) { <span class="tier-subtitle">— {{ currentUnit() }}</span> }
+    </h2>
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng số dự án</div>
+          <div class="kpi-value">{{ fmtCount(kpi().tongSoDuAn) }}</div>
+          <div class="kpi-unit">trong kỳ</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-cyan">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng TMĐT BCNCKT</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().tongTmdtBcnckt) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng chi phí thực tế</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().tongChiPhiTt) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-emerald">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-body">
+          <div class="kpi-label">DA tăng hiệu quả</div>
+          <div class="kpi-value">{{ fmtCount(kpi().soDaTangHieuQua) }}</div>
+          <div class="kpi-unit">giá trị tăng ≥ 0</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-rose">
+        <div class="kpi-icon">📉</div>
+        <div class="kpi-body">
+          <div class="kpi-label">DA thiệt hại</div>
+          <div class="kpi-value">{{ fmtCount(kpi().soDaThietHai) }}</div>
+          <div class="kpi-unit">giá trị tăng &lt; 0</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Phân bổ &amp; So sánh BCNCKT vs Thực tế</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>Phân loại theo cấp điện áp</h3>
+        <div class="chart-host">
+          @if (capDienAp().length === 0) {
+            <div class="chart-empty">Chưa có dự án</div>
+          } @else {
+            <echarts [options]="capDienApChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>TMĐT BCNCKT vs Chi phí Thực tế (Top 10)</h3>
+        <div class="chart-host">
+          @if (topByTmdt().length === 0) {
+            <div class="chart-empty">Chưa có dữ liệu chi phí</div>
+          } @else {
+            <echarts [options]="tmdtChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Hiệu quả tài chính</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>Giá trị tăng / thiệt hại theo dự án (Top 15)</h3>
+        <div class="chart-host">
+          @if (topByTangThiet().length === 0) {
+            <div class="chart-empty">Chưa có dự án có giá trị tăng/thiệt hại</div>
+          } @else {
+            <echarts [options]="tangThietChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+      @if (showPcChart()) {
+        <div class="chart-card">
+          <h3>Số dự án theo PC</h3>
+          <div class="chart-host">
+            @if (pcCount().length === 0) {
+              <div class="chart-empty">Chưa có dự án</div>
+            } @else {
+              <echarts [options]="pcChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+</div>

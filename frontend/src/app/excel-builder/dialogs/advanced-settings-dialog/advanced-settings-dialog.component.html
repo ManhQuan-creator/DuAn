@@ -1,0 +1,127 @@
+<ng-template
+  [(appDialog)]="isOpen"
+  (appDialogChange)="isOpenChange.emit($event)"
+  [appDialogOptions]="{ size: 'l', dismissible: true, closeable: true }"
+>
+  <div class="dialog-wrapper">
+    <div class="dialog-header">
+      <h2 class="dialog-title">{{ title }}</h2>
+    </div>
+
+    <div class="dialog-body">
+      <div class="field field-full">
+        <label tuiLabel>Mã báo cáo <span class="required">*</span></label>
+        <tui-input
+          [(ngModel)]="code"
+          tuiTextfieldSize="m"
+          [tuiTextfieldLabelOutside]="true"
+        ></tui-input>
+        <span class="field-error" *ngIf="code.trim().length > 0 && !isCodeValid">
+          Chỉ cho phép chữ cái, số và dấu gạch dưới (a-z, A-Z, 0-9, _)
+        </span>
+      </div>
+
+      <div class="field field-full">
+        <label tuiLabel>Tên báo cáo <span class="required">*</span></label>
+        <tui-textarea
+          [(ngModel)]="name"
+          [tuiTextfieldLabelOutside]="true"
+          [expandable]="true"
+          [rows]="3"
+          tuiTextfieldSize="m"
+          class="report-name-textarea"
+        >
+          Nhập tên báo cáo (Enter để xuống dòng)
+        </tui-textarea>
+      </div>
+
+      <div class="field">
+        <label tuiLabel>Quy trình phê duyệt</label>
+        <app-single-select
+          [(ngModel)]="selectedWorkflowKey"
+          [options]="workflowSelectOptions"
+          placeholder="-- Chưa gán quy trình --"
+          clearLabel="-- Chưa gán quy trình --"
+        ></app-single-select>
+      </div>
+
+      <div class="field">
+        <label tuiLabel>Kỳ báo cáo <span class="required">*</span></label>
+        <tui-select
+          [(ngModel)]="selectedPeriodType"
+          [stringify]="stringifyPeriodType"
+          tuiTextfieldSize="m"
+          [tuiTextfieldLabelOutside]="true"
+        >
+          <tui-data-list *tuiDataList>
+            <button *ngFor="let opt of periodTypeOptions" tuiOption [value]="opt.value">
+              {{ opt.label }}
+            </button>
+          </tui-data-list>
+        </tui-select>
+      </div>
+
+      <div class="field">
+        <label tuiLabel>Lĩnh vực báo cáo</label>
+        <app-multi-select
+          [(ngModel)]="selectedReportDepartmentIds"
+          [options]="reportDepartmentSelectOptions"
+          placeholder="Chọn lĩnh vực báo cáo..."
+        ></app-multi-select>
+      </div>
+
+      <div class="field">
+        <label tuiLabel>Nhóm chức năng báo cáo</label>
+        <app-grouped-multi-select
+          [(ngModel)]="selectedSidebarMenuKeys"
+          [options]="sidebarMenuSelectOptions"
+          placeholder="Chọn nhóm chức năng (lấy từ menu sidebar)..."
+        ></app-grouped-multi-select>
+      </div>
+
+      <div class="field">
+        <label tuiLabel>Năm preview placeholder {{ '${N}' }}</label>
+        <tui-input-year
+          [(ngModel)]="previewYear"
+          [tuiTextfieldLabelOutside]="true"
+          tuiTextfieldSize="m"
+        ></tui-input-year>
+      </div>
+
+      <div class="field">
+        <label tuiLabel>Tháng preview placeholder {{ '${M}' }}</label>
+        <app-single-select
+          [(ngModel)]="previewMonth"
+          [options]="monthOptions"
+          [clearable]="false"
+          placeholder="Chọn tháng"
+        ></app-single-select>
+      </div>
+
+      <div class="field field-full">
+        <tui-checkbox-labeled
+          [(ngModel)]="selectedUseDueDate"
+          size="l"
+          class="due-date-checkbox"
+        >
+          Có hạn xử lý — bật input "Hạn xử lý" khi tạo phiên + badge ở entry view
+        </tui-checkbox-labeled>
+      </div>
+    </div>
+
+    <div class="dialog-footer">
+      <button tuiButton appearance="outline" (click)="onClose()" class="btn btn-cancel">
+        Hủy
+      </button>
+      <button
+        tuiButton
+        appearance="primary"
+        [disabled]="!canSave"
+        (click)="onSave()"
+        class="btn btn-submit"
+      >
+        Lưu
+      </button>
+    </div>
+  </div>
+</ng-template>

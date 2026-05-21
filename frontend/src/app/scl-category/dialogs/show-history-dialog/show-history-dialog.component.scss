@@ -1,0 +1,21 @@
+.dialog-wrapper {
+  width: 80vw;
+  max-width: 1200px;
+  height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0; // quan trọng để flex child có thể shrink
+  gap: 8px;
+}
+
+.dialog-grid-container {
+  flex: 1;
+  min-height: 0; // quan trọng để ag-grid không bị overflow
+  overflow: hidden;
+}

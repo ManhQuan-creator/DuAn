@@ -1,0 +1,682 @@
+@use '../../styles.scss' as *;
+
+.render-container {
+  padding: 16px 24px;
+}
+
+.render-header {
+  margin-bottom: 16px;
+}
+
+.entry-header {
+  margin: 10px 0px 10px 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.render-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  color: #64748b !important;
+  font-size: 13px !important;
+  &:hover {
+    color: #1e293b !important;
+  }
+}
+
+.render-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.render-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 20px;
+  color: #4574C0;
+  text-transform: uppercase;
+  text-align: center;
+  margin-top: 18px;
+  white-space: pre-line;
+  line-height: 1.3;
+}
+
+.entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 10px;
+  line-height: 1.4;
+}
+
+.meta-year {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.meta-month {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.meta-org {
+  background: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+
+.meta-org-tct {
+  background: #fefce8;
+  color: #a16207;
+  border: 1px solid #fef08a;
+}
+
+.render-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actions-divider {
+  width: 1px;
+  height: 24px;
+  background: #e2e8f0;
+  margin: 0 4px;
+}
+
+/* =======================================================================
+ * Chuẩn hóa action buttons trong render-actions — cùng chiều cao, bo góc,
+ * padding, font, icon. Chỉ phân cấp qua Taiga appearance:
+ *  - primary (SAVE): xanh chủ đạo, filled
+ *  - accent (Duyệt/Xử lý): vàng/cam CTA
+ *  - secondary (còn lại): bordered trung tính
+ * ======================================================================= */
+.template-action-btn {
+  height: 35px !important;
+  min-height: 35px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1px !important;
+  line-height: 1 !important;
+
+  .btn-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+}
+
+// Nút toggle tài liệu đính kèm — khi rỗng hiển thị như hint (muted, italic)
+.attachments-toggle-btn {
+  &--empty {
+    color: #94a3b8 !important;
+    font-style: italic;
+    font-weight: 400 !important;
+  }
+}
+
+.validation-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+}
+
+// History panel
+.history-panel {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.history-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+}
+
+.history-close {
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+
+  &:hover {
+    color: #475569;
+  }
+}
+
+.render-loading {
+  padding: 40px 0;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.entry-list-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 16px 10px 10px 10px;
+  overflow: hidden;
+}
+
+.report-search-card {
+  margin-bottom: 16px;
+  padding: 16px 20px 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #dbe5f0;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.report-search-type {
+  margin-bottom: 14px;
+  color: #475569;
+  font-size: 13px;
+
+  strong {
+    color: #0f172a;
+    font-weight: 700;
+  }
+}
+
+.report-search-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 2.3fr)
+    minmax(140px, 0.9fr)
+    minmax(140px, 0.9fr)
+    minmax(180px, 1.2fr)
+    minmax(170px, 1.1fr);
+  gap: 14px;
+  align-items: end;
+
+  /* Báo cáo theo NĂM ẩn input kỳ → 4 cột, Lĩnh vực hấp thụ fr giải phóng. */
+  &--no-period {
+    grid-template-columns:
+      minmax(280px, 2.3fr)
+      minmax(140px, 0.9fr)
+      minmax(180px, 2.1fr)
+      minmax(170px, 1.1fr);
+  }
+}
+
+.report-search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.report-filter-field {
+  width: 100%;
+}
+
+.report-search-field:first-child {
+  min-width: 280px;
+}
+
+.report-search-field ::ng-deep tui-select,
+.report-search-field ::ng-deep tui-input-year {
+  width: 100%;
+}
+
+.report-search-field ::ng-deep [tuiWrapper][data-appearance='textfield'] {
+  min-height: 44px;
+}
+
+.report-search-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.report-clear-btn {
+  .btn-icon {
+    margin-right: 6px;
+  }
+}
+
+@media (max-width: 1520px) {
+  .report-search-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.entry-list-grid-wrapper {
+  min-height: calc(100vh - 400px);
+  height: 550px;
+  display: flex;
+  flex-direction: column;
+}
+
+.data-entry-grid-wrapper {
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Spinner keyframes for dropdown loading */
+@keyframes cc-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1200px) {
+  .report-search-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .render-container {
+    padding: 16px;
+  }
+
+  .report-search-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+ * EditMode — thêm/xóa dòng động (Option A)
+ * ========================================================================== */
+
+/* Chỉnh sửa dòng — switch đặc biệt kiểu "dev tool / tech terminal":
+   monospace label + corner-bracket decoration + cyan neon accent khi ON. */
+.edit-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 35px;
+  padding: 0 14px 0 12px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1;
+  transition: background .2s ease, border-color .2s ease,
+              color .2s ease, box-shadow .25s ease;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Corner-bracket decoration — 2 góc (top-left + bottom-right) tạo cảm giác "framing" tech */
+.edit-mode-switch::before,
+.edit-mode-switch::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border: 1px solid #94a3b8;
+  opacity: 0.55;
+  pointer-events: none;
+  transition: border-color .2s ease, opacity .2s ease, box-shadow .25s ease;
+}
+.edit-mode-switch::before {
+  top: 3px; left: 3px;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 3px;
+}
+.edit-mode-switch::after {
+  bottom: 3px; right: 3px;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 3px;
+}
+
+.edit-mode-switch:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-color: #94a3b8;
+  color: #334155;
+}
+.edit-mode-switch:focus-within {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18);
+}
+
+/* Ẩn native checkbox nhưng giữ cho a11y + keyboard toggle */
+.edit-mode-switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.edit-mode-switch__icon {
+  width: 14px;
+  height: 14px;
+  color: #64748b;
+  transition: color .2s ease, filter .25s ease;
+}
+
+.edit-mode-switch__label {
+  white-space: nowrap;
+}
+
+/* Track + thumb — mini LED-style indicator */
+.edit-mode-switch__track {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 14px;
+  background: #cbd5e1;
+  border: 1px solid #94a3b8;
+  border-radius: 999px;
+  transition: background .2s ease, border-color .2s ease, box-shadow .25s ease;
+  flex-shrink: 0;
+}
+.edit-mode-switch__thumb {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform .2s ease, background-color .25s ease, box-shadow .3s ease;
+}
+
+/* ON state — dark slate + cyan neon, pulse LED, corner brackets sáng lên */
+.edit-mode-switch--on {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-color: #0891b2;
+  color: #67e8f9;
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.3),
+              inset 0 0 12px rgba(34, 211, 238, 0.12);
+}
+.edit-mode-switch--on:hover {
+  border-color: #22d3ee;
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.5),
+              0 0 14px rgba(34, 211, 238, 0.25),
+              inset 0 0 14px rgba(34, 211, 238, 0.18);
+}
+.edit-mode-switch--on::before,
+.edit-mode-switch--on::after {
+  border-color: #22d3ee;
+  opacity: 1;
+  box-shadow: 0 0 4px rgba(34, 211, 238, 0.6);
+}
+.edit-mode-switch--on .edit-mode-switch__icon {
+  color: #22d3ee;
+  filter: drop-shadow(0 0 3px rgba(34, 211, 238, 0.55));
+}
+.edit-mode-switch--on .edit-mode-switch__track {
+  background: #0c4a6e;
+  border-color: #22d3ee;
+  box-shadow: inset 0 0 4px rgba(34, 211, 238, 0.4);
+}
+.edit-mode-switch--on .edit-mode-switch__thumb {
+  transform: translateX(14px);
+  background: #22d3ee;
+  box-shadow: 0 0 4px rgba(34, 211, 238, 0.9),
+              0 0 8px rgba(34, 211, 238, 0.55);
+  animation: edit-mode-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes edit-mode-pulse {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(34, 211, 238, 0.9),
+                0 0 8px rgba(34, 211, 238, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 6px rgba(34, 211, 238, 1),
+                0 0 14px rgba(34, 211, 238, 0.75);
+  }
+}
+
+.edit-mode-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+  padding: 8px 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  color: #1e40af;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.edit-mode-banner__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #2563eb;
+}
+.edit-mode-banner strong { font-weight: 600; }
+
+.unsynced-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+  padding: 8px 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.unsynced-banner__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #d97706;
+}
+.unsynced-banner strong { font-weight: 600; }
+
+/* Floating context menu — position:fixed theo tọa độ chuột phải */
+.custom-row-menu {
+  position: fixed;
+  z-index: 10000;
+  min-width: 220px;
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+  animation: custom-row-menu-in 0.12s ease-out;
+}
+
+@keyframes custom-row-menu-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.custom-row-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: #111827;
+  font-size: 13px;
+  text-align: left;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+.custom-row-menu__item:hover {
+  background: #f3f4f6;
+}
+.custom-row-menu__icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #6b7280;
+}
+.custom-row-menu__item--danger {
+  color: #dc2626;
+}
+.custom-row-menu__item--danger .custom-row-menu__icon {
+  color: #dc2626;
+}
+.custom-row-menu__item--danger:hover {
+  background: #fef2f2;
+}
+
+/* Delta badge: cell formula thay đổi vs original snapshot — corner orange triangle.
+   AG Grid `cellClassRules` add class này; cell phải position relative để pseudo-element
+   vẽ đúng góc. Pointer-events:none tránh badge chặn click vào cell. */
+.cell-formula-delta {
+  position: relative;
+}
+.cell-formula-delta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 8px 8px 0;
+  border-color: transparent #f97316 transparent transparent;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.custom-row-menu__add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+}
+.custom-row-menu__add-btn {
+  flex: 0 0 auto;
+  width: auto;
+  padding-right: 8px;
+}
+.custom-row-menu__count-input {
+  width: 56px;
+  padding: 4px 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: center;
+  background: #fff;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.1s ease, box-shadow 0.1s ease;
+}
+.custom-row-menu__count-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+.custom-row-menu__count-input::-webkit-outer-spin-button,
+.custom-row-menu__count-input::-webkit-inner-spin-button {
+  opacity: 1;
+}
+.custom-row-menu__suffix {
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.render-format-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+.render-format-bar__label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+.render-format-bar__hint {
+  margin-left: auto;
+  font-size: 11px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/**
+ * Container "Hạn xử lý" — luôn hiển thị app-date-picker. Highlight border + bg
+ * chỉ áp khi quá hạn (đỏ) hoặc sắp đến hạn ≤3 ngày (vàng); ngoài ra giữ default.
+ */
+.due-date-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  &__icon { width: 14px; height: 14px; }
+  &__label { white-space: nowrap; }
+  &__clear-btn { width: 35px !important; height: 35px !important; }
+  &__btn { width: 35px !important; height: 35px !important; }
+  /* Highlight chỉ qua màu chữ của icon + label "Hạn:". Picker bên trong giữ
+     style mặc định Taiga, không bị nhuộm theo overdue/soon. */
+  &--soon {
+    color: #b45309;
+    .due-date-control__icon { color: #b45309; }
+  }
+  &--overdue {
+    color: #b91c1c;
+    .due-date-control__icon { color: #b91c1c; }
+  }
+}

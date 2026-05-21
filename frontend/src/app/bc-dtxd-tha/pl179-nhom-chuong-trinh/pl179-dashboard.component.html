@@ -1,0 +1,118 @@
+<div class="dashboard-root">
+
+  @if (loadError(); as err) {
+    <div class="error-banner">{{ err }}</div>
+  }
+
+  @if (!entryExists()) {
+    <app-no-data-hint [templateId]="templateId()"></app-no-data-hint>
+  }
+
+  <!-- ═════ TẦNG 1 — KPI CARDS ═════ -->
+  <section class="tier tier-kpi">
+    <h2 class="tier-title">
+      Tổng quan
+      @if (currentUnit()) { <span class="tier-subtitle">— {{ currentUnit() }}</span> }
+    </h2>
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng số công trình</div>
+          <div class="kpi-value">{{ fmtCount(kpi().tongSoCT) }}</div>
+          <div class="kpi-unit">cả năm</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng TMĐT</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().tongTmdt) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-emerald">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Đã hoàn thành</div>
+          <div class="kpi-value">{{ fmtCount(kpi().tongHt) }}</div>
+          <div class="kpi-unit">công trình</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-body">
+          <div class="kpi-label">% Hoàn thành / KH</div>
+          <div class="kpi-value">{{ fmtPercent(kpi().tyleHt) }}</div>
+          <div class="kpi-unit">tiến độ năm</div>
+        </div>
+      </div>
+      @if (showUnitCharts()) {
+        <div class="kpi-card kpi-violet">
+          <div class="kpi-icon">🏢</div>
+          <div class="kpi-body">
+            <div class="kpi-label">Số đơn vị báo cáo</div>
+            <div class="kpi-value">{{ fmtCount(kpi().soDonViBaoCao) }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ═════ TẦNG 2 — CƠ CẤU + %HT ═════ -->
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Phân tích nhóm chương trình</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>Cơ cấu TMĐT theo nhóm chương trình</h3>
+        <div class="chart-host">
+          @if (groupBreakdown().length === 0) {
+            <div class="chart-empty">Chưa có dữ liệu</div>
+          } @else {
+            <echarts [options]="coCauChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>% Hoàn thành theo nhóm chương trình</h3>
+        <div class="chart-host">
+          @if (groupBreakdown().length === 0) {
+            <div class="chart-empty">Chưa có dữ liệu</div>
+          } @else {
+            <echarts [options]="tyleHtChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ TẦNG 3 — THEO ĐƠN VỊ (ẩn khi filter PC) ═════ -->
+  @if (showUnitCharts()) {
+    <section class="tier tier-charts">
+      <h2 class="tier-title">Phân bổ theo đơn vị (Top 15)</h2>
+      <div class="charts-grid charts-2col">
+        <div class="chart-card">
+          <h3>Tổng TMĐT theo đơn vị</h3>
+          <div class="chart-host">
+            @if (unitBreakdown().length === 0) {
+              <div class="chart-empty">Chưa có dữ liệu</div>
+            } @else {
+              <echarts [options]="unitTmdtChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+            }
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>HT vs Chưa HT theo đơn vị</h3>
+          <div class="chart-host">
+            @if (unitBreakdown().length === 0) {
+              <div class="chart-empty">Chưa có dữ liệu</div>
+            } @else {
+              <echarts [options]="unitHtChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+</div>

@@ -1,0 +1,78 @@
+@startuml
+title Quy trình Quản lý Kế hoạch và Chi phí Sửa chữa lớn (SCL)
+autonumber
+
+actor "Đơn vị cấp 3" as DV
+participant "Hệ thống (Software)" as Sys
+participant "Ban Kế hoạch" as BKH
+participant "Tổ xét duyệt\n(KH, KT, TC, ĐT)" as TXD
+participant "TGĐ/P.TGĐ" as TGD
+participant "HĐTV" as HDTV
+
+== Giai đoạn 1: Tạm tính & Phân bổ chi phí (Năm N) ==
+BKH -> Sys: Nhập định mức tiết kiệm/giả định
+activate Sys
+Sys -> Sys: Lấy dữ liệu (SL Điện N, NG Tài sản N-3)
+Sys --> BKH: File Excel tính toán tạm tính
+deactivate Sys
+
+BKH -> TGD: Tờ trình phương án tạm tính
+activate TGD
+TGD --> BKH: Thông qua phương án
+deactivate TGD
+
+BKH -> HDTV: Tờ trình HĐTV phương án tạm tính
+activate HDTV
+HDTV --> BKH: Nghị quyết phê duyệt
+deactivate HDTV
+
+BKH -> TGD: Trình thông báo phân bổ (Tạm tính)
+activate TGD
+TGD --> DV: Thông báo phân bổ chi phí SCL
+deactivate TGD
+
+== Giai đoạn 2: Lập & Thẩm định Kế hoạch ==
+activate DV
+DV -> Sys: Lấy dữ liệu CBM, CRM, ERP
+Sys --> DV: Biểu mẫu B.62
+DV -> BKH: Trình danh mục KH SCL (Deadline 31/05)
+deactivate DV
+
+BKH -> Sys: Tổng hợp KH các đơn vị
+Sys --> BKH: File tổng hợp danh mục
+
+BKH -> TXD: Chuyển hồ sơ thẩm định
+activate TXD
+TXD -> TXD: Thẩm định (Trước 01/07)
+TXD --> DV: Yêu cầu hiệu chỉnh (nếu có)
+DV -> Sys: Cập nhật KH đã hiệu chỉnh
+TXD -> TGD: Tờ trình thông qua KH Đợt 1
+deactivate TXD
+
+activate TGD
+TGD --> BKH: Phê duyệt
+BKH -> TGD: Soạn văn bản giao KH & Tạm ứng phí
+TGD --> DV: Văn bản giao KH SCL Đợt 1
+deactivate TGD
+
+== Giai đoạn 3: Giao chi phí chính thức ==
+BKH -> Sys: Tính toán phân bổ chính thức (theo EVN)
+BKH -> TGD: Trình phương án chính thức
+TGD --> BKH: Thông qua
+BKH -> HDTV: Tờ trình phân bổ chính thức
+HDTV --> BKH: Nghị quyết phê duyệt
+
+BKH -> TGD: Trình văn bản giao chính thức
+TGD --> DV: Quyết định giao chi phí SCL Chính thức
+
+== Giai đoạn 4: Điều chỉnh & Báo cáo ==
+BKH -> Sys: Xây dựng phương án điều chỉnh/điều hòa
+BKH -> TGD: Trình phương án điều chỉnh
+TGD -> HDTV: Báo cáo xin ý kiến
+HDTV --> BKH: Nghị quyết thông qua
+BKH -> TGD: Soạn văn bản điều chỉnh
+TGD --> DV: Quyết định điều chỉnh
+
+DV -> Sys: Báo cáo kết quả/tiến độ
+Sys --> BKH: Tổng hợp báo cáo đánh giá
+@enduml

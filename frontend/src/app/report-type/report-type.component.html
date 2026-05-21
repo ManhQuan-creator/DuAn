@@ -1,0 +1,110 @@
+<div class="manager-container">
+  <app-page-header
+    [title]="headerTitle"
+    [subtitle]="subTitle"
+    [breadcrumbs]="breadcrumbs"
+    [showCreateBtn]="false"
+  ></app-page-header>
+
+  <div class="card manager-filters">
+    <!-- Mã biểu mẫu -->
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Mã biểu mẫu</label>
+      <tui-input
+        [(ngModel)]="filterCode"
+        (ngModelChange)="onFilterChange()"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="filter-field"
+      >
+        Nhập mã biểu mẫu...
+      </tui-input>
+    </div>
+
+    <!-- Lĩnh vực -->
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Lĩnh vực</label>
+      <tui-input
+        [(ngModel)]="filterSector"
+        (ngModelChange)="onFilterChange()"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="filter-field"
+      >
+        Nhập lĩnh vực...
+      </tui-input>
+    </div>
+
+    <!-- Đơn vị -->
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Đơn vị</label>
+      <tui-select
+        [(ngModel)]="filterOrgCode"
+        (ngModelChange)="onOrgChange()"
+        [stringify]="stringifyOrg"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="filter-field"
+      >
+        Đơn vị
+        <tui-data-list *tuiDataList>
+          @for (code of orgOptions; track code) {
+            <button tuiOption [value]="code">
+              {{ stringifyOrg(code) }}
+            </button>
+          }
+        </tui-data-list>
+      </tui-select>
+    </div>
+
+    <!-- Trạng thái -->
+    <div class="form-group">
+      <label tuiLabel class="app-form-label">Trạng thái</label>
+      <tui-select
+        [(ngModel)]="filterStatus"
+        (ngModelChange)="onStatusChange()"
+        [stringify]="stringifyStatus"
+        [tuiTextfieldLabelOutside]="true"
+        tuiTextfieldSize="m"
+        class="filter-field"
+      >
+        Trạng thái
+        <tui-data-list *tuiDataList>
+          @for (s of statusOptions; track s) {
+            <button tuiOption [value]="s">
+            {{ stringifyStatus(s) }}
+            </button>
+          }
+        </tui-data-list>
+      </tui-select>
+    </div>
+  </div>
+
+  <div class="card manager-grid-card">
+    <div *ngIf="loading" class="grid-loading-overlay">
+      <span class="grid-loading-spinner"></span> Đang tải dữ liệu...
+    </div>
+    <app-grid-header
+      [title]="gridTitle"
+    ></app-grid-header>
+    <div class="manager-grid">
+      <app-ag-grid-wrapper [enableRangeSelection]="true"
+        [rowData]="templateList"
+        [columnDefs]="columnDefs"
+        [animateRows]="true"
+        [pagination]="false"
+        [suppressCellFocus]="true"
+        [height]="'100%'"
+        [width]="'100%'"
+        [theme]="'ag-theme-quartz'"
+      ></app-ag-grid-wrapper>
+    </div>
+    <app-custom-pagination
+      [totalRows]="totalRows"
+      [currentPage]="pageNum + 1"
+      [pageSize]="pageSize"
+      (pageChanged)="onPageChanged($event)"
+      (pageSizeChanged)="onPageSizeChanged($event)"
+    />
+  </div>
+</div>

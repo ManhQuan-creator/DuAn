@@ -1,0 +1,70 @@
+@startuml
+!theme vibrant
+skinparam componentStyle uml2
+skinparam linetype ortho
+' 1. Định hướng chiều dọc
+top to bottom direction
+title "Hệ thống Notification"
+
+package "Frontend (Angular)" as Frontend{
+    actor "User" as User
+    
+    database "LocalStorage" {
+        [lastEventId]
+    }
+}
+
+
+package "Nginx / Kong" as GatewayLayer {
+    [Load Balancer]
+    note right
+        Header: X-Accel-Buffering: no
+        Timeout: 3600s
+    end note
+}
+
+
+package "Backend Cluster (Spring Boot)" as Backend {
+    package "Node A (Instance)" {
+        component "Memory" {
+            [Local Emitters Map]
+        }
+    }
+}
+
+database "Data Layer" as DataLayer {
+    component "Redis Cluster" as Redis {
+        [Hash: User Locations]
+        [Pub/Sub Topics]
+        note right
+           1. Map: User -> NodeID
+           2. Topic: tin nhắn cho Node
+        end note
+    }
+    
+    component "Oracle DB" as DB {
+        [Table: LH_NOTIFICATIONS]
+    }
+}
+
+' --- ÉP LAYOUT XẾP CHỒNG (QUAN TRỌNG) ---
+Frontend -[hidden]down-> GatewayLayer
+GatewayLayer -[hidden]down-> Backend
+Backend -[hidden]down-> DataLayer
+
+' --- RELATIONSHIPS ---
+
+' 1. Connection Flow
+
+
+' 2. Backend Logic
+
+
+' 3. Sending Flow (Targeted)
+
+Frontend ..> GatewayLayer : SSE Connection
+GatewayLayer ..> Backend : Load balancing proxy request
+Backend --> DB : Save Notification
+Backend --> Redis : Lookup Node & Publish
+
+@enduml

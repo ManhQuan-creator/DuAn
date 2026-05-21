@@ -1,0 +1,57 @@
+<div class="bpmn-shell">
+  <div class="bpmn-header">
+    <div class="bpmn-title">
+      <div class="bpmn-title__main">BPMN Editor</div>
+      <div class="bpmn-title__sub">Kéo thả trên canvas.</div>
+    </div>
+
+    <div class="bpmn-actions">
+      <button type="button" class="btn" (click)="zoomOut()">-</button>
+      <button type="button" class="btn" (click)="zoomFit()">Fit</button>
+      <button type="button" class="btn" (click)="zoomIn()">+</button>
+      <span class="sep"></span>
+
+      <button
+        type="button"
+        class="btn"
+        (click)="configureSelectedUserTask()"
+        [disabled]="!canConfigureUserTask || saving"
+      >
+        Cấu hình bước
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        (click)="configureSelectedServiceTask()"
+        [disabled]="!canConfigureServiceTask || saving"
+      >
+        Cấu hình ServiceTask
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        (click)="configureSelectedProcess()"
+        [disabled]="!canConfigureProcess || saving"
+      >
+        Cấu hình quy trình
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="onSaveClick()"
+        [disabled]="saving"
+      >
+        {{ saving ? 'Đang lưu...' : 'Lưu' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="bpmn-body">
+    <div class="bpmn-canvas-wrap">
+      <div #canvas class="bpmn-canvas" aria-label="BPMN canvas"></div>
+    </div>
+  </div>
+</div>

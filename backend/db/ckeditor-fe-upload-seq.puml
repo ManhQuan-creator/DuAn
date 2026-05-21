@@ -1,0 +1,40 @@
+@startuml
+autonumber
+actor User
+participant "Angular Component" as App
+participant "Adapter" as Adapter
+participant "Backend API" as API
+
+== 1. UPLOAD (Tạo Mapping) ==
+User -> Adapter: Chọn ảnh
+Adapter -> API: Upload File
+API --> Adapter: Trả về { itemId: "img_001" }
+
+Adapter -> Adapter: URL.createObjectURL(file)\n-> "blob:abc..."
+Adapter -> App: Callback: map.set("blob:abc...", "img_001")
+Adapter --> User: Hiển thị ảnh (src="blob:abc...")
+
+== 2. SAVE (Hoán đổi SRC -> ID) ==
+User -> App: Bấm Save
+App -> App: Parse HTML
+loop Tìm thẻ <img>
+    App -> App: Lấy src ("blob:abc...")
+    App -> App: Tìm trong Map -> ra "img_001"
+    App -> App: Set data-s3-id="img_001"
+    App -> App: Xóa src (src="")
+end
+App -> API: Gửi HTML sạch (chỉ có ID)
+
+== 3. VIEW (Re-hydrate) ==
+User -> App: Xem bài
+App -> API: Get Content
+API --> App: HTML (data-s3-id="img_001")
+loop Tìm thẻ <img> có ID
+    App -> API: Get Blob by ID
+    API --> App: Blob Data
+    App -> App: URL.createObjectURL(blob)\n-> "blob:xyz..."
+    App -> App: Set src="blob:xyz..."
+    note right: Quan trọng: Add lại vào Map\nđể nếu User bấm Save thì ko bị mất ID
+    App -> App: map.set("blob:xyz...", "img_001")
+end
+@enduml

@@ -1,0 +1,141 @@
+<div class="manager-container">
+    <app-page-header
+        [title]="headerTitle"
+        [breadcrumbs]="breadcrumbs"
+    >
+    </app-page-header>
+
+    <div class="card manager-filters app-search-toolbar">
+        <div class="form-group">
+            <label for="unitSelect" tuiLabel class="app-form-label">Đơn vị</label>
+            <tui-select
+                id="unitSelect"
+                [(ngModel)]="unitFilter"
+                (ngModelChange)="onUnitChange()"
+                [stringify]="stringifyUnit"
+                [tuiTextfieldLabelOutside]="true"
+                [tuiTextfieldCleaner]="true"
+                tuiTextfieldSize="m"
+                class="search-input app-search-toolbar__field"
+            >
+                Chọn đơn vị
+                <tui-data-list *tuiDataList>
+                    <button *ngFor="let unit of listUnitOptions" tuiOption [value]="unit">
+                        {{ stringifyUnit(unit) }}
+                    </button>
+                </tui-data-list>
+            </tui-select>
+        </div>
+
+        <div class="form-group">
+            <label for="categoryCodeInput" tuiLabel class="app-form-label">Mã hạng mục</label>
+            <tui-input
+                id="categoryCodeInput"
+                [(ngModel)]="categoryCodeFilter"
+                (ngModelChange)="onSearchInput()"
+                [tuiTextfieldLabelOutside]="true"
+                [tuiTextfieldCleaner]="true"
+                tuiTextfieldSize="m"
+                class="search-input app-search-toolbar__field"
+            >
+                Nhập mã hạng mục...
+            </tui-input>
+        </div>
+
+        <div class="form-group">
+            <label for="categoryNameInput" tuiLabel class="app-form-label">Tên hạng mục</label>
+            <tui-input
+                id="categoryNameInput"
+                [(ngModel)]="categoryNameFilter"
+                (ngModelChange)="onSearchInput()"
+                [tuiTextfieldLabelOutside]="true"
+                [tuiTextfieldCleaner]="true"
+                tuiTextfieldSize="m"
+                class="search-input app-search-toolbar__field"
+            >
+                Nhập tên hạng mục...
+            </tui-input>
+        </div>
+
+        <div class="form-group">
+            <label for="statusSelect" tuiLabel class="app-form-label">Trạng thái</label>
+            <tui-select
+                id="statusSelect"
+                [(ngModel)]="statusFilter"
+                (ngModelChange)="onUnitChange()"
+                [stringify]="stringifyStatus"
+                [tuiTextfieldLabelOutside]="true"
+                [tuiTextfieldCleaner]="true"
+                tuiTextfieldSize="m"
+            >
+                Chọn trạng thái
+                <tui-data-list *tuiDataList>
+                    <button
+                        *ngFor="let s of statusOptions"
+                        tuiOption
+                        [value]="s"
+                    >
+                        {{ stringifyStatus(s) }}
+                    </button>
+                </tui-data-list>
+            </tui-select>
+        </div>
+
+        <div class="form-group">
+            <label for="yearSelect" tuiLabel class="app-form-label">Năm</label>
+            <tui-select
+                id="yearSelect"
+                [(ngModel)]="yearFilter"
+                (ngModelChange)="onUnitChange()"
+                [stringify]="stringifyYear"
+                [tuiTextfieldLabelOutside]="true"
+                [tuiTextfieldCleaner]="true"
+                tuiTextfieldSize="m"
+                class="search-input app-search-toolbar__field"
+            >
+                Chọn năm
+                <tui-data-list *tuiDataList>
+                    <button *ngFor="let yearPlan of yearOptions" tuiOption [value]="yearPlan">
+                        {{ stringifyYear(yearPlan) }}
+                    </button>
+                </tui-data-list>
+            </tui-select>
+        </div>
+    </div>
+
+    <div class="card manager-grid-card">
+        <div *ngIf="loading" class="grid-loading-overlay">
+            <span class="grid-loading-spinner"></span> Đang tải dữ liệu...
+        </div>
+        <app-grid-header
+            [title]="title"
+            [showBtnExport]="true"
+            (buttonClickExport)="handleExportSelected()"
+        ></app-grid-header>
+        <div class="manager-grid">
+            <app-ag-grid-wrapper [enableRangeSelection]="true"
+                [rowData]="templateList"
+                [columnDefs]="columnDefs"
+                [animateRows]="true"
+                [pagination]="false"
+                [suppressCellFocus]="true"
+                [height]="'100%'"
+                [width]="'100%'"
+                [theme]="'ag-theme-quartz'"
+                (gridReady)="onGridReady($event)"
+            ></app-ag-grid-wrapper>
+        </div>
+        <app-custom-pagination
+            [totalRows]="totalRows"
+            [currentPage]="pageNum + 1"
+            [pageSize]="pageSize"
+            (pageChanged)="onPageChanged($event)"
+            (pageSizeChanged)="onPageSizeChanged($event)"
+        />
+    </div>
+</div>
+
+<app-attach-file-dialog
+  [(isOpen)]="dialogAttachFile.isOpen"
+  [attachedFiles]="dialogAttachFile.attachedFiles"
+/>

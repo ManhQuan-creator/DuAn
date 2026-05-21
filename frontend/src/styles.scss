@@ -1,0 +1,289 @@
+@use 'styles/ag-grid-overrides';
+@use 'styles/search-toolbar';
+@use 'styles/tui-input-overrides';
+
+/* ============================================================
+ * Tailwind CSS v3 — utility classes (preflight disabled trong tailwind.config.js).
+ * ============================================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+ * Helvetica Neue — local font family
+ * Source: src/assets/fonts/helvetica-neue-5/
+ * ============================================================ */
+
+/* 100 — UltraLight */
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueUltraLight.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueUltraLightItalic.otf') format('opentype');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* 200 — Thin */
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueThin.otf') format('opentype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueThinItalic.otf') format('opentype');
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* 300 — Light */
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueLight.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueLightItalic.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* 400 — Regular (Roman) */
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueRoman.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueItalic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* 500 — Medium */
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueMedium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueMediumItalic.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* 700 — Bold */
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueBold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueBoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* 800 — Heavy */
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueHeavy.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueHeavyItalic.otf') format('opentype');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* 900 — Black */
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueBlack.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Neue';
+  src: url('assets/fonts/helvetica-neue-5/HelveticaNeueBlackItalic.otf') format('opentype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* src/styles.scss */
+
+/* QUAN TRỌNG: Dùng body đứng trước để tăng độ ưu tiên (Specificy) */
+
+/* 1. Lớp chứa Dialog (Popup to) */
+body .cdk-global-overlay-wrapper {
+  z-index: 1000 !important;
+  /* Mức thấp hơn dropdown */
+  display: flex !important;
+  /* Đảm bảo layout không bị vỡ */
+}
+
+/* 2. Lớp chứa Dropdown / Tooltip / Select (Popup nhỏ) */
+body .cdk-overlay-connected-position-bounding-box {
+  z-index: 10001 !important;
+  /* Mức CAO HƠN Dialog -> Sẽ nổi lên trên */
+}
+
+/* 3. Container tổng (đề phòng) */
+body .cdk-overlay-container {
+  z-index: 9999 !important;
+}
+
+/* 4. Fix lỗi Dropdown bị cắt cụt nếu Dialog có overflow: hidden */
+tui-dialog {
+  overflow: visible !important;
+}
+
+.tui-dialog-host {
+  overflow: visible !important;
+}
+
+.tui-z-index-force {
+  position: relative;
+  z-index: 10002 !important;
+}
+
+/* Global: font smoothing */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global: custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Áp dụng font mặc định cho toàn bộ app.
+ * - Override CSS variables của Taiga UI (--tui-font-text, --tui-font-heading)
+ *   vì Taiga components set font-family qua biến này, KHÔNG inherit từ body.
+ * - Set trên html/body cho các phần tử ngoài Taiga (plain HTML, AG Grid...).
+ * - KHÔNG dùng `body *` vì sẽ đè lên icon font (tui-svg, material-icons...)
+ *   khiến icon hiển thị thành ô vuông.
+ */
+:root {
+  --tui-font-text: 'Helvetica Neue', Arial, sans-serif;
+  --tui-font-heading: 'Helvetica Neue', Arial, sans-serif;
+}
+
+html,
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+
+/* Global: không dùng :host — trong styles.scss (global) :host không khớp phần tử nào.
+ * QUAN TRỌNG: scope về [tuiButton] để KHÔNG đè lên các Taiga component khác cũng dùng
+ * tuiWrapper + data-appearance='primary' (vd tui-checkbox khi checked → bị stretch height
+ * 35px nhưng width giữ theo size token → ra hình chữ nhật). */
+[tuiButton][tuiWrapper][data-appearance='primary'] {
+  // width: 130px !important;
+  height: 35px !important;
+  border-radius: 8px !important;
+
+  background: #4574C0 !important;
+  color: #fff !important;
+
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: #365fa3 !important;
+  }
+}
+
+[tuiButton][tuiWrapper][data-appearance='primary'] .tui-button__box,
+[tuiButton][tuiWrapper][data-appearance='primary'] .tui-button__content,
+[tuiButton][tuiWrapper][data-appearance='primary'] .t-content {
+  background: inherit !important;
+  color: inherit !important;
+  border-radius: inherit !important;
+}
+
+/* Outline / secondary — match height + radius của primary để cặp nút Hủy/Cập nhật
+ * trong dialog đồng nhất kích cỡ. Giữ màu mặc định của Taiga để phân biệt action.
+ * Cũng scope về [tuiButton] vì tui-input/tui-textarea cũng dùng appearance='outline'. */
+[tuiButton][tuiWrapper][data-appearance='outline'],
+[tuiButton][tuiWrapper][data-appearance='secondary'] {
+  height: 35px !important;
+  border-radius: 8px !important;
+}
+
+.manager-container {
+  padding: 20px 24px;
+  background: #f9f9f9;
+}
+
+/* AG Grid tooltip wrapper — khi dùng custom `tooltipComponent`, wrapper `.ag-tooltip`
+ * của quartz theme vẫn render background/border/shadow của riêng nó, chồng lên
+ * shadow của component → user thấy "nhiều box-shadow". Bỏ chrome của wrapper để
+ * chỉ còn style của FormulaTooltipComponent hiện ra. */
+.ag-tooltip,
+.ag-tooltip-custom {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* bpmn-js / diagram-js base styles */
+@import 'bpmn-js/dist/assets/diagram-js.css';
+@import 'bpmn-js/dist/assets/bpmn-js.css';
+@import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';

@@ -1,0 +1,92 @@
+@startuml
+skinparam linetype ortho
+skinparam roundcorner 10
+
+entity "CAS_REQUEST" as request #LightGray {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * request_code : VARCHAR2(20) <<UK>>
+  * status : VARCHAR2(20)
+  --
+  == Thông tin KH (Snapshot) ==
+  * customer_cif : VARCHAR2(20)
+  * customer_name : VARCHAR2(70)
+  customer_class : VARCHAR2(36)
+  customer_vip_code : VARCHAR2(70)
+  customer_id_type : VARCHAR2(40)
+  customer_id_number : VARCHAR2(30)
+  customer_branch_code : VARCHAR2(10)
+  customer_branch_name : VARCHAR2(100)
+  ...
+}
+
+entity "CAS_REQUEST_FACILITY" as facility #LightBlue {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * request_id : VARCHAR2(36) <<FK>>
+  parent_id : VARCHAR2(36) <<FK>> (self)
+  --
+  == Thông tin sản phẩm ==
+  * product_type : VARCHAR2(20)
+  product_code : VARCHAR2(50)
+  * product_name : VARCHAR2(200)
+  specific_product_code : VARCHAR2(50)
+  specific_product_name : VARCHAR2(200)
+  has_extra_fields : NUMBER(1)
+  --
+  == Phân loại & Kỳ hạn ==
+  * product_category : VARCHAR2(20)
+  term_type : VARCHAR2(20)
+  --
+  == Thông tin tài chính ==
+  amount : NUMBER(20,2)
+  currency : VARCHAR2(3)
+  term_value : NUMBER(5)
+  term_unit : VARCHAR2(10)
+  purpose : VARCHAR2(100)
+  effective_date : DATE
+  disbursement_deadline : DATE
+  --
+  == Audit ==
+  * status : VARCHAR2(20)
+  * is_deleted : NUMBER(1)
+  * created_at : TIMESTAMP
+}
+
+entity "CAS_REQUEST_FACILITY_EXTRA" as fac_extra #LightYellow {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * facility_id : VARCHAR2(36) <<FK>>
+  --
+  * extra_fields_config : CLOB (JSON array - cả bộ config)
+  extra_fields_values : CLOB (JSON object - {fieldCode: value})
+  --
+  == Audit ==
+  * created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "CAS_REQUEST_COLLATERAL" as collateral #LightGreen {
+  * id : VARCHAR2(36) <<PK>>
+  --
+  * request_id : VARCHAR2(36) <<FK>>
+  bcol_asset_id : VARCHAR2(50)
+  --
+  * asset_type_code : VARCHAR2(50)
+  * asset_type_name : VARCHAR2(200)
+  asset_number : VARCHAR2(100)
+  description : VARCHAR2(500)
+  valuation_amount : NUMBER(20,2)
+  --
+  * status : VARCHAR2(20)
+  * source : VARCHAR2(20)
+  * is_deleted : NUMBER(1)
+  * created_at : TIMESTAMP
+}
+
+request ||--o{ facility : "1-N"
+request ||--o{ collateral : "1-N"
+facility ||--o| fac_extra : "1-1"
+facility ||--o{ facility : "1-N"
+
+@enduml

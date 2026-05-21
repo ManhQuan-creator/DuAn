@@ -1,0 +1,112 @@
+<div class="grid-header">
+  <div class="header-text">
+    <span class="title">{{ title }}</span>
+    <span class="subtitle" *ngIf="subtitle">{{ subtitle }}</span>
+  </div>
+  <div class="button-group">
+    <button
+      type="button"
+      *ngIf="showBtnCustom"
+      tuiButton
+      appearance="primary"
+      size="s"
+      class="buttons"
+      [icon]="customIcon"
+      [disabled]="disableCustom"
+      (click)="onButtonClickCustom()"
+    >
+      {{ btnLabelCustom }}
+    </button>
+    <button
+      type="button"
+      *ngIf="showBtnReject"
+      tuiButton
+      appearance="primary"
+      size="s"
+      class="buttons"
+      icon="tuiIconX"
+      [disabled]="disableReject"
+      (click)="onButtonClickReject()"
+    >
+      {{ btnLabelReject }}
+    </button>
+    <button
+      type="button"
+      *ngIf="showBtnApproval"
+      tuiButton
+      appearance="primary"
+      size="s"
+      class="buttons"
+      icon="tuiIconCheck"
+      [disabled]="disableApproval"
+      (click)="onButtonClickApproval()"
+    >
+      {{ btnLabelApproval }}
+    </button>
+    <button
+      type="button"
+      *ngIf="showBtnSendApprove"
+      tuiButton
+      appearance="primary"
+      size="s"
+      class="buttons"
+      icon="tuiIconSend"
+      [disabled]="disableSendApprove"
+      (click)="onButtonClickSendApprove()"
+    >
+      {{ btnLabelSendApprove }}
+    </button>
+    <button
+      type="button"
+      *ngIf="showBtnDelete"
+      tuiButton
+      appearance="primary"
+      size="s"
+      class="buttons"
+      icon="tuiIconTrash"
+      [disabled]="disableDelete"
+      (click)="onButtonClickDelete()"
+    >
+      {{ btnLabelDelete }}
+    </button>
+    <button
+      type="button"
+      *ngIf="showBtnExport"
+      tuiButton
+      appearance="primary"
+      size="s"
+      class="buttons"
+      icon="tuiIconDownload"
+      [disabled]="disableExport"
+      (click)="onButtonClickExport()"
+    >
+      {{ btnLabelExport }}
+    </button>
+    <button
+      type="button"
+      *ngIf="showBtnAssessment"
+      tuiButton
+      appearance="primary"
+      size="s"
+      class="buttons"
+      icon="tuiIconSend"
+      [disabled]="disableAssessment"
+      (click)="onButtonClickAssessment()"
+    >
+      {{ btnLabelAssessment }}
+    </button>
+    <button
+      type="button"
+      *ngIf="showBtnCreateNew"
+      tuiButton
+      appearance="primary"
+      size="s"
+      class="buttons"
+      icon="tuiIconPlus"
+      [disabled]="disableCreateNew"
+      (click)="onButtonClickCreateNew()"
+    >
+      {{ btnLabelCreateNew }}
+    </button>
+  </div>
+</div>

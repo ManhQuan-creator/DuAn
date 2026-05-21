@@ -1,0 +1,112 @@
+<div class="dashboard-root">
+
+  @if (loadError(); as err) {
+    <div class="error-banner">{{ err }}</div>
+  }
+
+  @if (!entryExists()) {
+    <app-no-data-hint [templateId]="templateId()"></app-no-data-hint>
+  }
+
+  <!-- ═════ TẦNG 1 — KPI CARDS ═════ -->
+  <section class="tier tier-kpi">
+    <h2 class="tier-title">Tổng quan kế hoạch vốn</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Kế hoạch vốn năm</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().tongKhVonNam) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Thực hiện</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().tongTh) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-body">
+          <div class="kpi-label">% Thực hiện / KH</div>
+          <div class="kpi-value">{{ fmtPercent(kpi().thTle) }}</div>
+          <div class="kpi-unit">tiến độ thực hiện</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-cyan">
+        <div class="kpi-icon">💸</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Giải ngân</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().tongGn) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-violet">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-body">
+          <div class="kpi-label">% Giải ngân / KH</div>
+          <div class="kpi-value">{{ fmtPercent(kpi().gnTle) }}</div>
+          <div class="kpi-unit">tiến độ giải ngân</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ TẦNG 2 — CƠ CẤU + TH/GN ═════ -->
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Phân tích nguồn vốn</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>Cơ cấu nguồn vốn theo Kế hoạch năm</h3>
+        <div class="chart-host">
+          @if (breakdown().length === 0) {
+            <div class="chart-empty">Chưa có dữ liệu nguồn vốn</div>
+          } @else {
+            <echarts [options]="nguonVonChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Thực hiện vs Giải ngân theo nguồn vốn</h3>
+        <div class="chart-host">
+          @if (breakdown().length === 0) {
+            <div class="chart-empty">Chưa có dữ liệu</div>
+          } @else {
+            <echarts [options]="thVsGnChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ TẦNG 3 — %HT + LINE TIẾN ĐỘ ═════ -->
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Tiến độ thực hiện</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>% Hoàn thành theo nguồn vốn</h3>
+        <div class="chart-host">
+          @if (breakdown().length === 0) {
+            <div class="chart-empty">Chưa có dữ liệu</div>
+          } @else {
+            <echarts [options]="tyleHtChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Tiến độ luỹ kế qua 4 quý ({{ year }})</h3>
+        <div class="chart-host">
+          @if (showTienDoChart()) {
+            <echarts [options]="tienDoChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          } @else {
+            <div class="chart-empty">Cần ít nhất 2 quý có dữ liệu để hiển thị xu hướng</div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

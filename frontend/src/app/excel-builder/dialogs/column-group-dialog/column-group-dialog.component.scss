@@ -1,0 +1,839 @@
+// ============================================================
+// Column Group Dialog — WYSIWYG Live Preview + Click-based Outline
+// BEM: .cg-* (column-group)
+// ============================================================
+
+// ─── Tokens ───────────────────────────────────────────────
+$radius-sm: 6px;
+$radius-md: 8px;
+$radius-lg: 12px;
+
+$font-xs: 12px;
+$font-sm: 13px;
+$font-base: 14px;
+$font-md: 15px;
+
+$gray-50: #f7f7f5;
+$gray-100: #f0eeea;
+$gray-200: #e2e0d8;
+$gray-300: #d2d0c8;
+$gray-400: #a8a7a2;
+$gray-600: #5f5e5a;
+$gray-800: #2c2c2a;
+
+$blue-50: #e6f1fb;
+$blue-100: #b5d4f4;
+$blue-300: #7fbbed;
+$blue-500: #378add;
+$blue-700: #185fa5;
+
+$amber-50: #fff7ed;
+$amber-100: #fed7aa;
+$amber-700: #9a3412;
+
+$red-50: #fcebeb;
+$red-500: #e24b4a;
+$red-700: #a32d2d;
+
+// ─── Dialog shell ──────────────────────────────────────────
+
+.cg-dialog {
+  width: 88vw;
+  max-width: 1200px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: $font-base;
+  color: $gray-800;
+  display: flex;
+  flex-direction: column;
+}
+
+.cg-dialog__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 12px;
+  border-bottom: 0.5px solid $gray-200;
+}
+
+.cg-dialog__header-icon {
+  width: 32px;
+  height: 32px;
+  background: $blue-50;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: $blue-700;
+  flex-shrink: 0;
+}
+
+.cg-dialog__title {
+  font-size: $font-md;
+  font-weight: 600;
+}
+
+.cg-dialog__subtitle {
+  font-size: $font-xs;
+  color: $gray-600;
+  margin-top: 2px;
+}
+
+.cg-dialog__footer {
+  padding: 12px 20px;
+  border-top: 0.5px solid $gray-200;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LIVE PREVIEW CANVAS (top section)
+// ═══════════════════════════════════════════════════════════
+
+.cg-preview {
+  margin: 12px 16px 8px;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  background: white;
+  overflow: hidden;
+}
+
+.cg-preview__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: $gray-50;
+  border-bottom: 0.5px solid $gray-200;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $gray-600;
+}
+
+.cg-preview__hint {
+  font-weight: 400;
+  text-transform: none;
+  font-size: 10px;
+  color: $gray-400;
+  font-style: italic;
+}
+
+.cg-preview__canvas {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  min-height: 70px;
+  max-height: 220px;
+  background: white;
+  align-items: stretch;
+}
+
+.cg-preview__empty {
+  width: 100%;
+  padding: 24px 12px;
+  text-align: center;
+  color: $gray-400;
+  font-size: $font-sm;
+  font-style: italic;
+}
+
+// ─── Preview group (nested header cell) ──────────────────
+
+.cg-preview-group {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  border-right: 1px solid $gray-200;
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.cg-preview-group--marry {
+  // visual cue cho marryChildren — viền đậm hơn
+  background: #fafafa;
+}
+
+.cg-preview-group__label {
+  padding: 8px 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: $font-sm;
+  color: $blue-700;
+  background: $blue-50;
+  border-bottom: 1px solid $blue-100;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.cg-preview-group__children {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  align-self: stretch;
+}
+
+// ─── Preview leaf (column header cell) ───────────────────
+
+.cg-preview-leaf {
+  min-width: 90px;
+  padding: 8px 12px;
+  text-align: center;
+  font-size: $font-sm;
+  background: white;
+  border-right: 1px solid $gray-200;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.cg-preview-leaf--standalone {
+  // Standalone columns (không thuộc nhóm) — viền dày hơn
+  border: 1px solid $gray-200;
+  border-top: 0;
+  border-bottom: 0;
+
+  &:first-child {
+    border-left: 0;
+  }
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.cg-preview-leaf--empty {
+  font-style: italic;
+  color: $gray-400;
+  background: $gray-50;
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOTTOM: Outline + Chips (2 panes)
+// ═══════════════════════════════════════════════════════════
+
+.cg-bottom {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 0;
+  padding: 0 16px 16px;
+  height: 420px;
+  max-height: calc(100vh - 400px);
+  min-height: 280px;
+  overflow: hidden;
+}
+
+// ─── Outline pane (left) ─────────────────────────────────
+
+.cg-outline {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  overflow: hidden;
+  background: white;
+  min-height: 0;
+}
+
+.cg-outline__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: $gray-50;
+  border-bottom: 0.5px solid $gray-200;
+}
+
+.cg-outline__title {
+  font-size: $font-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $gray-600;
+}
+
+.cg-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+  min-height: 0;
+}
+
+.cg-add-root {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 0.5px solid $gray-200;
+  background: $gray-50;
+
+  tui-input {
+    flex: 1;
+  }
+}
+
+// ─── Tree node row ───────────────────────────────────────
+
+.cg-node-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 5px 8px;
+  border-radius: $radius-sm;
+  margin: 1px 8px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  border: 1px solid transparent;
+
+  &:hover {
+    background: $blue-50;
+
+    .cg-node-actions {
+      opacity: 1;
+    }
+  }
+}
+
+.cg-node-row--selected {
+  background: $blue-50;
+  border-color: $blue-300;
+  box-shadow: 0 0 0 1px $blue-100 inset;
+
+  .cg-node-actions {
+    opacity: 1;
+  }
+}
+
+.cg-node-row--empty {
+  opacity: 0.85;
+}
+
+.cg-toggle {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 9px;
+  color: $gray-600;
+  border-radius: 3px;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: $gray-100;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.cg-toggle--invisible {
+  visibility: hidden;
+}
+
+.cg-node-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.cg-node-name {
+  flex: 1;
+  font-size: $font-sm;
+  font-weight: 500;
+  user-select: none;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline dashed $gray-400;
+    text-underline-offset: 3px;
+  }
+}
+
+.cg-node-rename {
+  flex: 1;
+  min-width: 0;
+
+  tui-input {
+    width: 100%;
+  }
+}
+
+.cg-node-meta {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.cg-node-actions {
+  display: flex;
+  gap: 1px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+// ─── Settings popover ────────────────────────────────────
+
+.cg-settings-popover {
+  margin: 4px 16px 8px;
+  padding: 12px 14px;
+  background: $amber-50;
+  border: 1px solid $amber-100;
+  border-radius: $radius-sm;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cg-settings-popover__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cg-settings-popover__row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+
+  tui-input {
+    flex: 1;
+  }
+}
+
+// ─── Add-sub inline form ─────────────────────────────────
+
+.cg-add-sub-inline {
+  margin: 4px 16px 8px;
+  padding: 10px 12px;
+  background: $blue-50;
+  border: 1px dashed $blue-100;
+  border-radius: $radius-sm;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  tui-input {
+    flex: 1;
+  }
+}
+
+// ─── Children list ───────────────────────────────────────
+
+.cg-children {
+  padding: 2px 0 4px;
+}
+
+.cg-empty-hint {
+  margin: 4px 8px;
+  padding: 8px 12px;
+  font-size: $font-xs;
+  color: $gray-400;
+  font-style: italic;
+  border: 1px dashed $gray-200;
+  border-radius: $radius-sm;
+  text-align: center;
+}
+
+// ─── Field row inside children ───────────────────────────
+
+.cg-field-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: $radius-sm;
+  margin: 1px 8px;
+  background: $gray-50;
+  border: 1px solid transparent;
+  transition: background 0.12s;
+
+  &:hover {
+    background: white;
+    border-color: $gray-200;
+
+    .cg-node-actions {
+      opacity: 1;
+    }
+  }
+}
+
+.cg-field-row__icon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.cg-field-row__name {
+  flex: 1;
+  font-size: $font-sm;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cg-field-row__field {
+  font-size: 10px;
+  color: $gray-600;
+  font-weight: 400;
+}
+
+// ─── Icon button ─────────────────────────────────────────
+
+.cg-icon-btn {
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  color: $gray-600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: $gray-100;
+    color: $gray-800;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.cg-icon-btn--active {
+  background: $amber-50;
+  color: $amber-700;
+
+  &:hover {
+    background: $amber-100;
+  }
+}
+
+.cg-icon-btn--danger {
+  &:hover:not(:disabled) {
+    background: $red-50;
+    color: $red-700;
+  }
+}
+
+// ─── Badges ──────────────────────────────────────────────
+
+.cg-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.cg-badge--gray {
+  background: $gray-100;
+  color: $gray-800;
+  border: 0.5px solid $gray-200;
+}
+
+.cg-badge--blue {
+  background: $blue-50;
+  color: $blue-700;
+  border: 0.5px solid $blue-100;
+}
+
+.cg-badge--info {
+  background: #ecfeff;
+  color: #155e75;
+  border: 0.5px solid #a5f3fc;
+}
+
+.cg-badge--warn {
+  background: $amber-50;
+  color: $amber-700;
+  border: 0.5px solid $amber-100;
+}
+
+.cg-count-chip {
+  display: inline-flex;
+  align-items: center;
+  background: $blue-50;
+  color: $blue-700;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 8px;
+  border: 0.5px solid $blue-100;
+}
+
+.cg-empty-state {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: $font-sm;
+  color: $gray-400;
+  font-style: italic;
+}
+
+.cg-field__label {
+  font-size: $font-xs;
+  font-weight: 500;
+  color: $gray-600;
+}
+
+.cg-field__error {
+  font-size: 11px;
+  color: $red-700;
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHIP PANEL (right)
+// ═══════════════════════════════════════════════════════════
+
+.cg-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: $gray-50;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  margin-left: 12px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.cg-chips__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cg-chips__title {
+  font-size: $font-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $gray-600;
+}
+
+.cg-chips__hint {
+  font-size: 11px;
+  color: $gray-600;
+  font-style: italic;
+  padding: 6px 8px;
+  border-radius: $radius-sm;
+  background: white;
+  border: 1px dashed $gray-200;
+  line-height: 1.5;
+}
+
+.cg-chips__hint--active {
+  background: $blue-50;
+  border-color: $blue-100;
+  color: $blue-700;
+  font-style: normal;
+
+  strong {
+    font-weight: 600;
+  }
+}
+
+.cg-chips__list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+  min-height: 80px;
+}
+
+.cg-chips__empty {
+  font-size: $font-xs;
+  color: $gray-400;
+  text-align: center;
+  padding: 12px 0;
+  font-style: italic;
+}
+
+.cg-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: white;
+  border: 1px solid $gray-200;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.12s, box-shadow 0.12s, transform 0.05s;
+
+  &:hover:not(:disabled) {
+    border-color: $blue-300;
+    box-shadow: 0 1px 4px rgba(55, 138, 221, 0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: $gray-50;
+  }
+}
+
+.cg-chip__icon {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.cg-chip__name {
+  flex: 1;
+  font-size: $font-sm;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cg-chip__field {
+  font-size: 10px;
+  color: $gray-600;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+// ═══════════════════════════════════════════════════════════
+// MOVE-TO PICKER (modal overlay)
+// ═══════════════════════════════════════════════════════════
+
+.cg-move-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: cg-fade-in 0.12s ease-out;
+}
+
+.cg-move-picker {
+  background: white;
+  border-radius: $radius-lg;
+  width: 480px;
+  max-width: 90vw;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  animation: cg-pop-in 0.14s ease-out;
+}
+
+.cg-move-picker__header {
+  padding: 14px 18px;
+  border-bottom: 1px solid $gray-200;
+  font-size: $font-base;
+  font-weight: 500;
+  background: $gray-50;
+}
+
+.cg-move-picker__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 100px;
+}
+
+.cg-move-picker__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid transparent;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: $font-sm;
+  color: inherit;
+  transition: background 0.1s, border-color 0.1s;
+
+  &:hover:not(:disabled) {
+    background: $blue-50;
+    border-color: $blue-100;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.cg-move-picker__option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cg-move-picker__option-reason {
+  font-size: 11px;
+  color: $gray-400;
+  font-style: italic;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.cg-move-picker__empty {
+  text-align: center;
+  padding: 24px;
+  color: $gray-400;
+  font-style: italic;
+}
+
+.cg-move-picker__footer {
+  padding: 10px 14px;
+  border-top: 1px solid $gray-200;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@keyframes cg-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes cg-pop-in {
+  from { transform: translateY(-8px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}

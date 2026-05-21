@@ -1,0 +1,43 @@
+@startuml
+title Workflow Tính Tổng Giới Hạn Tín Dụng (GHTD)
+
+start
+:Xác định Khách hàng (CIF);
+
+partition "Bước 1: Lấy danh sách Commitment master - Commitment CAS" {
+    :Lấy level cấp cao nhất (root) level 0 hoặc 1;
+    :Commitment không nằm trong CAS Hiện tại
+    :JOIN 1 - 1 với commitment trong CAS có trạng thái 
+    Inprogress (Đang xử lý), unassigned (Chờ phân công), Returned (Trả về) 
+    và 
+    ACTION = UPDATE, REMOVE (1 commitment root trong master tại 1 thời điểm sẽ chỉ có 1 commitment trong CAS có action UPDATE hoặc REMOVE)
+    - Nếu không tìm thấy commitment trong cas thì xác định là Commitment đã Approved và không thay đổi -> (1)
+    - Nếu tìm thấy commitment trong cas có ACTION UPDATE, REMOVE thì xác định là commitment này có khả năng thay đổi -> (2)
+
+}
+partition "Bước 2: Lấy Commitment master - Commitment CAS hiện tại" {
+    :Lấy level cấp cao nhất (root) level 0 hoặc 1;
+    :JOIN 1 - 1 với commitment trong CAS hiện tại
+    ACTION = UPDATE, REMOVE (1 commitment root trong master tại 1 thời điểm sẽ chỉ có 1 commitment trong CAS có action UPDATE hoặc REMOVE)
+    - Nếu không tìm thấy commitment trong cas thì xác định là Commitment đã Approved và không thay đổi -> append (1)
+    - Nếu tìm thấy commitment trong cas có ACTION UPDATE, REMOVE thì xác định là commitment này có khả năng thay đổi -> append (2)
+}
+
+partition "Bước 3: Tính Commitment Approved không thay đổi (1)" {
+    :Tính GHTD từng Commitment root -> (3).
+  '  :Tính GHTD_Approved (Theo nguyên tắc a - Dữ liệu Master);
+    :Tính GHTD_Approved = SUM (GHTD từng commitment (3));
+}
+
+partition "Bước 4: Tính Commitment Approved thay đổi (2)" {
+    :Tính GHTD từng Commitment root -> (4).
+  '  :Tính GHTD_Approved (Theo nguyên tắc a - Dữ liệu Master);
+    :Tính GHTD_Pending_Khac = SUM (GHTD từng commitment (4));
+}
+
+partition "Bước 5: Tổng hợp" {
+    :Tổng GHTD = GHTD_Approved + GHTD_Pending_Khac + GHTD_Hien_Tai;
+}
+
+stop
+@endum

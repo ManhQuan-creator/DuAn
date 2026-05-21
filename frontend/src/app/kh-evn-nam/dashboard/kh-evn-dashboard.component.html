@@ -1,0 +1,181 @@
+<div class="dashboard-root">
+
+  <!-- Header: title + filter năm -->
+  <header class="page-header">
+    <div class="title-block">
+      <h1>Kế hoạch SXKD - ĐTXD - Tài chính năm Tập đoàn giao</h1>
+      <p class="subtitle">Tổng công ty Điện lực miền Bắc · Phụ lục Quyết định EVN</p>
+    </div>
+    <div class="filter-block">
+      <label for="year-select">Năm</label>
+      <app-single-select
+        [options]="yearOptions"
+        [ngModel]="selectedYear"
+        (ngModelChange)="onYearChange($event)"
+        placeholder="Chọn năm">
+      </app-single-select>
+    </div>
+  </header>
+
+  @if (loadError(); as err) {
+    <div class="error-banner">{{ err }}</div>
+  }
+
+  <!-- ═════ TẦNG 1 — KPI CARDS ═════ -->
+  <section class="tier tier-kpi">
+    <h2 class="tier-title">Chỉ tiêu chính SXKD</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Điện thương phẩm</div>
+          <div class="kpi-value">{{ fmtNumber(kpi().dienThuongPham) }}</div>
+          <div class="kpi-unit">triệu kWh</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-icon">💵</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Giá bán bình quân</div>
+          <div class="kpi-value">{{ fmtNumber(kpi().giaBanBinhQuan) }}</div>
+          <div class="kpi-unit">đ/kWh</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-icon">📉</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổn thất điện năng</div>
+          <div class="kpi-value">{{ fmtPercent(kpi().ttdnTong) }}</div>
+          <div class="kpi-unit">tổng cấp điện áp</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-violet">
+        <div class="kpi-icon">🔧</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Chi phí SCL</div>
+          <div class="kpi-value">{{ fmtNumber(kpi().chiPhiScl) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-rose">
+        <div class="kpi-icon">⏱️</div>
+        <div class="kpi-body">
+          <div class="kpi-label">SAIDI</div>
+          <div class="kpi-value">{{ fmtNumber(kpi().saidi) }}</div>
+          <div class="kpi-unit">phút</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-cyan">
+        <div class="kpi-icon">🔄</div>
+        <div class="kpi-body">
+          <div class="kpi-label">MAIFI</div>
+          <div class="kpi-value">{{ fmtNumber(kpi().maifi, 2) }}</div>
+          <div class="kpi-unit">lần</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-emerald">
+        <div class="kpi-icon">🎓</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng lượt đào tạo</div>
+          <div class="kpi-value">{{ fmtNumber(kpi().daoTaoTongLuot) }}</div>
+          <div class="kpi-unit">lượt</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-indigo">
+        <div class="kpi-icon">🏗️</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng vốn ĐTXD</div>
+          <div class="kpi-value">{{ fmtNumber(kpi().tongDauTu) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ TẦNG 2 — CHARTS SXKD ═════ -->
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Chi tiết SXKD</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>Tổn thất điện năng theo cấp điện áp</h3>
+        <div class="chart-host"><echarts [options]="ttdnChartOptions()" class="echarts-instance" [autoResize]="true"></echarts></div>
+      </div>
+      <div class="chart-card">
+        <h3>Suất sự cố lưới 110kV</h3>
+        <div class="chart-host"><echarts [options]="suatSuCoChartOptions()" class="echarts-instance" [autoResize]="true"></echarts></div>
+      </div>
+      <div class="chart-card">
+        <h3>Độ tin cậy cung cấp điện</h3>
+        <div class="chart-host"><echarts [options]="doTinCayChartOptions()" class="echarts-instance" [autoResize]="true"></echarts></div>
+      </div>
+      <div class="chart-card">
+        <h3>Kế hoạch đào tạo</h3>
+        <div class="chart-host"><echarts [options]="daoTaoChartOptions()" class="echarts-instance" [autoResize]="true"></echarts></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ TẦNG 3 — ĐTXD + GIÁ BÁN BUÔN ═════ -->
+  <section class="tier tier-dtxd">
+    <h2 class="tier-title">Đầu tư xây dựng &amp; Giá bán buôn</h2>
+    <div class="charts-grid charts-3col">
+      <div class="chart-card">
+        <h3>Cơ cấu nguồn vốn</h3>
+        <div class="chart-host"><echarts [options]="nguonVonChartOptions()" class="echarts-instance" [autoResize]="true"></echarts></div>
+      </div>
+      <div class="chart-card">
+        <h3>Cơ cấu hạng mục</h3>
+        <div class="chart-host"><echarts [options]="hangMucChartOptions()" class="echarts-instance" [autoResize]="true"></echarts></div>
+      </div>
+      <div class="chart-card">
+        <h3>Giá bán buôn EVN → EVNNPC</h3>
+        <div class="chart-host"><echarts [options]="giaBanBuonChartOptions()" class="echarts-instance" [autoResize]="true"></echarts></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ TẦNG 4 — MỤC TIÊU ĐỊNH TÍNH ═════ -->
+  <section class="tier tier-muctieu">
+    <h2 class="tier-title">Mục tiêu nâng cao hiệu quả</h2>
+    @if (mucTieuGroups().length === 0) {
+      <p class="empty-note">Chưa có mục tiêu được nhập cho năm này.</p>
+    } @else {
+      <div class="accordion">
+        @for (group of mucTieuGroups(); track group.sectionCode) {
+          <div class="acc-item" [class.expanded]="expandedSections.has(group.sectionCode)">
+            <button class="acc-header" type="button" (click)="toggleSection(group.sectionCode)">
+              <span class="acc-icon">{{ expandedSections.has(group.sectionCode) ? '▼' : '▶' }}</span>
+              <span class="acc-title">{{ group.tieuDe }}</span>
+              <span class="acc-count">{{ group.mucTieuItems.length }} mục tiêu</span>
+            </button>
+            @if (expandedSections.has(group.sectionCode)) {
+              <div class="acc-body">
+                <table class="muctieu-table">
+                  <thead>
+                    <tr>
+                      <th class="col-stt">STT</th>
+                      <th>Mục tiêu</th>
+                      <th class="col-chitieu">Chỉ tiêu định lượng</th>
+                      <th>Ghi chú</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of group.mucTieuItems; track item.stt) {
+                      <tr>
+                        <td class="col-stt">{{ item.stt }}</td>
+                        <td>{{ item.mucTieu }}</td>
+                        <td class="col-chitieu"><strong>{{ item.chiTieuDinhLuong || '—' }}</strong></td>
+                        <td>{{ item.ghiChu }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+</div>

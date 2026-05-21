@@ -1,0 +1,56 @@
+/* ===================================================================
+   Taiga UI Input Overrides — flat style, no box-shadow, clear border
+   Chỉ áp dụng cho textfield (input, select, textarea, combo-box…)
+   =================================================================== */
+
+[tuiWrapper][data-appearance='textfield'] {
+  box-shadow: none !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  transition: border-color 0.2s ease !important;
+  outline: none !important;
+  // height: 35px;
+
+  &:focus-visible,
+  &:focus-within {
+    outline: none !important;
+  }
+
+  &:hover {
+    border-color: #94a3b8 !important;
+  }
+
+  &._focused {
+    border-color: #a8c4e0 !important;
+    box-shadow: 0 0 0 1px rgba(120, 160, 212, 0.25) !important;
+  }
+
+  &._invalid {
+    border-color: #ef4444 !important;
+  }
+
+  &._disabled {
+    background: #f1f5f9 !important;
+    border-color: #e2e8f0 !important;
+    opacity: 0.7;
+  }
+
+  &._readonly {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+}
+
+/* Tắt outline browser trên native input/textarea bên trong Taiga wrapper */
+[tuiWrapper][data-appearance='textfield'] input,
+[tuiWrapper][data-appearance='textfield'] textarea,
+tui-primitive-textfield input,
+tui-primitive-textfield textarea {
+  outline: none !important;
+
+  &:focus,
+  &:focus-visible {
+    outline: none !important;
+  }
+}

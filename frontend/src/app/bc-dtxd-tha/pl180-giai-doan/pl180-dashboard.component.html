@@ -1,0 +1,114 @@
+<div class="dashboard-root">
+
+  @if (loadError(); as err) {
+    <div class="error-banner">{{ err }}</div>
+  }
+
+  @if (!entryExists()) {
+    <app-no-data-hint [templateId]="templateId()"></app-no-data-hint>
+  }
+
+  <section class="tier tier-kpi">
+    <h2 class="tier-title">
+      Tổng quan
+      @if (currentUnit()) { <span class="tier-subtitle">— {{ currentUnit() }}</span> }
+    </h2>
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng KH năm — Số CT</div>
+          <div class="kpi-value">{{ fmtCount(kpi().tongSoCT) }}</div>
+          <div class="kpi-unit">công trình</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tổng KH năm — TMĐT</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().tongTmdt) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-cyan">
+        <div class="kpi-icon">📅</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Giao trước 1/1</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().truocTmdt) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Giao trong năm</div>
+          <div class="kpi-value">{{ fmtMoney(kpi().trongTmdt) }}</div>
+          <div class="kpi-unit">triệu đồng</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-emerald">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-body">
+          <div class="kpi-label">% HT năm</div>
+          <div class="kpi-value">{{ fmtPercent(kpi().tyleHtNam) }}</div>
+          <div class="kpi-unit">tiến độ năm</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier tier-charts">
+    <h2 class="tier-title">Cơ cấu giai đoạn giao</h2>
+    <div class="charts-grid charts-2col">
+      <div class="chart-card">
+        <h3>Cơ cấu TMĐT: Giao trước 1/1 vs Trong năm</h3>
+        <div class="chart-host">
+          @if (phaseBreakdown().length === 0) {
+            <div class="chart-empty">Chưa có dữ liệu</div>
+          } @else {
+            <echarts [options]="coCauTmdtChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Cơ cấu Số CT: Giao trước vs Trong năm</h3>
+        <div class="chart-host">
+          @if (phaseBreakdown().length === 0) {
+            <div class="chart-empty">Chưa có dữ liệu</div>
+          } @else {
+            <echarts [options]="coCauSoCTChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  @if (showUnitCharts()) {
+    <section class="tier tier-charts">
+      <h2 class="tier-title">Phân bổ theo đơn vị (Top 15)</h2>
+      <div class="charts-grid charts-2col">
+        <div class="chart-card">
+          <h3>TMĐT giao trước vs trong năm theo đơn vị</h3>
+          <div class="chart-host">
+            @if (unitBreakdown().length === 0) {
+              <div class="chart-empty">Chưa có dữ liệu</div>
+            } @else {
+              <echarts [options]="unitPhaseChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+            }
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>% HT năm theo đơn vị</h3>
+          <div class="chart-host">
+            @if (unitBreakdown().length === 0) {
+              <div class="chart-empty">Chưa có dữ liệu</div>
+            } @else {
+              <echarts [options]="unitTyleHtChartOptions()" class="echarts-instance" [autoResize]="true"></echarts>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+</div>

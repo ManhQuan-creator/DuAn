@@ -1,0 +1,50 @@
+@startuml
+!theme plain
+autonumber
+hide footbox
+
+participant "Core Service\n(Business Logic)" as Core
+participant "Sender Node\n(Node A)" as Sender
+participant "Redis Cluster" as Redis
+participant "Receiver Node\n(Node B)" as Receiver
+participant "Angular Client" as Client
+database "Oracle DB" as DB
+
+Note over Client, Receiver: User đang kết nối vào Node B (Active Tab)
+
+== Bước 1: Nghiệp vụ Gửi Tin ==
+Core -> Sender: sendNotification(User="USER_01", Content="Approved")
+activate Sender
+
+Sender -> DB: INSERT INTO LH_NOTIFICATIONS
+note right: Luôn lưu DB trước để an toàn
+
+== Bước 2: Định Tuyến (Targeted Routing) ==
+Sender -> Redis: GET "user_locations" "USER_01"
+activate Redis
+Redis --> Sender: Return "NODE_B"
+deactivate Redis
+
+alt User Offline (Return NULL)
+    Sender -> Sender: Log "User offline", Stop.
+else User Online (Found NODE_B)
+    Sender -> Redis: PUBLISH "notifications:NODE_B" (Payload)
+    
+    activate Redis
+    Redis -> Receiver: onMessage(Payload)
+    deactivate Redis
+    
+    activate Receiver
+    Receiver -> Receiver: localEmitters.get("USER_01")
+    
+    alt Emitter tồn tại
+        Receiver -> Client: SSE Event: NEW_NOTIFICATION
+        Client -> Client: Update UI & LocalStorage
+    else Emitter null (Lỗi data rác)
+        Receiver -> Receiver: Ignore & Cleanup Redis Location
+    end
+    deactivate Receiver
+end
+
+deactivate Sender
+@enduml

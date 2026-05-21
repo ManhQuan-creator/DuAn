@@ -1,0 +1,163 @@
+<div class="manager-container tui-space_top-5">
+  <app-builder-formula-help
+    [title]="resolvedTemplateName"
+    [(visible)]="formulaHelpVisible"
+  />
+
+
+  <div class="toolbar-card">
+    <div class="toolbar-groups">
+      <div class="toolbar-group">
+        <button tuiButton icon="tuiIconPlus" size="s" (click)="openDialog()">Cấu hình Cột</button>
+        <button tuiButton appearance="outline" icon="tuiIconPlus" size="s" (click)="addRow()">Thêm dòng</button>
+        <button tuiButton appearance="outline" size="s" (click)="openColumnGroupDialog()">Nhóm cột</button>
+      </div>
+      <div class="toolbar-separator"></div>
+      <div class="toolbar-group">
+        <app-format-toolbar
+          #formatToolbar
+          [gridApi]="gridApi"
+          [getRangeBounds]="rangeBoundsFn"
+          (formatChanged)="onFormatChanged($event)"
+        ></app-format-toolbar>
+      </div>
+      <div class="toolbar-separator"></div>
+      <div class="toolbar-group">
+        <button tuiButton appearance="outline" size="s" (click)="exportExcel()">Xuất Excel</button>
+        <button tuiButton appearance="outline" size="s" (click)="importExcel()">Nhập Excel</button>
+      </div>
+      <div class="toolbar-separator"></div>
+      <div class="toolbar-group">
+        <!-- <span *ngIf="currentTemplateName" class="toolbar-template-name">{{ currentTemplateName }}</span> -->
+        <button tuiButton appearance="primary" size="s" (click)="openSaveDialog()" [disabled]="templateSaving">
+          {{ templateSaving ? 'Đang lưu...' : (currentTemplateId ? 'Lưu' : 'Lưu mới') }}
+        </button>
+        <button tuiButton appearance="outline" size="s" (click)="openTemplateList()">Mở</button>
+        <button tuiButton appearance="outline" size="s" (click)="openPermissionDialog()" *ngIf="currentTemplateId">Quyền</button>
+        <button tuiButton appearance="outline" size="s" (click)="openButtonManagerDialog()" *ngIf="currentTemplateId">Nút chức năng</button>
+      </div>
+      <!-- <div class="toolbar-group">
+        <button tuiButton appearance="flat" size="s" (click)="undo()" [disabled]="undoStack.length === 0" title="Hoàn tác (Ctrl+Z)">Hoàn tác</button>
+        <button tuiButton appearance="flat" size="s" (click)="redo()" [disabled]="redoStack.length === 0" title="Làm lại (Ctrl+Y)">Làm lại</button>
+      </div> -->
+    </div>
+    <div class="toolbar-advanced-settings-container">
+      <div class="toolbar-advanced-settings-item">
+        <button tuiButton icon="tuiIconSettings" size="s" title="Cấu hình nâng cao" *ngIf="currentTemplateId" (click)="openAdvancedSettings()"> Nâng cao</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div
+    class="ag-theme-quartz"
+    style="width: 100%; height: calc(100vh - 270px); min-height: calc(100vh - 27
+
+    0px);"
+    (copy)="handleGridCopy($event)"
+    (paste)="handleGridPaste($event)"
+  >
+    <app-ag-grid-wrapper
+      [rowData]="rowData"
+      [columnDefs]="gridColDefs"
+      [defaultColDef]="gridDefaultColDef"
+      [getRowStyle]="getRowStyle"
+      [animateRows]="true"
+      [suppressCellFocus]="false"
+      [width]="'100%'"
+      [height]="'100%'"
+      [rowDragManaged]="true"
+      (gridReady)="onGridReady($event)"
+      (cellValueChanged)="onCellValueChangedUndo($event)"
+      (rowDragEnd)="onRowDragEnd($event)"
+      (columnResized)="onColumnResized($event)"
+    ></app-ag-grid-wrapper>
+  </div>
+  <app-validation-error-panel
+    [errors]="validationErrors"
+    [expanded]="validationPanelExpanded"
+    (toggle)="onValidationPanelToggle()"
+    (entryClick)="onValidationEntryClick($event)"
+  ></app-validation-error-panel>
+</div>
+
+<app-column-config-dialog
+  [(isOpen)]="isColumnConfigDialogOpen"
+  [editData]="columnConfigEditData"
+  [existingFields]="existingFields"
+  (submitColumn)="onColumnConfigSubmit($event)"
+/>
+
+<app-add-row-dialog
+  [(isOpen)]="isAddRowDialogOpen"
+  [targetFields]="targetFieldOptions"
+  [catalogTypes]="catalogTypes"
+  (addRow)="onAddRowSubmit($event)"
+/>
+
+<app-cell-config-dialog
+  [(isOpen)]="isCellConfigDialogOpen"
+  [config]="cellConfigInput"
+  [catalogTypes]="catalogTypes"
+  [cellDropdownItems]="cellDropdownItems"
+  [cellDropdownLoading]="cellDropdownLoading"
+  [formulaValidation]="formulaValidation"
+  (saveCellConfig)="onCellConfigSave($event)"
+  (clearCellConfig)="onCellConfigClear()"
+  (dropdownCatalogTypeChange)="onCellDropdownCatalogTypeChange($event)"
+/>
+
+<app-column-group-dialog
+  [(isOpen)]="isColumnGroupDialogOpen"
+  [columnGroups]="columnGroups"
+  [columnConfigs]="columnConfigs"
+  (applyGroups)="onColumnGroupsApply($event)"
+/>
+
+<app-save-template-dialog
+  [(isOpen)]="isSaveDialogOpen"
+  [saving]="templateSaving"
+  (saveTemplate)="onSaveTemplateSubmit($event)"
+/>
+
+<app-open-template-dialog
+  [(isOpen)]="isOpenDialogOpen"
+  [loading]="templateLoading"
+  [templateList]="templateList"
+  [currentTemplateId]="currentTemplateId"
+  (loadTemplate)="onLoadTemplateFromList($event)"
+  (deleteTemplate)="onDeleteTemplateFromList($event)"
+/>
+
+<app-permission-template-dialog
+  [(isOpen)]="isPermDialogOpen"
+  [title]="'Quản lý quyền chỉnh sửa'"
+  [columnConfigs]="columnConfigs"
+  [(permissions)]="permissions"
+  (handleSavePermission)="onPermissionSaved($event)"
+  (handleCancelEvent)="onPermDialogClose()"
+/>
+
+<app-advanced-settings-dialog
+  [(isOpen)]="isAdvancedSettingsOpen"
+  [data]="advancedSettingsData"
+  [workflows]="deployedWorkflows"
+  [reportDepartmentOptions]="reportDepartmentOptions"
+  [sidebarMenuOptions]="sidebarMenuOptions"
+  (handleSaveEvent)="onAdvancedSettingsSave($event)"
+  (handleCancelEvent)="onAdvancedSettingsCancel()"
+/>
+
+<app-template-button-manager-dialog
+  [(isOpen)]="isButtonDialogOpen"
+  [templateId]="currentTemplateId"
+/>
+
+<app-import-file-dialog
+  [(open)]="isImportDialogOpen"
+  [title]="'Nhập Excel — ' + (resolvedTemplateName || 'Biểu mẫu')"
+  [fileType]="'excel'"
+  [isDownloadingTemplate]="isDownloadingImportTemplate"
+  (handlerFileSubmit)="onImportFileSubmit($event)"
+  (handlerDowloadTemplate)="onDownloadImportTemplate()"
+></app-import-file-dialog>

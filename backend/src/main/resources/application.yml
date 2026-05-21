@@ -1,0 +1,109 @@
+spring:
+  devtools:
+    restart:
+      enabled: true
+      poll-interval: 750ms
+      quiet-period: 400ms
+  output:
+    ansi:
+      enabled: always
+  application:
+    name: oracle-connection-pool
+  
+  # --- Cấu hình Datasource cũ của ông ---
+  datasource:
+    url: jdbc:oracle:thin:@//10.10.0.202:1521/orcl
+    username: EVNNPC
+    password: EVNNPC
+    driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      pool-name: HikariOraclePool
+
+  # --- BỔ SUNG CẤU HÌNH REDIS TẠI ĐÂY ---
+  data:
+    redis:
+      host: 10.10.0.235      # Thay bằng IP Server Redis nếu chạy Remote
+      port: 6379
+      password:            # Điền password nếu Redis có cài pass
+      database: 0          # Chọn DB index (mặc định là 0)
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 10   # Số lượng kết nối tối đa
+          max-idle: 5      # Số kết nối nhàn rỗi tối đa
+          min-idle: 1
+          max-wait: 2000ms
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect # Đảm bảo dùng đúng Dialect cho Oracle
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+# --- Cấu hình Server ---
+server:
+  servlet:
+    context-path: /excelpro-service
+  port: 8081
+
+# --- Camunda BPM ---
+camunda:
+  bpm:
+    database:
+      type: oracle
+    history-level: full
+    auto-deployment-enabled: true
+    admin-user:
+      id: camunda-admin
+      password: camunda-admin
+    filter:
+      create: All
+    authorization:
+      enabled: false
+
+# --- JWT & File storage ---
+app:
+  jwt:
+    secret: "dGhpcyBpcyBhIHZlcnkgc2VjdXJlIGJhc2U2NCBzZWNyZXQga2V5IGZvciBqd3Q="
+    expiration-ms: 86400000
+  cors:
+    # Danh sách origin được phép gọi API (comma-separated). KHÔNG dùng "*" vì
+    # allowCredentials=true không tương thích với wildcard origin (CORS spec).
+    # Override qua env APP_CORS_ALLOWED_ORIGINS="https://form.llq.vn,https://abc.xyz".
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:4200,https://form.llq.vn}
+  file:
+    # LOCAL: ghi thẳng filesystem cùng máy (Linux server prod).
+    # SFTP:  ghi qua SSH sang máy khác (dev Windows trỏ về Linux share).
+    # Override qua env APP_FILE_STORAGE_MODE=sftp trên máy dev.
+    storage-mode: ${APP_FILE_STORAGE_MODE:SFTP}
+    # Share folder:
+    #   - LOCAL: absolute path trên máy hiện tại.
+    #   - SFTP:  absolute path trên remote server (không phải máy chạy backend).
+    share-path: ${APP_FILE_SHARE_PATH:/app/projects/share-file/excelpro}
+    # Giới hạn mỗi file (byte) — phải <= spring.servlet.multipart.max-file-size
+    max-file-size: 10485760
+    # --- SFTP config (chỉ dùng khi storage-mode=sftp) ---
+    # Ưu tiên SSH key (set APP_SFTP_KEY=path/to/id_rsa) — password chỉ dùng khi không có key.
+    sftp:
+      host: ${APP_SFTP_HOST:10.10.0.235}
+      port: ${APP_SFTP_PORT:22}
+      username: ${APP_SFTP_USERNAME:llqform}
+      password: ${APP_SFTP_PASSWORD:Abcd12#$}
+      # false = accept mọi host key (dev). true = fail nếu host chưa có trong known_hosts (prod).
+      strict-host-key-checking: ${APP_SFTP_STRICT_HOST_CHECK:false}
+      connect-timeout-ms: ${APP_SFTP_CONNECT_TIMEOUT_MS:10000}
+      session-timeout-ms: ${APP_SFTP_SESSION_TIMEOUT_MS:30000}
